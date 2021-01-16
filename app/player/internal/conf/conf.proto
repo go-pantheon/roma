@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package player.internal.conf;
+
+option go_package = "github.com/vulcan-frame/vulcan-game/app/player/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message Bootstrap {
+	Label label = 1;
+	Trace trace = 2;
+	Server server = 3;
+	Data data = 4;
+	Log log = 5;
+}
+
+message Label {
+	string service = 1;
+	string profile = 2;
+	string color = 3;
+	string version = 4;
+	uint32 zone = 5;
+	string node = 6;
+	string language = 7;
+}
+
+message Trace {
+	string endpoint = 1;
+}
+
+message Log {
+	string type = 1;
+	string level = 2;
+}
+
+message Server {
+	message HTTP {
+	string network = 1;
+	string addr = 2;
+	google.protobuf.Duration timeout = 3;
+	}
+	message GRPC {
+		string network = 1;
+		string addr = 2;
+		google.protobuf.Duration timeout = 3;
+	}
+	HTTP http = 1;
+	GRPC grpc = 2;
+	string health = 3;
+}
+
+message Data {
+	message Redis {
+		string addr = 1;
+		string password = 2;
+		bool cluster = 3;
+		google.protobuf.Duration dial_timeout = 4;
+		google.protobuf.Duration read_timeout = 5;
+		google.protobuf.Duration write_timeout = 6;
+	}
+	Redis redis = 1;
+}
+
+message Registry {
+	Etcd etcd = 1;
+}
+
+message Etcd {
+	repeated string endpoints = 1;
+	string username = 2;
+	string password = 3;
+}
