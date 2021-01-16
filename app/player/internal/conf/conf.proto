@@ -50,6 +50,11 @@ message Server {
 }
 
 message Data {
+	message Mongo {
+		string source = 1;
+		string database = 2;
+		google.protobuf.Duration dial_timeout = 3;
+	}
 	message Redis {
 		string addr = 1;
 		string password = 2;
@@ -59,6 +64,7 @@ message Data {
 		google.protobuf.Duration write_timeout = 6;
 	}
 	Redis redis = 1;
+	Mongo mongo = 2;
 }
 
 message Registry {

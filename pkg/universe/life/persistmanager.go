@@ -2,7 +2,6 @@ package life
 
 import (
 	"context"
-	"time"
 
 	"sync/atomic"
 
@@ -91,7 +90,7 @@ func (s *PersistManager) prepareToPersist(ctx context.Context) VersionProto {
 }
 
 func (s *PersistManager) Persist(c context.Context, proto VersionProto) error {
-	ctx, cancel := context.WithTimeout(c, time.Second*5)
+	ctx, cancel := context.WithTimeout(c, constants.AsyncMongoTimeout)
 	defer cancel()
 
 	if err := s.persister.Persist(ctx, s.ID(), proto); err != nil {
@@ -114,7 +113,7 @@ func (s *PersistManager) IncVersion(ctx context.Context) error {
 		return nil
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	ctx, cancel := context.WithTimeout(ctx, constants.AsyncMongoTimeout)
 	defer cancel()
 
 	ver := proto.GetVersion()

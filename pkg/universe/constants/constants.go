@@ -3,6 +3,7 @@ package constants
 import "time"
 
 const (
+	AsyncMongoTimeout = time.Second * 1
 	AsyncMySQLTimeout = time.Second * 5
 	AsyncRedisTimeout = time.Second * 1
 	AsyncGRPCTimeout  = time.Second * 3

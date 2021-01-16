@@ -42,4 +42,3 @@ app/*/configs
 # generated files
 bin/
 *.log
-

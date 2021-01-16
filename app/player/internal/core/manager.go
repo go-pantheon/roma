@@ -20,6 +20,7 @@ func NewManager(logger log.Logger, userDo *domain.UserDomain) (*Manager, func())
 	lifeMgr, stopFunc := life.NewManager(logger, newContext, newPersister)
 	m := &Manager{
 		Manager: lifeMgr,
+		pusher:  pusher,
 	}
 
 	return m, stopFunc
@@ -55,4 +56,21 @@ func (m *Manager) OnCreatedEventRegister(f func(ctx Context)) {
 	m.Manager.OnCreatedEventRegister(func(ctx life.Context) {
 		f(ctx.(Context))
 	})
+}
+
+func (m *Manager) Pusher() *data.PushRepo {
+	return m.pusher
+}
+
+func (m *Manager) ExecuteAppEvent(ctx context.Context, uid int64, f life.EventFunc) error {
+	w, err := m.Worker(ctx, uid, NewReplier(EmptyReplyFunc))
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		w.TriggerStop()
+	}()
+
+	return w.ExecuteEvent(newContext(ctx, w), f)
 }
