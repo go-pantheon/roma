@@ -1,4 +1,4 @@
-package server
+package registry
 
 import (
 	"github.com/go-kratos/kratos/log"

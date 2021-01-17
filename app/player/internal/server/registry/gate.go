@@ -1,4 +1,4 @@
-package server
+package registry
 
 import (
 	user "github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/registry"

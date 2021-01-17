@@ -38,7 +38,9 @@ app/*/configs
 # submodules
 /api/
 /deps/
+/mock/deps/
 
 # generated files
 bin/
 *.log
+vulcan/fixtures/outputs/
