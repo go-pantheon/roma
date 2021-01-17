@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package mercury.internal.conf;
+
+option go_package = "mercury.internal.conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message Bootstrap {
+	Label label = 1;
+	Gate gate = 2;
+	App app = 3;
+	Log log = 4;
+}
+
+message Label {
+	uint64 id = 1;
+	string profile = 2;
+	string color = 3;
+	bool unencrypted = 4;
+}
+
+message Log {
+	string type = 1;
+	string level = 2;
+}
+
+message Gate {
+	repeated string addr = 1;
+}
+
+message App {
+	int64 first_uid = 1;
+	int64 worker_count = 2;
+	google.protobuf.Duration login_interval = 3;
+	google.protobuf.Duration heartbeat_interval = 5;
+	google.protobuf.Duration work_min_interval = 8;
+}
+
+message Secret {
+	string aes_key = 1;
+	string server_pub_key = 2;
+	string client_pri_key = 3;
+}

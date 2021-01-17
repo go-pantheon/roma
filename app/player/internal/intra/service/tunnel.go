@@ -13,6 +13,7 @@ import (
 	"github.com/vulcan-frame/vulcan-game/gen/app/player/handler"
 	"github.com/vulcan-frame/vulcan-game/gen/app/player/service"
 	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
+	"github.com/vulcan-frame/vulcan-game/pkg/universe/middleware/logging"
 	"github.com/vulcan-frame/vulcan-kit/xcontext"
 	"github.com/vulcan-frame/vulcan-util/xsync"
 	"golang.org/x/sync/errgroup"
@@ -36,13 +37,18 @@ func NewTunnelService(logger log.Logger, mgr *core.Manager, svc *service.PlayerS
 }
 
 func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error {
+	ctx := stream.Context()
+
+	if !life.IsGateContext(ctx) {
+		return errors.Errorf("must be called by Gateway. status=%d", xcontext.Status(ctx))
+	}
+
 	var (
 		w   life.Workable
 		oid int64
 		err error
 	)
-	
-	ctx := stream.Context()
+
 	if oid, err = xcontext.OID(ctx); err != nil {
 		return err
 	}
