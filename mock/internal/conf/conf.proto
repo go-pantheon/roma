@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package mercury.internal.conf;
+package mock.internal.conf;
 
-option go_package = "mercury.internal.conf;conf";
+option go_package = "mock.internal.conf;conf";
 
 import "google/protobuf/duration.proto";
 

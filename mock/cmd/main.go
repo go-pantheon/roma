@@ -23,12 +23,12 @@ import (
 )
 
 var (
-	Name        = "mercury"
-	flagConf    string
+	Name     = "mock"
+	flagConf string
 )
 
 func init() {
-	flag.StringVar(&flagConf, "conf", "mercury/configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagConf, "conf", "mock/configs", "config path, eg: -conf config.yaml")
 }
 
 func main() {
@@ -63,7 +63,7 @@ func main() {
 		panic(err)
 	}
 
-	logger := xlog.Init(bc.Log.Type, bc.Log.Level, bc.Label.Profile, bc.Label.Color, "mercury", "v0.0.1", "local")
+	logger := xlog.Init(bc.Log.Type, bc.Log.Level, bc.Label.Profile, bc.Label.Color, "mock", "v0.0.1", "local")
 	dep := base.NewDependency(base.NewConfig(&bc), logger)
 	base.Dep = dep
 
@@ -74,7 +74,7 @@ func main() {
 	}
 }
 
-var completedSign = errors.Errorf("mercury completed")
+var completedSign = errors.Errorf("mock completed")
 
 func run(logger log.Logger, bc *conf.Bootstrap) error {
 	var ws *workshop.Workshop
