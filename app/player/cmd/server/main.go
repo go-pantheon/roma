@@ -5,14 +5,17 @@ import (
 	"path/filepath"
 
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/conf"
+	"github.com/vulcan-frame/vulcan-game/gamedata"
 )
 
 var (
 	flagConf    string
+	gameDataDir string
 )
 
 func init() {
 	flag.StringVar(&flagConf, "conf", "app/player/configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&gameDataDir, "gamedata", "gen/gamedata/json", "config path, eg: -gamedata json")
 }
 
 func newApp(logger log.Logger, hs *http.Server, gs *grpc.Server, health *health.Server, label *conf.Label, rr registry.Registrar) *kratos.App {
@@ -49,6 +52,11 @@ func main() {
 		panic(err)
 	}
 
+	gameDataDir, err = filepath.Abs(gameDataDir)
+	if err != nil {
+		panic(err)
+	}
+
 	c := config.New(
 		config.WithSource(
 			env.NewSource(profile.ORG_PREFIX),
@@ -76,6 +84,9 @@ func main() {
 	}
 
 	logger := xlog.Init(bc.Log.Type, bc.Log.Level, bc.Label.Profile, bc.Label.Color, bc.Label.Service, bc.Label.Version, bc.Label.Node)
+	metrics.Init(bc.Label.Service)
+
+	gamedata.Load(gameDataDir)
 
 	app, cleanup, err := initApp(bc.Server, bc.Label, &rc, bc.Data, logger, health.NewServer(bc.Server.Health))
 	if err != nil {

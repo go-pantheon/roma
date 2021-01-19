@@ -13,6 +13,7 @@ import (
 	"github.com/go-kratos/kratos/config/file"
 	"github.com/go-kratos/kratos/log"
 	"github.com/pkg/errors"
+	"github.com/vulcan-frame/vulcan-game/gamedata"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/base"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/base/security"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/conf"
@@ -23,18 +24,25 @@ import (
 )
 
 var (
-	Name     = "mock"
-	flagConf string
+	Name        = "mock"
+	flagConf    string
+	gameDataDir string
 )
 
 func init() {
 	flag.StringVar(&flagConf, "conf", "mock/configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&gameDataDir, "gamedata", "app/gamedata/json", "config path, eg: -gamedata json")
 }
 
 func main() {
 	flag.Parse()
 
 	flagConf, err := filepath.Abs(flagConf)
+	if err != nil {
+		panic(err)
+	}
+
+	gameDataDir, err = filepath.Abs(gameDataDir)
 	if err != nil {
 		panic(err)
 	}
@@ -66,6 +74,8 @@ func main() {
 	logger := xlog.Init(bc.Log.Type, bc.Log.Level, bc.Label.Profile, bc.Label.Color, "mock", "v0.0.1", "local")
 	dep := base.NewDependency(base.NewConfig(&bc), logger)
 	base.Dep = dep
+
+	gamedata.Load(gameDataDir)
 
 	log.Infof("[%s] is running. profile=%s, color=%s", Name, bc.Label.Profile, bc.Label.Color)
 
