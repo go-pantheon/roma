@@ -7,7 +7,7 @@ import (
 	"github.com/vulcan-frame/vulcan-game/vulcan/app/gamedata/internal/parser/field"
 	"github.com/vulcan-frame/vulcan-game/vulcan/app/gamedata/internal/parser/line"
 	"github.com/vulcan-frame/vulcan-game/vulcan/app/gamedata/internal/pkg"
-	"github.com/xuri/excelize"
+	"github.com/xuri/excelize/"
 )
 
 type Sheet interface {

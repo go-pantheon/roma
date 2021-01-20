@@ -4,8 +4,22 @@ import (
 	"flag"
 	"path/filepath"
 
+	"github.com/go-kratos/kratos"
+	"github.com/go-kratos/kratos/config"
+	"github.com/go-kratos/kratos/config/env"
+	"github.com/go-kratos/kratos/config/file"
+	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/registry"
+	"github.com/go-kratos/kratos/transport/grpc"
+	"github.com/go-kratos/kratos/transport/http"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/conf"
 	"github.com/vulcan-frame/vulcan-game/gamedata"
+	"github.com/vulcan-frame/vulcan-kit/metrics"
+	"github.com/vulcan-frame/vulcan-kit/profile"
+	"github.com/vulcan-frame/vulcan-kit/trace"
+	"github.com/vulcan-frame/vulcan-kit/xlog"
+	"github.com/vulcan-frame/vulcan-net/health"
+	"github.com/vulcan-frame/vulcan-util/xtime"
 )
 
 var (

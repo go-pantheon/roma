@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/log"
-	tcp "github.com/luffy050596/fabrica-net/tcp/client"
 	"github.com/pkg/errors"
 	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
 	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
@@ -17,6 +16,7 @@ import (
 	"github.com/vulcan-frame/vulcan-game/mock/internal/base/security"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/job/system"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/task"
+	tcp "github.com/vulcan-frame/vulcan-net/tcp/client"
 	"github.com/vulcan-frame/vulcan-util/xsync"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"

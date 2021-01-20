@@ -6,6 +6,8 @@
 package main
 
 import (
+	"github.com/go-kratos/kratos"
+	"github.com/go-kratos/kratos/log"
 	"github.com/google/wire"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/client"
@@ -14,6 +16,7 @@ import (
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/data"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/intra"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/server"
+	"github.com/vulcan-frame/vulcan-net/health"
 )
 
 // initApp init kratos application.

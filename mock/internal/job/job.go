@@ -7,6 +7,7 @@ import (
 const (
 	TypeUserLogin = Type(iota)
 	TypeUserReconnect
+	TypeDev
 	TypeStorage
 	TypeSystem
 )

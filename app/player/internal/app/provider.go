@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/google/wire"
+	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/gamedata"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/recharge"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage"
@@ -13,6 +14,7 @@ var ProviderSet = wire.NewSet(
 	gamedata.ProviderSet,
 	user.ProviderSet,
 	recharge.ProviderSet,
+	dev.ProviderSet,
 	system.ProviderSet,
 	storage.ProviderSet,
 )

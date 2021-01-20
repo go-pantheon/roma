@@ -2,7 +2,8 @@ package biz
 
 import (
 	"errors"
-	
+
+	"github.com/go-kratos/kratos/log"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
 	"github.com/vulcan-frame/vulcan-game/gamedata"
@@ -11,8 +12,8 @@ import (
 )
 
 type StorageUseCase struct {
-	log       *log.Helper
-	do        *domain.StorageDomain
+	log *log.Helper
+	do  *domain.StorageDomain
 }
 
 func NewStorageUseCase(mgr *core.Manager, logger log.Logger, storageDo *domain.StorageDomain) *StorageUseCase {

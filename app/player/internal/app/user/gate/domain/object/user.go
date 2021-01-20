@@ -25,14 +25,16 @@ type User struct {
 	Version      int64
 	newborn      bool
 
-	Basic   *basicobj.Basic
-	System  *System
-	Storage *storageobj.Storage
-
 	NextDailyResetAt    time.Time
 	DailyOnlineDuration time.Duration
 	TotalOnlineDuration time.Duration
 	ServerVersion       string
+
+	Basic *basicobj.Basic
+
+	Dev     *Dev
+	System  *System
+	Storage *storageobj.Storage
 }
 
 func NewUser(id int64, name string) *User {
@@ -42,6 +44,7 @@ func NewUser(id int64, name string) *User {
 	}
 
 	u.Basic = basicobj.NewBasic()
+	u.Dev = NewDev()
 	u.System = NewSystem()
 	u.Storage = storageobj.NewStorage()
 
@@ -51,6 +54,7 @@ func NewUser(id int64, name string) *User {
 func NewUserProto() *dbv1.UserProto {
 	p := &dbv1.UserProto{}
 	p.Basic = basicobj.NewBasicProto()
+	p.Dev = NewDevProto()
 	p.System = NewSystemProto()
 	p.Storage = storageobj.NewStorageProto()
 	return p
@@ -73,6 +77,7 @@ func (o *User) EncodeServer(p *dbv1.UserProto) *dbv1.UserProto {
 	p.ServerVersion = o.ServerVersion
 
 	o.Basic.EncodeServer(p.Basic)
+	o.Dev.EncodeServer(p.Dev)
 	o.System.EncodeServer(p.System)
 	o.Storage.EncodeServer(p.Storage)
 
@@ -106,6 +111,7 @@ func (o *User) DecodeServer(ctx context.Context, p *dbv1.UserProto) (err error) 
 	if err = o.Basic.DecodeServer(p.Basic); err != nil {
 		return errors.WithMessagef(err, "basic unmarshal failed. uid=%d", o.Id)
 	}
+	o.Dev.DecodeServer(p.Dev)
 	o.System.DecodeServer(p.System)
 	o.Storage.DecodeServer(ctx, p.Storage)
 	return nil

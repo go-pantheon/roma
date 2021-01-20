@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/log"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/system/gate/biz"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
 	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"

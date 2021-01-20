@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-kratos/kratos/log"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/conf"
+	"github.com/vulcan-frame/vulcan-game/mock/internal/job/dev"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/job/storage"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/job/user"
 	"github.com/vulcan-frame/vulcan-game/mock/internal/worker"
@@ -15,6 +16,7 @@ func initWorkshop(_ context.Context, logger log.Logger, bc *conf.Bootstrap) *wor
 	ws := workshop.NewWorkshop("echo")
 	ws.AddJob(
 		user.NewLoginJob(),
+		dev.NewDevListJob(),
 		storage.NewStorageJob(),
 	)
 

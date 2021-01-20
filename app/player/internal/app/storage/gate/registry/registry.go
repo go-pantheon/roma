@@ -1,6 +1,9 @@
 package registry
 
 import (
+	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/transport/grpc"
+	"github.com/go-kratos/kratos/transport/http"
 	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
 )
 

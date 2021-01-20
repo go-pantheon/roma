@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-kratos/kratos/log"
 	"github.com/pkg/errors"
 	"github.com/vulcan-frame/vulcan-game/gamedata"
 	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"

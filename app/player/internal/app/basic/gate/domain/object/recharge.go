@@ -1,4 +1,4 @@
-package userobj
+package object
 
 import (
 	"fmt"

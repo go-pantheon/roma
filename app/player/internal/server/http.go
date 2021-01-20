@@ -1,9 +1,18 @@
 package server
 
 import (
+	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/middleware"
+	"github.com/go-kratos/kratos/middleware/logging"
+	"github.com/go-kratos/kratos/middleware/metadata"
+	"github.com/go-kratos/kratos/middleware/recovery"
+	"github.com/go-kratos/kratos/middleware/tracing"
+	"github.com/go-kratos/kratos/transport/http"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/conf"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/intra/filter"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/server/registry"
+	devmd "github.com/vulcan-frame/vulcan-game/pkg/universe/middleware/dev"
+	"github.com/vulcan-frame/vulcan-kit/metrics"
 )
 
 func NewHTTPServer(
@@ -13,7 +22,11 @@ func NewHTTPServer(
 			middleware.Chain(
 				recovery.Recovery(),
 				metadata.Server(),
+				tracing.Server(),
+				metrics.Server(),
+				devmd.Server(),
 				logging.Server(logger),
+				filter.Server(),
 			)),
 	}
 	if c.Http.Network != "" {
