@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos//log"
 	"github.com/pkg/errors"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/domain"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/data"

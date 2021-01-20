@@ -12,6 +12,7 @@ message Bootstrap {
 	Server server = 3;
 	Data data = 4;
 	Log log = 5;
+	Recharge recharge = 6;
 }
 
 message Label {
@@ -75,4 +76,17 @@ message Etcd {
 	repeated string endpoints = 1;
 	string username = 2;
 	string password = 3;
+}
+
+message Recharge {
+	message Apple {
+		string bundle_id = 1;
+	}
+	message Google {
+		string json = 1;
+		string pub_key = 2;
+		string package_name = 3;
+	}
+	Apple apple = 1;
+	Google google = 2;
 }

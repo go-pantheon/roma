@@ -25,3 +25,10 @@ data:
     dial_timeout: 1s
     read_timeout: 0.4s
     write_timeout: 0.6s
+recharge:
+  apple:
+    bundle_id: ${APPLE_RECHARGE_BUNDLE_ID}
+  google:
+    json: json
+    pub_key: ${GOOGLE_RECHARGE_PUB_KEY}
+    package_name: ${GOOGLE_RECHARGE_PACKAGE_NAME}

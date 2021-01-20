@@ -12,6 +12,8 @@ var (
 
 	propertyFormulaDatas *PropertyFormulaDatas
 
+	rechargeProductDatas *RechargeProductDatas
+
 	resourceConstantData *ResourceConstantData
 
 	resourceItemDatas *ResourceItemDatas
@@ -34,6 +36,11 @@ func loadGen(dir string) {
 	}
 
 	propertyFormulaDatas, err = newPropertyFormulaDatas(base.PropertyFormulaDataBaseGens)
+	if err != nil {
+		panic(err)
+	}
+
+	rechargeProductDatas, err = newRechargeProductDatas(base.RechargeProductDataBaseGens)
 	if err != nil {
 		panic(err)
 	}
@@ -62,6 +69,8 @@ func loadGen(dir string) {
 
 	propertyFormulaDatas.build()
 
+	rechargeProductDatas.build()
+
 	resourceConstantData.build()
 
 	resourceItemDatas.build()
@@ -73,6 +82,8 @@ func loadGen(dir string) {
 	propertyAttributeData.init()
 
 	propertyFormulaDatas.init()
+
+	rechargeProductDatas.init()
 
 	resourceConstantData.init()
 
@@ -94,6 +105,14 @@ func GetPropertyFormulaDataList() []*PropertyFormulaData {
 
 func GetPropertyFormulaData(key int64) *PropertyFormulaData {
 	return propertyFormulaDatas.Map[key]
+}
+
+func GetRechargeProductDataList() []*RechargeProductData {
+	return rechargeProductDatas.List
+}
+
+func GetRechargeProductData(key int64) *RechargeProductData {
+	return rechargeProductDatas.Map[key]
 }
 
 func GetResourceConstantData() *ResourceConstantData {

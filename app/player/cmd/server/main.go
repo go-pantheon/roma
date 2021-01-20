@@ -88,7 +88,7 @@ func main() {
 
 	gamedata.Load(gameDataDir)
 
-	app, cleanup, err := initApp(bc.Server, bc.Label, &rc, bc.Data, logger, health.NewServer(bc.Server.Health))
+	app, cleanup, err := initApp(bc.Server, bc.Label, bc.Recharge, &rc, bc.Data, logger, health.NewServer(bc.Server.Health))
 	if err != nil {
 		panic(err)
 	}
