@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	basicobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/basic/gate/domain/object"
+	storageobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain/object"
 	message "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
 	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
 	"github.com/vulcan-frame/vulcan-kit/profile"
@@ -24,7 +25,9 @@ type User struct {
 	Version      int64
 	newborn      bool
 
-	Basic  *basicobj.Basic
+	Basic   *basicobj.Basic
+	System  *System
+	Storage *storageobj.Storage
 
 	NextDailyResetAt    time.Time
 	DailyOnlineDuration time.Duration
@@ -34,16 +37,22 @@ type User struct {
 
 func NewUser(id int64, name string) *User {
 	u := &User{
-		Id:    id,
-		Name:  name,
-		Basic: basicobj.NewBasic(),
+		Id:   id,
+		Name: name,
 	}
+
+	u.Basic = basicobj.NewBasic()
+	u.System = NewSystem()
+	u.Storage = storageobj.NewStorage()
+
 	return u
 }
 
 func NewUserProto() *dbv1.UserProto {
 	p := &dbv1.UserProto{}
 	p.Basic = basicobj.NewBasicProto()
+	p.System = NewSystemProto()
+	p.Storage = storageobj.NewStorageProto()
 	return p
 }
 
@@ -64,6 +73,8 @@ func (o *User) EncodeServer(p *dbv1.UserProto) *dbv1.UserProto {
 	p.ServerVersion = o.ServerVersion
 
 	o.Basic.EncodeServer(p.Basic)
+	o.System.EncodeServer(p.System)
+	o.Storage.EncodeServer(p.Storage)
 
 	return p
 }
@@ -95,6 +106,8 @@ func (o *User) DecodeServer(ctx context.Context, p *dbv1.UserProto) (err error) 
 	if err = o.Basic.DecodeServer(p.Basic); err != nil {
 		return errors.WithMessagef(err, "basic unmarshal failed. uid=%d", o.Id)
 	}
+	o.System.DecodeServer(p.System)
+	o.Storage.DecodeServer(ctx, p.Storage)
 	return nil
 }
 
@@ -132,6 +145,7 @@ func checkServerVersion(serverVersion, userVersion string) (newUserVersion strin
 func (o *User) EncodeClient() *message.UserProto {
 	p := &message.UserProto{
 		Basic:   o.Basic.EncodeClient(),
+		Storage: o.Storage.EncodeClient(),
 	}
 	return p
 }

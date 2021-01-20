@@ -6,6 +6,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/basic/gate/domain/object"
+	storagedo "github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/domain"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
 	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
@@ -21,15 +22,18 @@ type UserUseCase struct {
 	log       *log.Helper
 	mgr       *core.Manager
 	do        *domain.UserDomain
+	storageDo *storagedo.StorageDomain
 }
 
 func NewUserUseCase(mgr *core.Manager,
 	do *domain.UserDomain,
+	storageDo *storagedo.StorageDomain,
 	logger log.Logger) *UserUseCase {
 	uc := &UserUseCase{
 		log:       log.NewHelper(log.With(logger, "module", "player/user/gate/biz")),
 		mgr:       mgr,
 		do:        do,
+		storageDo: storageDo,
 	}
 
 	mgr.OnCreatedEventRegister(uc.onCreated)

@@ -7,6 +7,8 @@ import (
 const (
 	TypeUserLogin = Type(iota)
 	TypeUserReconnect
+	TypeStorage
+	TypeSystem
 )
 
 type Type int64
