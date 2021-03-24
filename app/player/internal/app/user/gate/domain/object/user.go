@@ -6,6 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 	basicobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/basic/gate/domain/object"
+	heroobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/hero/gate/domain/object"
+	plunderobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/plunder/gate/domain/object"
 	storageobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain/object"
 	message "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
 	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
@@ -32,9 +34,11 @@ type User struct {
 
 	Basic *basicobj.Basic
 
-	Dev     *Dev
-	System  *System
-	Storage *storageobj.Storage
+	Dev      *Dev
+	System   *System
+	Plunders *plunderobj.Plunders
+	Storage  *storageobj.Storage
+	HeroList *heroobj.HeroList
 }
 
 func NewUser(id int64, name string) *User {
@@ -46,7 +50,9 @@ func NewUser(id int64, name string) *User {
 	u.Basic = basicobj.NewBasic()
 	u.Dev = NewDev()
 	u.System = NewSystem()
+	u.Plunders = plunderobj.NewPlunders()
 	u.Storage = storageobj.NewStorage()
+	u.HeroList = heroobj.NewHeroList()
 
 	return u
 }
@@ -56,7 +62,9 @@ func NewUserProto() *dbv1.UserProto {
 	p.Basic = basicobj.NewBasicProto()
 	p.Dev = NewDevProto()
 	p.System = NewSystemProto()
+	p.Plunders = plunderobj.NewPlundersProto()
 	p.Storage = storageobj.NewStorageProto()
+	p.HeroList = heroobj.NewHeroListProto()
 	return p
 }
 
@@ -79,7 +87,9 @@ func (o *User) EncodeServer(p *dbv1.UserProto) *dbv1.UserProto {
 	o.Basic.EncodeServer(p.Basic)
 	o.Dev.EncodeServer(p.Dev)
 	o.System.EncodeServer(p.System)
+	o.Plunders.EncodeServer(p.Plunders)
 	o.Storage.EncodeServer(p.Storage)
+	o.HeroList.EncodeServer(p.HeroList)
 
 	return p
 }
@@ -113,7 +123,11 @@ func (o *User) DecodeServer(ctx context.Context, p *dbv1.UserProto) (err error) 
 	}
 	o.Dev.DecodeServer(p.Dev)
 	o.System.DecodeServer(p.System)
+	o.Plunders.DecodeServer(p.Plunders)
 	o.Storage.DecodeServer(ctx, p.Storage)
+	if err = o.HeroList.DecodeServer(ctx, p.HeroList); err != nil {
+		return errors.WithMessagef(err, "heroList unmarshal failed. uid=%d", o.Id)
+	}
 	return nil
 }
 
@@ -150,8 +164,9 @@ func checkServerVersion(serverVersion, userVersion string) (newUserVersion strin
 
 func (o *User) EncodeClient() *message.UserProto {
 	p := &message.UserProto{
-		Basic:   o.Basic.EncodeClient(),
-		Storage: o.Storage.EncodeClient(),
+		Basic:    o.Basic.EncodeClient(),
+		Storage:  o.Storage.EncodeClient(),
+		HeroList: o.HeroList.EncodeClient(),
 	}
 	return p
 }

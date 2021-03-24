@@ -17,6 +17,7 @@ const (
 	ItemTypeRechargeCurrency                 // 1
 	ItemTypeGameCurrency                     // 2
 	ItemTypeRecovery                         // 3
+	ItemTypeHeroPiece                        // 4
 )
 
 type ResourceItemData struct {

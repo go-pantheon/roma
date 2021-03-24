@@ -11,3 +11,23 @@ func (d *PropertyFormulaDataGen) CalcSteakCapacity(
 		"UserSteakCapacity": UserSteakCapacity,
 	})
 }
+
+func (d *PropertyFormulaDataGen) CalcHeroAtk(
+	HeroLevelAtk float64,
+	HeroLevel float64,
+) (float64, error) {
+	return formula.Calc(d.Formula, map[string]float64{
+		"HeroLevelAtk": HeroLevelAtk,
+		"HeroLevel":    HeroLevel,
+	})
+}
+
+func (d *PropertyFormulaDataGen) CalcHeroHp(
+	HeroLevelHp float64,
+	HeroLevel float64,
+) (float64, error) {
+	return formula.Calc(d.Formula, map[string]float64{
+		"HeroLevelHp": HeroLevelHp,
+		"HeroLevel":   HeroLevel,
+	})
+}

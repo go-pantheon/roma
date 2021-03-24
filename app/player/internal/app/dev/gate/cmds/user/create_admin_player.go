@@ -4,6 +4,7 @@ import (
 	"github.com/go-kratos/kratos/log"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/biz"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/cmds"
+	heroobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/hero/gate/domain/object"
 	storagedo "github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
 	"github.com/vulcan-frame/vulcan-game/gamedata"
@@ -36,6 +37,12 @@ func NewAdminPlayerCommander(uc *biz.DevUseCase, storageDo *storagedo.StorageDom
 
 func (c *CreateAdminPlayerCommander) Func(ctx core.Context, args map[string]string) (sc *climsg.SCDevExecute, err error) {
 	sc = &climsg.SCDevExecute{}
+
+	// add all heroes
+	for _, d := range gamedata.GetHeroBaseDataList() {
+		r, _ := heroobj.NewHero(d.ID)
+		ctx.User().HeroList.Heroes[r.Id] = r
+	}
 
 	// add all necessary items
 	amounts := make(map[int64]uint64)

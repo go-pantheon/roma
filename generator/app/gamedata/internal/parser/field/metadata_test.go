@@ -40,6 +40,58 @@ func TestStringToMetadataType(t *testing.T) {
 			in:   fmt.Sprintf("%s#%s_%s", JoinedType, "ResourceItem", "Item"),
 			want: &NameInfo{Type: NormalType, JoinedType: JoinedType, JoinedName: "ResourceItem", FieldName: "Item"},
 		},
+		{
+			name: "string with 2 sep and joinedList",
+			in:   fmt.Sprintf("%s_%s#%s_%s", SharedType, JoinedListType, "HeroSkill", "Skill"),
+			want: &NameInfo{Type: SharedType, JoinedType: JoinedListType, JoinedName: "HeroSkill", FieldName: "Skill"},
+		},
+		{
+			name:   "string with 3 sep is invalid",
+			in:     fmt.Sprintf("%s_%s_%s", SharedType, MergedMapType, "Pack"),
+			want:   &NameInfo{},
+			hasErr: true,
+		},
+		{
+			name:   "string with invalid joined 1",
+			in:     fmt.Sprintf("%s#%s_%s_%s", JoinedType, "ResourcePack", MergedMapType, "Pack"),
+			want:   &NameInfo{},
+			hasErr: true,
+		},
+		{
+			name:   "string with invalid joined 2",
+			in:     fmt.Sprintf("%s#%s", JoinedType, "ResourcePack"),
+			want:   &NameInfo{},
+			hasErr: true,
+		},
+		{
+			name:   "string with invalid second prefix",
+			in:     fmt.Sprintf("%s_%s_%s", SharedType, SharedType, "Hero"),
+			want:   &NameInfo{},
+			hasErr: true,
+		},
+		{
+			name:   "string with invalid second prefix",
+			in:     fmt.Sprintf("%s_%s_%s", SharedIdType, JoinedType, "Hero"),
+			want:   &NameInfo{},
+			hasErr: true,
+		},
+		{
+			name: "string with formula prefix",
+			in:   fmt.Sprintf("%s#%s_%s", FormulaType, "Attribute", "Formula"),
+			want: &NameInfo{Type: NormalType, FormulaValue: "Attribute", FieldName: "Formula"},
+		},
+		{
+			name:   "string with invalid formula prefix",
+			in:     fmt.Sprintf("%s#%s_%s", FormulaType, "", "Formula"),
+			want:   &NameInfo{},
+			hasErr: true,
+		},
+		{
+			name:   "string with empty joined name",
+			in:     fmt.Sprintf("%s#%s_%s", JoinedType, "", "HeroLevel"),
+			want:   &NameInfo{},
+			hasErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

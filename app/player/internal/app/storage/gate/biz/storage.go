@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-kratos/kratos/log"
 
+	plunderdo "github.com/vulcan-frame/vulcan-game/app/player/internal/app/plunder/gate/domain"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
 	"github.com/vulcan-frame/vulcan-game/gamedata"
@@ -13,14 +14,16 @@ import (
 )
 
 type StorageUseCase struct {
-	log *log.Helper
-	do  *domain.StorageDomain
+	log       *log.Helper
+	do        *domain.StorageDomain
+	plunderDo *plunderdo.PlunderDomain
 }
 
-func NewStorageUseCase(mgr *core.Manager, logger log.Logger, storageDo *domain.StorageDomain) *StorageUseCase {
+func NewStorageUseCase(mgr *core.Manager, logger log.Logger, storageDo *domain.StorageDomain, plunderDo *plunderdo.PlunderDomain) *StorageUseCase {
 	uc := &StorageUseCase{
-		log: log.NewHelper(log.With(logger, "module", "player/storage/gate/biz")),
-		do:  storageDo,
+		log:       log.NewHelper(log.With(logger, "module", "player/storage/gate/biz")),
+		do:        storageDo,
+		plunderDo: plunderDo,
 	}
 
 	mgr.OnCreatedEventRegister(uc.onCreated)

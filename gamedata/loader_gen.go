@@ -7,6 +7,13 @@ import (
 )
 
 var (
+	heroBaseDatas *HeroBaseDatas
+
+	heroConstantData *HeroConstantData
+
+	heroLevelDatas *HeroLevelDatas
+
+	heroSkillDatas *HeroSkillDatas
 
 	propertyAttributeData *PropertyAttributeData
 
@@ -27,6 +34,26 @@ func loadGen(dir string) {
 	var err error
 
 	if err = base.Load(dir); err != nil {
+		panic(err)
+	}
+
+	heroBaseDatas, err = newHeroBaseDatas(base.HeroBaseDataBaseGens)
+	if err != nil {
+		panic(err)
+	}
+
+	heroConstantData, err = newHeroConstantData(base.HeroConstantDataBaseGen)
+	if err != nil {
+		panic(err)
+	}
+
+	heroLevelDatas, err = newHeroLevelDatas(base.HeroLevelDataBaseGens)
+	if err != nil {
+		panic(err)
+	}
+
+	heroSkillDatas, err = newHeroSkillDatas(base.HeroSkillDataBaseGens)
+	if err != nil {
 		panic(err)
 	}
 
@@ -65,6 +92,14 @@ func loadGen(dir string) {
 		panic(err)
 	}
 
+	heroBaseDatas.build()
+
+	heroConstantData.build()
+
+	heroLevelDatas.build()
+
+	heroSkillDatas.build()
+
 	propertyAttributeData.build()
 
 	propertyFormulaDatas.build()
@@ -78,6 +113,14 @@ func loadGen(dir string) {
 	resourceRadioDatas.build()
 
 	resourcePackDatas.build()
+
+	heroBaseDatas.init()
+
+	heroConstantData.init()
+
+	heroLevelDatas.init()
+
+	heroSkillDatas.init()
 
 	propertyAttributeData.init()
 
@@ -93,6 +136,34 @@ func loadGen(dir string) {
 
 	resourcePackDatas.init()
 
+}
+
+func GetHeroBaseDataList() []*HeroBaseData {
+	return heroBaseDatas.List
+}
+
+func GetHeroBaseData(key int64) *HeroBaseData {
+	return heroBaseDatas.Map[key]
+}
+
+func GetHeroConstantData() *HeroConstantData {
+	return heroConstantData
+}
+
+func GetHeroLevelDataList() []*HeroLevelData {
+	return heroLevelDatas.List
+}
+
+func GetHeroLevelData(key int64) *HeroLevelData {
+	return heroLevelDatas.Map[key]
+}
+
+func GetHeroSkillDataList() []*HeroSkillData {
+	return heroSkillDatas.List
+}
+
+func GetHeroSkillData(key int64) *HeroSkillData {
+	return heroSkillDatas.Map[key]
 }
 
 func GetPropertyAttributeData() *PropertyAttributeData {
