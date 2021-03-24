@@ -19,7 +19,8 @@ import (
 
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(
-	c *conf.Server, logger log.Logger, filter *filter.GrpcFilter, rg *registry.ServiceRegistrars,
+	c *conf.Server, logger log.Logger, filter *filter.GrpcFilter,
+	svcRg *registry.ServiceRegistrars, adminRg *registry.AdminRegistrars,
 ) *kgrpc.Server {
 	var opts = []kgrpc.ServerOption{
 		kgrpc.Middleware(
@@ -50,7 +51,10 @@ func NewGRPCServer(
 	))
 
 	svr := kgrpc.NewServer(opts...)
-	for _, r := range rg.Rgs {
+	for _, r := range svcRg.Rgs {
+		r.GrpcRegister(svr)
+	}
+	for _, r := range adminRg.Rgs {
 		r.GrpcRegister(svr)
 	}
 	return svr

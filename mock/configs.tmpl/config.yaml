@@ -12,5 +12,6 @@ app:
   first_uid: 1
   worker_count: 1
   login_interval: 2s
+  status_admin: false
   heartbeat_interval: 5s
   work_min_interval: 1s

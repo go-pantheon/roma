@@ -35,7 +35,8 @@ type Worker struct {
 	userId int64
 	Token  string
 
-	tcpCli *tcp.Client
+	tcpCli   *tcp.Client
+	adminCli *base.AdminClients
 
 	taskChan     chan task.Taskable
 	redirectChan chan *clipkt.Packet
@@ -55,6 +56,10 @@ func (w *Worker) Log() *log.Helper {
 
 func (w *Worker) UID() int64 {
 	return w.userId
+}
+
+func (w *Worker) AdminClient() *base.AdminClients {
+	return w.adminCli
 }
 
 func NewWorker(userId int64, logger log.Logger) *Worker {

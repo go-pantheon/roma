@@ -8,6 +8,7 @@ import (
 	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
 	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
 	cliseq "github.com/vulcan-frame/vulcan-game/gen/api/client/sequence"
+	adv1 "github.com/vulcan-frame/vulcan-game/gen/api/server/player/admin/storage/v1"
 	"github.com/vulcan-frame/vulcan-game/pkg/errs"
 )
 
@@ -21,7 +22,7 @@ type StorageDomain struct {
 	log *log.Helper
 }
 
-func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.UpdateInfo, silent bool) {
+func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.UpdateInfo, src adv1.ItemSource, silent bool) {
 	if updateInfo == nil {
 		return
 	}

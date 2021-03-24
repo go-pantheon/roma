@@ -33,6 +33,7 @@ message App {
 	int64 first_uid = 1;
 	int64 worker_count = 2;
 	google.protobuf.Duration login_interval = 3;
+	bool status_admin = 4;
 	google.protobuf.Duration heartbeat_interval = 5;
 	google.protobuf.Duration work_min_interval = 8;
 }

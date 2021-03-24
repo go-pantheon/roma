@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/vulcan-frame/vulcan-game/vulcan/app/gamedata/internal/parser/sheet"
-	"github.com/xuri/excelize/"
+	"github.com/xuri/excelize"
 )
 
 var (

@@ -259,6 +259,7 @@ type App struct {
 	FirstUid          int64                  `protobuf:"varint,1,opt,name=first_uid,json=firstUid,proto3" json:"first_uid,omitempty"`
 	WorkerCount       int64                  `protobuf:"varint,2,opt,name=worker_count,json=workerCount,proto3" json:"worker_count,omitempty"`
 	LoginInterval     *durationpb.Duration   `protobuf:"bytes,3,opt,name=login_interval,json=loginInterval,proto3" json:"login_interval,omitempty"`
+	StatusAdmin       bool                   `protobuf:"varint,4,opt,name=status_admin,json=statusAdmin,proto3" json:"status_admin,omitempty"`
 	HeartbeatInterval *durationpb.Duration   `protobuf:"bytes,5,opt,name=heartbeat_interval,json=heartbeatInterval,proto3" json:"heartbeat_interval,omitempty"`
 	WorkMinInterval   *durationpb.Duration   `protobuf:"bytes,8,opt,name=work_min_interval,json=workMinInterval,proto3" json:"work_min_interval,omitempty"`
 	unknownFields     protoimpl.UnknownFields
@@ -314,6 +315,13 @@ func (x *App) GetLoginInterval() *durationpb.Duration {
 		return x.LoginInterval
 	}
 	return nil
+}
+
+func (x *App) GetStatusAdmin() bool {
+	if x != nil {
+		return x.StatusAdmin
+	}
+	return false
 }
 
 func (x *App) GetHeartbeatInterval() *durationpb.Duration {

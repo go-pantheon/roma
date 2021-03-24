@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/go-kratos/kratos/contrib/registry/etcd/"
+	"github.com/go-kratos/kratos/contrib/registry/etcd"
 	"github.com/go-kratos/kratos/registry"
 	"github.com/pkg/errors"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/conf"

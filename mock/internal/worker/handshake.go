@@ -106,6 +106,10 @@ func genToken(id int64) (string, error) {
 		Status:      intrav1.OnlineStatus_ONLINE_STATUS_GATE,
 	}
 
+	if base.App().StatusAdmin {
+		auth.Status = intrav1.OnlineStatus_ONLINE_STATUS_ADMIN
+	}
+
 	bytes, err := proto.Marshal(auth)
 	if err != nil {
 		return "", errors.Wrapf(err, "AuthToken marshal failed")

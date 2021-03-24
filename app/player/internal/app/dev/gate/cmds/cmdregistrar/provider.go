@@ -12,5 +12,6 @@ var ProviderSet = wire.NewSet(
 	system.ProviderSet,
 	storage.ProviderSet,
 
+	user.NewAdminPlayerCommander,
 	user.NewSimulateRechargeCommander,
 )

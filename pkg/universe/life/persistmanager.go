@@ -83,6 +83,9 @@ func (s *PersistManager) PrepareToPersist(ctx context.Context) {
 }
 
 func (s *PersistManager) prepareToPersist(ctx context.Context) VersionProto {
+	if IsAdminID(s.ID()) {
+		return nil
+	}
 	if !s.changed.CompareAndSwap(true, false) {
 		return nil
 	}
@@ -90,6 +93,10 @@ func (s *PersistManager) prepareToPersist(ctx context.Context) VersionProto {
 }
 
 func (s *PersistManager) Persist(c context.Context, proto VersionProto) error {
+	if IsAdminID(s.ID()) {
+		return nil
+	}
+
 	ctx, cancel := context.WithTimeout(c, constants.AsyncMongoTimeout)
 	defer cancel()
 
@@ -107,6 +114,10 @@ func (s *PersistManager) Persist(c context.Context, proto VersionProto) error {
 }
 
 func (s *PersistManager) IncVersion(ctx context.Context) error {
+	if IsAdminID(s.ID()) {
+		return nil
+	}
+
 	proto := s.persister.PrepareToPersist(ctx)
 	if proto == nil {
 		s.log.Infof("prepare to persist failed when incr db version. oid=%d", s.ID())

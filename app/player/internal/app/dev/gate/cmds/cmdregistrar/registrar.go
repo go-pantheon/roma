@@ -20,6 +20,7 @@ func NewRegistrar(
 	_ *storage.SubPackCommander,
 
 	_ *user.SimulateRechargeCommander,
+	_ *user.CreateAdminPlayerCommander,
 ) *Registrar {
 	return &Registrar{}
 }

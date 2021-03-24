@@ -2,9 +2,11 @@ package dev
 
 import (
 	"context"
+	"strings"
 
 	"github.com/go-kratos/kratos/middleware"
 	"github.com/go-kratos/kratos/transport"
+	"github.com/go-kratos/kratos/transport/http"
 	"github.com/vulcan-frame/vulcan-kit/profile"
 	"github.com/vulcan-frame/vulcan-kit/xcontext"
 	"google.golang.org/grpc/metadata"
@@ -38,4 +40,16 @@ func TransformContext(ctx context.Context) context.Context {
 	}
 
 	return ctx
+}
+
+func IsAdminPath(ctx context.Context) bool {
+	tp, ok := transport.FromServerContext(ctx)
+	if !ok {
+		return false
+	}
+	info, ok := tp.(*http.Transport)
+	if !ok {
+		return false
+	}
+	return strings.Index(info.Request().RequestURI, "/admin") == 0
 }

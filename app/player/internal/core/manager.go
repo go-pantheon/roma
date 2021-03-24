@@ -69,6 +69,10 @@ func (m *Manager) ExecuteAppEvent(ctx context.Context, uid int64, f life.EventFu
 	}
 
 	defer func() {
+		// check the status before stop the worker, because the worker will be connected to gate when the admin execute the event
+		if life.IsGateContext(ctx) {
+			return
+		}
 		w.TriggerStop()
 	}()
 

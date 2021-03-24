@@ -5,5 +5,5 @@ import (
 )
 
 var ProviderSet = wire.NewSet(
-	NewServicelessUseCase, NewServiceRegistrars, NewGateRegistrars,
+	NewServicelessUseCase, NewAdminRegistrars, NewServiceRegistrars, NewGateRegistrars,
 )

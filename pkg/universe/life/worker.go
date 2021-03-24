@@ -308,6 +308,14 @@ func (w *Worker) ID() int64 {
 	return w.persistManager.ID()
 }
 
+func (w *Worker) IsAdminID() bool {
+	return IsAdminID(w.ID())
+}
+
+func IsAdminID(id int64) bool {
+	return id == 0
+}
+
 // Nonce return the nonce of the worker
 // nonce is unique identifier for the current worker, used to distinguish between multiple instances of the same ID, one of usages is the optimistic lock for deletion from the Manager
 func (w *Worker) Nonce() string {

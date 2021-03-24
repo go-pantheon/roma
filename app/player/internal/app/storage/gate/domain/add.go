@@ -5,6 +5,7 @@ import (
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain/object"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
 	"github.com/vulcan-frame/vulcan-game/gamedata"
+	adv1 "github.com/vulcan-frame/vulcan-game/gen/api/server/player/admin/storage/v1"
 	"github.com/vulcan-frame/vulcan-game/pkg/errs"
 )
 
@@ -14,6 +15,7 @@ type AddOptions struct {
 	Items      []*gamedata.ItemPrize
 	Packs      []*gamedata.PackPrize
 	Prizes     []*gamedata.Prizes
+	ItemSource adv1.ItemSource
 	Silent     bool
 }
 
@@ -32,6 +34,12 @@ func WithPacks(packs ...*gamedata.PackPrize) AddOption {
 func WithPrizes(prizes ...*gamedata.Prizes) AddOption {
 	return func(o *AddOptions) {
 		o.Prizes = prizes
+	}
+}
+
+func WithItemSource(itemSource adv1.ItemSource) AddOption {
+	return func(o *AddOptions) {
+		o.ItemSource = itemSource
 	}
 }
 

@@ -16,7 +16,9 @@ import (
 )
 
 func NewHTTPServer(
-	c *conf.Server, logger log.Logger, filter *filter.HttpFilter, svcRg *registry.ServiceRegistrars, gateRg *registry.GateRegistrars) *http.Server {
+	c *conf.Server, logger log.Logger, filter *filter.HttpFilter,
+	svcRg *registry.ServiceRegistrars, gateRg *registry.GateRegistrars, adminRg *registry.AdminRegistrars,
+) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			middleware.Chain(
@@ -44,6 +46,9 @@ func NewHTTPServer(
 		r.HttpRegister(svr)
 	}
 	for _, r := range svcRg.Rgs {
+		r.HttpRegister(svr)
+	}
+	for _, r := range adminRg.Rgs {
 		r.HttpRegister(svr)
 	}
 	return svr
