@@ -5,14 +5,17 @@ import (
 
 	"github.com/go-kratos/kratos/log"
 	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/domain"
+	"github.com/vulcan-frame/vulcan-game/pkg/universe/data"
 	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
 )
 
 type Manager struct {
 	*life.Manager
+
+	pusher *data.PushRepo
 }
 
-func NewManager(logger log.Logger, userDo *domain.UserDomain) (*Manager, func()) {
+func NewManager(logger log.Logger, userDo *domain.UserDomain, pusher *data.PushRepo) (*Manager, func()) {
 	newPersister := func(ctx context.Context, uid int64, allowBorn bool) (persister life.Persistent, born bool, err error) {
 		return newUserPersister(ctx, userDo, uid, allowBorn)
 	}
@@ -63,7 +66,7 @@ func (m *Manager) Pusher() *data.PushRepo {
 }
 
 func (m *Manager) ExecuteAppEvent(ctx context.Context, uid int64, f life.EventFunc) error {
-	w, err := m.Worker(ctx, uid, NewReplier(EmptyReplyFunc))
+	w, err := m.Worker(ctx, uid, NewReplier(EmptyReplyFunc), life.NewBroadcaster(m.Pusher()))
 	if err != nil {
 		return err
 	}

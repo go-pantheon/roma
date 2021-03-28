@@ -34,6 +34,7 @@ var _ Replier = (*Worker)(nil)
 
 type Worker struct {
 	xsync.Stoppable
+	Broadcaster
 	Replier
 	*Tickers
 
@@ -56,12 +57,14 @@ type Worker struct {
 func newWorker(ctx context.Context, log *log.Helper,
 	persistManager *PersistManager,
 	replier Replier,
+	broadcaster Broadcaster,
 	tickers *Tickers,
 	notifyStoppedFunc func(uid int64, nonce string),
 	newContextFunc newContextFunc,
 ) (w *Worker) {
 	w = &Worker{
 		log:               log,
+		Broadcaster:       broadcaster,
 		Replier:           replier,
 		Tickers:           tickers,
 		nonce:             uuid.New().String(),

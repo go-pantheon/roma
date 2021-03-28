@@ -65,7 +65,7 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return nil
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, core.NewReplier(replyFunc)); err != nil {
+	if w, err = s.mgr.Worker(ctx, oid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
 		return err
 	}
 	return s.run(ctx, w, stream)

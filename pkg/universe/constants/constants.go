@@ -24,5 +24,6 @@ const (
 	WorkerSize       = 1024 * 20
 	WorkerEventSize  = 512
 	WorkerReplySize  = 1024
+	BroadcastMsgSize = 1024
 	WorkerHolderSize = 1024
 )

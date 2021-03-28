@@ -60,7 +60,7 @@ func NewManager(logger log.Logger, newContext newContextFunc, newPersister newPe
 	}
 }
 
-func (m *Manager) Worker(ctx context.Context, oid int64, replier Replier) (worker *Worker, err error) {
+func (m *Manager) Worker(ctx context.Context, oid int64, replier Replier, broadcaster Broadcaster) (worker *Worker, err error) {
 	v, err, _ := m.group.Do(workerSingleFlightKey(oid), func() (interface{}, error) {
 		status := OnlineStatus(xcontext.Status(ctx))
 		if old := m.get(ctx, oid); old != nil {
@@ -78,7 +78,7 @@ func (m *Manager) Worker(ctx context.Context, oid int64, replier Replier) (worke
 		}
 
 		allowBorn := !IsInnerStatus(status)
-		return m.load(ctx, oid, replier, allowBorn)
+		return m.load(ctx, oid, replier, broadcaster, allowBorn)
 	})
 	if err != nil {
 		return
@@ -100,7 +100,7 @@ func (m *Manager) get(_ context.Context, id int64) *Worker {
 	return m.workers.Get(id)
 }
 
-func (m *Manager) load(ctx context.Context, oid int64, replier Replier, allowBorn bool) (*Worker, error) {
+func (m *Manager) load(ctx context.Context, oid int64, replier Replier, broadcaster Broadcaster, allowBorn bool) (*Worker, error) {
 	var (
 		changed bool
 		err     error
@@ -112,7 +112,7 @@ func (m *Manager) load(ctx context.Context, oid int64, replier Replier, allowBor
 	}
 
 	w := newWorker(ctx, m.log, newPersistManager(m.log, persister),
-		replier, newTickers(m.PreparedTickFuncs),
+		replier, broadcaster, newTickers(m.PreparedTickFuncs),
 		m.notifyWorkerStopped, m.newContext)
 
 	// Increment version number immediately after loading to prevent other services from loading the same data simultaneously
