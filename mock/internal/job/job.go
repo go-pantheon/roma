@@ -10,6 +10,7 @@ const (
 	TypeDev
 	TypeStorage
 	TypeSystem
+	TypeRoom
 )
 
 type Type int64

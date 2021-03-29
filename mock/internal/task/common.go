@@ -101,5 +101,11 @@ func (t *CommonTask) GetObj(ctx *base.Context) int64 {
 	}
 
 	fmt.Println(user.Basic.Name)
-	return ctx.Manager.UID()
+
+	switch t.Mod {
+	case climod.ModuleID_Room:
+		return 0
+	default:
+		return ctx.Manager.UID()
+	}
 }

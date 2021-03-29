@@ -1,0 +1,113 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "account/interface/v1/notice.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "NoticeInterface"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/notice/list": {
+      "get": {
+        "summary": "Notice List",
+        "operationId": "NoticeInterface_NoticeList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1NoticeListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "NoticeInterface"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1Notice": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "content": {
+          "type": "string",
+          "title": "Content"
+        }
+      },
+      "title": "Notice"
+    },
+    "v1NoticeListResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1NoticeListResponseCode",
+          "title": "Response code"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Notice"
+          },
+          "title": "Notice list, up to 10 items"
+        }
+      }
+    },
+    "v1NoticeListResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded"
+    }
+  }
+}

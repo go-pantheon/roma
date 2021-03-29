@@ -1,0 +1,127 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "message/storage_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "StorageService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/storage/use/pack": {
+      "post": {
+        "summary": "Use pack",
+        "operationId": "StorageService_UsePack",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCUsePack"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSUsePack"
+            }
+          }
+        ],
+        "tags": [
+          "StorageService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "messageCSUsePack": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Pack ID"
+        }
+      },
+      "title": "Request: Use pack"
+    },
+    "messageSCUsePack": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCUsePackCode"
+        },
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Pack ID"
+        },
+        "prizes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "the prizes that the player has received"
+        }
+      },
+      "title": "Response: Use pack"
+    },
+    "messageSCUsePackCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrPackNotExist",
+        "ErrPackLimit"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrPackNotExist: Pack does not exist\n - ErrPackLimit: Usage restricted"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

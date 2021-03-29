@@ -8,6 +8,7 @@ import (
 	basicobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/basic/gate/domain/object"
 	heroobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/hero/gate/domain/object"
 	plunderobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/plunder/gate/domain/object"
+	roomobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/room/gate/domain/object"
 	storageobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain/object"
 	message "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
 	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
@@ -39,6 +40,7 @@ type User struct {
 	Plunders *plunderobj.Plunders
 	Storage  *storageobj.Storage
 	HeroList *heroobj.HeroList
+	Room     *roomobj.Room
 }
 
 func NewUser(id int64, name string) *User {
@@ -53,6 +55,7 @@ func NewUser(id int64, name string) *User {
 	u.Plunders = plunderobj.NewPlunders()
 	u.Storage = storageobj.NewStorage()
 	u.HeroList = heroobj.NewHeroList()
+	u.Room = roomobj.NewRoom()
 
 	return u
 }
@@ -65,6 +68,7 @@ func NewUserProto() *dbv1.UserProto {
 	p.Plunders = plunderobj.NewPlundersProto()
 	p.Storage = storageobj.NewStorageProto()
 	p.HeroList = heroobj.NewHeroListProto()
+	p.Room = roomobj.NewRoomProto()
 	return p
 }
 
@@ -90,6 +94,7 @@ func (o *User) EncodeServer(p *dbv1.UserProto) *dbv1.UserProto {
 	o.Plunders.EncodeServer(p.Plunders)
 	o.Storage.EncodeServer(p.Storage)
 	o.HeroList.EncodeServer(p.HeroList)
+	o.Room.EncodeServer(p.Room)
 
 	return p
 }
@@ -125,6 +130,7 @@ func (o *User) DecodeServer(ctx context.Context, p *dbv1.UserProto) (err error) 
 	o.System.DecodeServer(p.System)
 	o.Plunders.DecodeServer(p.Plunders)
 	o.Storage.DecodeServer(ctx, p.Storage)
+	o.Room.DecodeServer(p.Room)
 	if err = o.HeroList.DecodeServer(ctx, p.HeroList); err != nil {
 		return errors.WithMessagef(err, "heroList unmarshal failed. uid=%d", o.Id)
 	}
@@ -167,6 +173,7 @@ func (o *User) EncodeClient() *message.UserProto {
 		Basic:    o.Basic.EncodeClient(),
 		Storage:  o.Storage.EncodeClient(),
 		HeroList: o.HeroList.EncodeClient(),
+		Room:     o.Room.EncodeClient(),
 	}
 	return p
 }

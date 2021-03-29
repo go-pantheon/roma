@@ -1,0 +1,227 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "gate/service/push/v1/push.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "PushService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/broadcast": {
+      "post": {
+        "operationId": "PushService_Broadcast",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1BroadcastResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1BroadcastRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PushService"
+        ]
+      }
+    },
+    "/multicast": {
+      "post": {
+        "operationId": "PushService_Multicast",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1MulticastResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1MulticastRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PushService"
+        ]
+      }
+    },
+    "/push": {
+      "post": {
+        "operationId": "PushService_Push",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1PushResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1PushRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PushService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1BroadcastRequest": {
+      "type": "object",
+      "properties": {
+        "bodies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PushBody"
+          }
+        }
+      }
+    },
+    "v1BroadcastResponse": {
+      "type": "object"
+    },
+    "v1MulticastRequest": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "bodies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PushBody"
+          }
+        }
+      }
+    },
+    "v1MulticastResponse": {
+      "type": "object"
+    },
+    "v1PushBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "format": "byte",
+          "title": "Message body proto bytes array"
+        },
+        "obj": {
+          "type": "string",
+          "format": "int64",
+          "title": "Object ID, according to the business agreement"
+        },
+        "mod": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Module ID, globally unique"
+        },
+        "seq": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Message ID within the module, unique within the module"
+        }
+      }
+    },
+    "v1PushRequest": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "bodies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PushBody"
+          }
+        }
+      }
+    },
+    "v1PushResponse": {
+      "type": "object"
+    }
+  }
+}

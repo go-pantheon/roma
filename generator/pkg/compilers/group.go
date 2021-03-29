@@ -12,6 +12,20 @@ type ModType string
 
 const (
 	PlayerGroup = GroupType("player")
+	GuildGroup  = GroupType("room")
+)
+
+const (
+	RoomMod = ModType("room")
+)
+
+var (
+	// groupModMap others not in the map are player mods
+	groupModMap = map[GroupType]map[ModType]struct{}{
+		GuildGroup: {
+			RoomMod: struct{}{},
+		},
+	}
 )
 
 func GroupByMod(mod ModType) GroupType {

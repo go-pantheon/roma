@@ -1,0 +1,758 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "account/interface/v1/account.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "AccountInterface"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/apple/login": {
+      "post": {
+        "summary": "Apple login",
+        "operationId": "AccountInterface_AppleLogin",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AppleLoginResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1AppleLoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    },
+    "/v1/apple/login/callback": {
+      "post": {
+        "summary": "Apple login callback",
+        "operationId": "AccountInterface_AppleLoginCallback",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AppleLoginCallbackResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1AppleLoginCallbackRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    },
+    "/v1/dev/ping": {
+      "get": {
+        "summary": "Connection test",
+        "operationId": "AccountInterface_DevPing",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DevPingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    },
+    "/v1/fb/login": {
+      "post": {
+        "summary": "Facebook login",
+        "operationId": "AccountInterface_FacebookLogin",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1FacebookLoginResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1FacebookLoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    },
+    "/v1/google/login": {
+      "post": {
+        "summary": "Google login",
+        "operationId": "AccountInterface_GoogleLogin",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GoogleLoginResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1GoogleLoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    },
+    "/v1/login": {
+      "post": {
+        "summary": "Login",
+        "operationId": "AccountInterface_Login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1LoginResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1LoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    },
+    "/v1/refresh": {
+      "post": {
+        "summary": "Session renewal",
+        "operationId": "AccountInterface_Refresh",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RefreshResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1RefreshRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    },
+    "/v1/register": {
+      "post": {
+        "summary": "Register",
+        "operationId": "AccountInterface_Register",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RegisterResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1RegisterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    },
+    "/v1/token": {
+      "post": {
+        "summary": "Get TCP handshake token",
+        "operationId": "AccountInterface_Token",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1TokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountInterface"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1AppleLoginCallbackRequest": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "idToken": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "v1AppleLoginCallbackResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1AppleLoginCallbackResponseCode",
+          "title": "Response code"
+        }
+      }
+    },
+    "v1AppleLoginCallbackResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_ERR_TOKEN",
+        "CODE_ERR_CODE",
+        "CODE_ERR_PARAM",
+        "CODE_ERR_APPLE"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Other errors\n - CODE_ERR_TOKEN: Token verification error\n - CODE_ERR_CODE: Code verification error\n - CODE_ERR_PARAM: Apple parameter error\n - CODE_ERR_APPLE: Apple callback error"
+    },
+    "v1AppleLoginRequest": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "title": "Apple token"
+        },
+        "appleId": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "v1AppleLoginResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1AppleLoginResponseCode",
+          "title": "Response code"
+        },
+        "info": {
+          "$ref": "#/definitions/v1LoginInfo",
+          "title": "Login information"
+        }
+      }
+    },
+    "v1AppleLoginResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED",
+        "CODE_ERR_TOKEN",
+        "CODE_ERR_APPLE_ID"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded\n - CODE_ERR_TOKEN: Token error\n - CODE_ERR_APPLE_ID: Apple ID error"
+    },
+    "v1DevPingResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        }
+      }
+    },
+    "v1FacebookLoginRequest": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "title": "Facebook access_token"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "v1FacebookLoginResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1FacebookLoginResponseCode",
+          "title": "Response code"
+        },
+        "info": {
+          "$ref": "#/definitions/v1LoginInfo",
+          "title": "Login information"
+        }
+      }
+    },
+    "v1FacebookLoginResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED",
+        "CODE_ERR_TOKEN"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded\n - CODE_ERR_TOKEN: Token error"
+    },
+    "v1GoogleLoginRequest": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "title": "Google token"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "v1GoogleLoginResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1GoogleLoginResponseCode",
+          "title": "Response code"
+        },
+        "info": {
+          "$ref": "#/definitions/v1LoginInfo",
+          "title": "Login information"
+        }
+      }
+    },
+    "v1GoogleLoginResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED",
+        "CODE_ERR_TOKEN"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded\n - CODE_ERR_TOKEN: Token error"
+    },
+    "v1LoginInfo": {
+      "type": "object",
+      "properties": {
+        "accountId": {
+          "type": "string",
+          "title": "Account ID. The unique ID of the account generated by the server"
+        },
+        "register": {
+          "type": "boolean",
+          "title": "Whether the account is registered"
+        },
+        "token": {
+          "type": "string",
+          "title": "TCP handshake token"
+        },
+        "tokenTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "Token timeout (unix timestamp)"
+        },
+        "session": {
+          "type": "string",
+          "title": "New session"
+        },
+        "sessionTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "New session timeout (unix timestamp)"
+        },
+        "state": {
+          "type": "string",
+          "title": "State random string for replay attack prevention"
+        }
+      }
+    },
+    "v1LoginRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Account name"
+        },
+        "password": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "v1LoginResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1LoginResponseCode",
+          "title": "Response code"
+        },
+        "accountId": {
+          "type": "string",
+          "title": "Account ID. The unique ID of the account generated by the server"
+        },
+        "session": {
+          "type": "string",
+          "title": "Account login session"
+        },
+        "sessionTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "Session timeout (unix timestamp)"
+        },
+        "token": {
+          "type": "string",
+          "title": "TCP handshake token"
+        },
+        "tokenTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "Token timeout (unix timestamp)"
+        }
+      }
+    },
+    "v1LoginResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED",
+        "CODE_ERR_ACCOUNT",
+        "CODE_ERR_PASSWORD"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded\n - CODE_ERR_ACCOUNT: Account does not exist\n - CODE_ERR_PASSWORD: Password error"
+    },
+    "v1RefreshRequest": {
+      "type": "object",
+      "properties": {
+        "accountId": {
+          "type": "string",
+          "title": "Account ID"
+        },
+        "session": {
+          "type": "string",
+          "title": "Existing session"
+        }
+      }
+    },
+    "v1RefreshResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1RefreshResponseCode",
+          "title": "Response code"
+        },
+        "session": {
+          "type": "string",
+          "title": "New session"
+        },
+        "sessionTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "New session timeout (unix timestamp)"
+        }
+      }
+    },
+    "v1RefreshResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED",
+        "CODE_ERR_ACCOUNT",
+        "CODE_ERR_SESSION_EXPIRED",
+        "CODE_ERR_SESSION_ILLEGAL"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded\n - CODE_ERR_ACCOUNT: Account does not exist\n - CODE_ERR_SESSION_EXPIRED: Session expired\n - CODE_ERR_SESSION_ILLEGAL: Session error"
+    },
+    "v1RegisterRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Account name, player fills in"
+        },
+        "password": {
+          "type": "string",
+          "title": "Password"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "v1RegisterResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1RegisterResponseCode",
+          "title": "Response code"
+        },
+        "accountId": {
+          "type": "string",
+          "title": "Account ID"
+        },
+        "session": {
+          "type": "string",
+          "title": "Account login session"
+        },
+        "sessionTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "Session timeout (unix timestamp)"
+        },
+        "token": {
+          "type": "string",
+          "title": "TCP handshake token"
+        },
+        "tokenTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "Token timeout"
+        }
+      }
+    },
+    "v1RegisterResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED",
+        "CODE_ERR_CREATED",
+        "CODE_ERR_NAME",
+        "CODE_ERR_PWD"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded\n - CODE_ERR_CREATED: Already registered\n - CODE_ERR_NAME: Account name format error, temporarily length 6-18\n - CODE_ERR_PWD: Password format error, temporarily length 6-18"
+    },
+    "v1TokenRequest": {
+      "type": "object",
+      "properties": {
+        "accountId": {
+          "type": "string",
+          "title": "Account ID"
+        },
+        "session": {
+          "type": "string",
+          "title": "Existing session"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "v1TokenResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/v1TokenResponseCode",
+          "title": "Response code"
+        },
+        "token": {
+          "type": "string",
+          "title": "TCP handshake token"
+        },
+        "tokenTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "Token timeout (unix timestamp)"
+        },
+        "session": {
+          "type": "string",
+          "title": "New session"
+        },
+        "sessionTimeout": {
+          "type": "string",
+          "format": "int64",
+          "title": "New session timeout (unix timestamp)"
+        }
+      }
+    },
+    "v1TokenResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED",
+        "CODE_ERR_ACCOUNT",
+        "CODE_ERR_SESSION_EXPIRED",
+        "CODE_ERR_SESSION_ILLEGAL"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded\n - CODE_ERR_ACCOUNT: Account does not exist\n - CODE_ERR_SESSION_EXPIRED: Session expired\n - CODE_ERR_SESSION_ILLEGAL: Session error"
+    }
+  }
+}

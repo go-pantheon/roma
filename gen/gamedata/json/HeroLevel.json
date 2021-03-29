@@ -1,0 +1,1 @@
+[{"ID": 1,"SubDatas": [{"Level": 1,"Name": "Level 1","Atk": 20,"Hp": 600,"Cost": {},"Prize": {}},{"Level": 2,"Name": "Level 2","Atk": 40,"Hp": 1000,"Cost": {"3":20,"4":2},"Prize": {"1":1}},{"Level": 3,"Name": "Level 3","Atk": 60,"Hp": 1600,"Cost": {"3":50,"4":5},"Prize": {"1":2}}]}]

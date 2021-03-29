@@ -1,0 +1,234 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "message/dev_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "DevService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/dev/execute": {
+      "post": {
+        "summary": "Execute Dev command",
+        "operationId": "DevService_DevExecute",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCDevExecute"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSDevExecute"
+            }
+          }
+        ],
+        "tags": [
+          "DevService"
+        ]
+      }
+    },
+    "/dev/list": {
+      "post": {
+        "summary": "Dev command list",
+        "operationId": "DevService_DevList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCDevList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSDevList"
+            }
+          }
+        ],
+        "tags": [
+          "DevService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "messageCSDevExecute": {
+      "type": "object",
+      "properties": {
+        "mod": {
+          "type": "string",
+          "title": "Command module"
+        },
+        "cmd": {
+          "type": "string",
+          "title": "Command name"
+        },
+        "args": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Command Parameters: DevCmdArgProto.key -\u003e value with string type"
+        }
+      },
+      "title": "Request: Execute Dev command"
+    },
+    "messageCSDevList": {
+      "type": "object",
+      "title": "Request: Dev command list"
+    },
+    "messageDevCmdArgProto": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "title": "Parameter name"
+        },
+        "def": {
+          "type": "string",
+          "title": "Default value"
+        }
+      },
+      "title": "A parameter of Dev command"
+    },
+    "messageDevCmdProto": {
+      "type": "object",
+      "properties": {
+        "mod": {
+          "type": "string",
+          "title": "Command module"
+        },
+        "name": {
+          "type": "string",
+          "title": "Command name"
+        },
+        "desc": {
+          "type": "string",
+          "title": "Description"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/messageDevCmdArgProto"
+          },
+          "title": "All parameters"
+        }
+      },
+      "title": "A Dev command"
+    },
+    "messageSCDevExecute": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCDevExecuteCode"
+        },
+        "message": {
+          "type": "string",
+          "title": "Result information, JSON format"
+        }
+      },
+      "title": "Response: Execute Dev command"
+    },
+    "messageSCDevExecuteCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrModNotExist",
+        "ErrNameNotExist",
+        "ErrArgNotExist",
+        "ErrArgIllegal",
+        "ErrArgFormat"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrModNotExist: Command module does not exist\n - ErrNameNotExist: Command name does not exist\n - ErrArgNotExist: Parameter does not exist\n - ErrArgIllegal: Parameter error\n - ErrArgFormat: Parameter format error"
+    },
+    "messageSCDevList": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCDevListCode"
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/messageDevCmdProto"
+          },
+          "title": "Dev command list"
+        }
+      },
+      "title": "Response: Dev command list"
+    },
+    "messageSCDevListCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

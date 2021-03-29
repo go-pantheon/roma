@@ -1,0 +1,827 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "message/room_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "RoomService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/room/agree_to_invite_join": {
+      "post": {
+        "summary": "Agree to invite to join room",
+        "operationId": "RoomService_AgreeToInviteJoinRoom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCAgreeToInviteJoinRoom"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSAgreeToInviteJoinRoom"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/approve_request_to_join": {
+      "post": {
+        "summary": "Approve request to join room",
+        "operationId": "RoomService_ApproveRequestToJoinRoom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCApproveRequestToJoinRoom"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSApproveRequestToJoinRoom"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/close": {
+      "post": {
+        "summary": "Close room",
+        "operationId": "RoomService_CloseRoom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCCloseRoom"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSCloseRoom"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/create": {
+      "post": {
+        "summary": "Create room",
+        "operationId": "RoomService_CreateRoom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCCreateRoom"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSCreateRoom"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/detail": {
+      "post": {
+        "summary": "Room detail",
+        "operationId": "RoomService_RoomDetail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCRoomDetail"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSRoomDetail"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/invite_to_join": {
+      "post": {
+        "summary": "Invite to join room",
+        "operationId": "RoomService_InviteToJoinRoom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCInviteToJoinRoom"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSInviteToJoinRoom"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/kick_user": {
+      "post": {
+        "summary": "Kick user from room",
+        "operationId": "RoomService_KickUserFromRoom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCKickUserFromRoom"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSKickUserFromRoom"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/leave": {
+      "post": {
+        "summary": "Leave room",
+        "operationId": "RoomService_LeaveRoom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCLeaveRoom"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSLeaveRoom"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/list": {
+      "post": {
+        "summary": "Room List",
+        "operationId": "RoomService_RoomList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCRoomList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSRoomList"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    },
+    "/room/request_to_join": {
+      "post": {
+        "summary": "Request to join room",
+        "operationId": "RoomService_RequestToJoinRoom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCRequestToJoinRoom"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSRequestToJoinRoom"
+            }
+          }
+        ],
+        "tags": [
+          "RoomService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "messageCSAgreeToInviteJoinRoom": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Room ID"
+        }
+      },
+      "title": "Request: Agree to invite to join room"
+    },
+    "messageCSApproveRequestToJoinRoom": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "User ID"
+        }
+      },
+      "title": "Request: Approve request to join room"
+    },
+    "messageCSCloseRoom": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Room ID"
+        }
+      },
+      "title": "Request: Close room"
+    },
+    "messageCSCreateRoom": {
+      "type": "object",
+      "properties": {
+        "roomType": {
+          "type": "string",
+          "format": "int64",
+          "title": "Room type"
+        }
+      },
+      "title": "Request: Create room"
+    },
+    "messageCSInviteToJoinRoom": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "User ID"
+        }
+      },
+      "title": "Request: Invite to join room"
+    },
+    "messageCSKickUserFromRoom": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64",
+          "title": "User ID"
+        }
+      },
+      "title": "Request: Kick user from room"
+    },
+    "messageCSLeaveRoom": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Room ID"
+        }
+      },
+      "title": "Request: Leave room"
+    },
+    "messageCSRequestToJoinRoom": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Room ID"
+        }
+      },
+      "title": "Request: Request to join room"
+    },
+    "messageCSRoomDetail": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Room ID"
+        }
+      },
+      "title": "Request: Room detail"
+    },
+    "messageCSRoomList": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "string",
+          "format": "int64",
+          "title": "Page number"
+        },
+        "pageSize": {
+          "type": "string",
+          "format": "int64",
+          "title": "Page size"
+        }
+      },
+      "title": "Request: Room List"
+    },
+    "messageRoomBasicProto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Room ID"
+        },
+        "roomType": {
+          "type": "string",
+          "format": "int64",
+          "title": "room type"
+        },
+        "creator": {
+          "$ref": "#/definitions/messageUserBasicProto",
+          "title": "Creator"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "Created at"
+        }
+      },
+      "title": "Room basic data"
+    },
+    "messageRoomMemberProto": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/messageUserBasicProto",
+          "title": "User basic data"
+        },
+        "joinedAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "Joined at"
+        }
+      },
+      "title": "Room member"
+    },
+    "messageRoomProto": {
+      "type": "object",
+      "properties": {
+        "basic": {
+          "$ref": "#/definitions/messageRoomBasicProto",
+          "title": "Room basic data"
+        },
+        "members": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/messageRoomMemberProto"
+          },
+          "title": "user ID -\u003e room member data"
+        },
+        "invitees": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "Invitees"
+        },
+        "requests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "Requests"
+        }
+      },
+      "title": "Room data"
+    },
+    "messageSCAgreeToInviteJoinRoom": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCAgreeToInviteJoinRoomCode",
+          "title": "Status code"
+        }
+      },
+      "title": "Response: Agree to invite to join room"
+    },
+    "messageSCAgreeToInviteJoinRoomCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrNotInRoom",
+        "ErrUnauthorized",
+        "ErrUserNotFound",
+        "ErrUserAlreadyInRoom",
+        "ErrUserNotInvited"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrNotInRoom: Not in room\n - ErrUnauthorized: Unauthorized\n - ErrUserNotFound: User not found\n - ErrUserAlreadyInRoom: User already in room\n - ErrUserNotInvited: User not invited"
+    },
+    "messageSCApproveRequestToJoinRoom": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCApproveRequestToJoinRoomCode",
+          "title": "Status code"
+        }
+      },
+      "title": "Response: Approve request to join room"
+    },
+    "messageSCApproveRequestToJoinRoomCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrNotInRoom",
+        "ErrUnauthorized",
+        "ErrUserNotFound",
+        "ErrUserAlreadyInRoom",
+        "ErrUserNotRequested"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrNotInRoom: Not in room\n - ErrUnauthorized: Unauthorized\n - ErrUserNotFound: User not found\n - ErrUserAlreadyInRoom: User already in room\n - ErrUserNotRequested: User not requested"
+    },
+    "messageSCCloseRoom": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCCloseRoomCode",
+          "title": "Status code"
+        }
+      },
+      "title": "Response: Close room"
+    },
+    "messageSCCloseRoomCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrNotInRoom",
+        "ErrUnauthorized"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrNotInRoom: Not in room\n - ErrUnauthorized: Unauthorized"
+    },
+    "messageSCCreateRoom": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCCreateRoomCode",
+          "title": "Status code"
+        },
+        "room": {
+          "$ref": "#/definitions/messageRoomProto",
+          "title": "Room data"
+        }
+      },
+      "title": "Response: Create room"
+    },
+    "messageSCCreateRoomCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrRoomTypeInvalid",
+        "ErrAlreadyInRoom"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrRoomTypeInvalid: Room type invalid\n - ErrAlreadyInRoom: Already in room"
+    },
+    "messageSCInviteToJoinRoom": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCInviteToJoinRoomCode",
+          "title": "Status code"
+        }
+      },
+      "title": "Response: Invite to join room"
+    },
+    "messageSCInviteToJoinRoomCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrNotInRoom",
+        "ErrUnauthorized",
+        "ErrUserNotFound",
+        "ErrUserAlreadyInRoom",
+        "ErrUserAlreadyInvited"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrNotInRoom: Not in room\n - ErrUnauthorized: Unauthorized\n - ErrUserNotFound: User not found\n - ErrUserAlreadyInRoom: User already in room\n - ErrUserAlreadyInvited: User already invited"
+    },
+    "messageSCKickUserFromRoom": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCKickUserFromRoomCode",
+          "title": "Status code"
+        }
+      },
+      "title": "Response: Kick user from room"
+    },
+    "messageSCKickUserFromRoomCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrNotInRoom",
+        "ErrUnauthorized",
+        "ErrUserNotFound",
+        "ErrUserNotInRoom"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrNotInRoom: Not in room\n - ErrUnauthorized: Unauthorized\n - ErrUserNotFound: User not found\n - ErrUserNotInRoom: User not in room"
+    },
+    "messageSCLeaveRoom": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCLeaveRoomCode",
+          "title": "Status code"
+        }
+      },
+      "title": "Response: Leave room"
+    },
+    "messageSCLeaveRoomCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrNotInRoom",
+        "ErrIsCreator"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrNotInRoom: Not in room\n - ErrIsCreator: Is creator"
+    },
+    "messageSCRequestToJoinRoom": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCRequestToJoinRoomCode",
+          "title": "Status code"
+        }
+      },
+      "title": "Response: Request to join room"
+    },
+    "messageSCRequestToJoinRoomCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrAlreadyInRoom",
+        "ErrRoomNotFound",
+        "ErrAlreadyRequested"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrAlreadyInRoom: Already in room\n - ErrRoomNotFound: Room not found\n - ErrAlreadyRequested: Already requested"
+    },
+    "messageSCRoomDetail": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCRoomDetailCode",
+          "title": "Status code"
+        },
+        "room": {
+          "$ref": "#/definitions/messageRoomProto",
+          "title": "Room data"
+        }
+      },
+      "title": "Response: Room detail"
+    },
+    "messageSCRoomDetailCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrRoomNotFound"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrRoomNotFound: Room not found"
+    },
+    "messageSCRoomList": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCRoomListCode",
+          "title": "Status code"
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/messageRoomBasicProto"
+          },
+          "title": "Room basic data list"
+        }
+      },
+      "title": "Response: Room List"
+    },
+    "messageSCRoomListCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded"
+    },
+    "messageUserBasicProto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id, globally unique string"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "gender": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Gender. 0:default 1:male 2:female"
+        },
+        "rechargeAmounts": {
+          "type": "number",
+          "format": "float",
+          "title": "Recharge amount"
+        }
+      },
+      "title": "Basic information"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "room/intra/v1/tunnel.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "TunnelService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1TunnelResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "format": "byte",
+          "title": "Serialized bytes of the cs/sc protocol in the message"
+        },
+        "dataVersion": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Data version number"
+        },
+        "obj": {
+          "type": "string",
+          "format": "int64",
+          "title": "Module object ID, according to the business agreement to pass the corresponding object ID"
+        },
+        "mod": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Module ID, globally unique"
+        },
+        "seq": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Module message ID, unique within the module"
+        }
+      }
+    }
+  }
+}

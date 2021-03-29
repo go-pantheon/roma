@@ -1,0 +1,1 @@
+[{"ID": 1,"Name": "Woody Treasure","ItemTypeInt": 3,"Max": 100,"Items": {"1":100,"2":100,"5":1},"Radios": {"1":1,"2":1},"GroupItems": [{"1":10000,"5":1},{"2":10000},{}],"GroupRadios": [{},{},{"1":20}],"GroupWeight": [10,10,980]}]

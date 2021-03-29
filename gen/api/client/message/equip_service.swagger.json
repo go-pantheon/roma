@@ -1,0 +1,300 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "message/equip_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "EquipService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/equip/takeoff": {
+      "post": {
+        "summary": "Take off equipment",
+        "operationId": "EquipService_EquipTakeOff",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCEquipTakeOff"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSEquipTakeOff"
+            }
+          }
+        ],
+        "tags": [
+          "EquipService"
+        ]
+      }
+    },
+    "/equip/upgrade": {
+      "post": {
+        "summary": "Equipment upgrade",
+        "operationId": "EquipService_EquipUpgrade",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCEquipUpgrade"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSEquipUpgrade"
+            }
+          }
+        ],
+        "tags": [
+          "EquipService"
+        ]
+      }
+    },
+    "/equip/wear": {
+      "post": {
+        "summary": "Wear equipment",
+        "operationId": "EquipService_EquipWear",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCEquipWear"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSEquipWear"
+            }
+          }
+        ],
+        "tags": [
+          "EquipService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "messageCSEquipTakeOff": {
+      "type": "object",
+      "properties": {
+        "equipId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Equipment ID"
+        }
+      },
+      "title": "Request: Take off equipment"
+    },
+    "messageCSEquipUpgrade": {
+      "type": "object",
+      "properties": {
+        "equipId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Equipment ID"
+        }
+      },
+      "title": "Request: Equipment upgrade"
+    },
+    "messageCSEquipWear": {
+      "type": "object",
+      "properties": {
+        "equipId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Equipment ID"
+        },
+        "heroId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Hero ID"
+        }
+      },
+      "title": "Request: Wear equipment"
+    },
+    "messageEquipProto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Equipment ID"
+        },
+        "dataId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Equipment DataID"
+        },
+        "level": {
+          "type": "string",
+          "format": "int64",
+          "title": "Current level"
+        },
+        "wearing": {
+          "type": "boolean",
+          "title": "Wearing status"
+        },
+        "heroId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Worn by hero ID (0 means not worn)"
+        }
+      },
+      "title": "Equipment"
+    },
+    "messageSCEquipTakeOff": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCEquipTakeOffCode"
+        },
+        "equip": {
+          "$ref": "#/definitions/messageEquipProto",
+          "title": "Updated equipment"
+        }
+      },
+      "title": "Response: Take off equipment"
+    },
+    "messageSCEquipTakeOffCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrEquipNotExist",
+        "ErrNotWearing"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrEquipNotExist: Equipment does not exist\n - ErrNotWearing: Not wearing"
+    },
+    "messageSCEquipUpgrade": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCEquipUpgradeCode"
+        },
+        "equip": {
+          "$ref": "#/definitions/messageEquipProto",
+          "title": "Upgraded equipment"
+        },
+        "costs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "Consumed materials"
+        }
+      },
+      "title": "Response: Equipment upgrade"
+    },
+    "messageSCEquipUpgradeCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrEquipNotExist",
+        "ErrMaxLevel",
+        "ErrCostNotEnough"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrEquipNotExist: Equipment does not exist\n - ErrMaxLevel: Already max level\n - ErrCostNotEnough: Cost not enough"
+    },
+    "messageSCEquipWear": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCEquipWearCode"
+        },
+        "replacedEquipId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Taken off equipment ID"
+        }
+      },
+      "title": "Response: Wear equipment"
+    },
+    "messageSCEquipWearCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrEquipNotExist",
+        "ErrHeroNotExist",
+        "ErrAlreadyWorn"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrEquipNotExist: Equipment does not exist\n - ErrHeroNotExist: Hero does not exist\n - ErrAlreadyWorn: Already worn"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

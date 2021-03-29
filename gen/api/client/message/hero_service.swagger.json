@@ -1,0 +1,165 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "message/hero_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "HeroService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/hero/level/upgrade": {
+      "post": {
+        "summary": "Hero level upgrade",
+        "operationId": "HeroService_HeroLevelUpgrade",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCHeroLevelUpgrade"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSHeroLevelUpgrade"
+            }
+          }
+        ],
+        "tags": [
+          "HeroService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "messageCSHeroLevelUpgrade": {
+      "type": "object",
+      "properties": {
+        "heroId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Hero_id"
+        }
+      },
+      "title": "Request: Hero level upgrade"
+    },
+    "messageHeroProto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Hero ID"
+        },
+        "dataId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Hero DataID"
+        },
+        "level": {
+          "type": "string",
+          "format": "int64",
+          "title": "Hero level"
+        },
+        "skills": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "Skill ID -\u003e Skill Level"
+        },
+        "equips": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "Equip IDs"
+        }
+      },
+      "title": "Hero"
+    },
+    "messageSCHeroLevelUpgrade": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCHeroLevelUpgradeCode",
+          "title": "Status code"
+        },
+        "hero": {
+          "$ref": "#/definitions/messageHeroProto",
+          "title": "Hero information"
+        },
+        "costs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "Consumed materials"
+        }
+      },
+      "title": "Response: Hero level upgrade"
+    },
+    "messageSCHeroLevelUpgradeCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrHeroNotExist",
+        "ErrMaxLevel",
+        "ErrCostNotEnough"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrHeroNotExist: Hero does not exist\n - ErrMaxLevel: Already max level\n - ErrCostNotEnough: Cost not enough"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

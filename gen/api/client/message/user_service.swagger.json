@@ -1,0 +1,420 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "message/user_service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "UserService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/user/gender/set": {
+      "post": {
+        "summary": "Set gender",
+        "operationId": "UserService_SetGender",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCSetGender"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSSetGender"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/user/login": {
+      "post": {
+        "summary": "Login",
+        "operationId": "UserService_Login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCLogin"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSLogin"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/user/name/update": {
+      "post": {
+        "summary": "Update name",
+        "operationId": "UserService_UpdateName",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/messageSCUpdateName"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/messageCSUpdateName"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "messageCSLogin": {
+      "type": "object",
+      "properties": {
+        "reconnect": {
+          "type": "boolean",
+          "description": "Whether it is a reconnection. When the client discovers that the network is disconnected during the online period and executes automatic reconnection, it is true."
+        }
+      },
+      "title": "Request: Login"
+    },
+    "messageCSSetGender": {
+      "type": "object",
+      "properties": {
+        "gender": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Gender. Same as ActorProto.gender"
+        }
+      },
+      "title": "Request: Set gender"
+    },
+    "messageCSUpdateName": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name"
+        }
+      },
+      "title": "Request: Update name"
+    },
+    "messageHeroProto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Hero ID"
+        },
+        "dataId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Hero DataID"
+        },
+        "level": {
+          "type": "string",
+          "format": "int64",
+          "title": "Hero level"
+        },
+        "skills": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "Skill ID -\u003e Skill Level"
+        },
+        "equips": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "Equip IDs"
+        }
+      },
+      "title": "Hero"
+    },
+    "messageItemRecoveryInfoProto": {
+      "type": "object",
+      "properties": {
+        "dataId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Item DataID"
+        },
+        "max": {
+          "type": "string",
+          "format": "int64",
+          "title": "Max Amount"
+        },
+        "recoverPerSec": {
+          "type": "number",
+          "format": "float",
+          "title": "Recover Per Second"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "int64",
+          "title": "Last updated time (Unix timestamp)"
+        }
+      },
+      "title": "Item Recovery info"
+    },
+    "messageSCLogin": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCLoginCode",
+          "title": "Status code"
+        },
+        "serverTime": {
+          "type": "string",
+          "format": "int64",
+          "title": "Server timestamp, accurate to seconds"
+        },
+        "user": {
+          "$ref": "#/definitions/messageUserProto",
+          "title": "Player data"
+        },
+        "newborn": {
+          "type": "boolean",
+          "title": "Whether the player is newborn"
+        }
+      },
+      "title": "Response: Login"
+    },
+    "messageSCLoginCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrAccountIdNotExist",
+        "ErrAccountBanned"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrAccountIdNotExist: Account does not exist\n - ErrAccountBanned: Account banned"
+    },
+    "messageSCSetGender": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCSetGenderCode",
+          "title": "Status code"
+        }
+      },
+      "title": "Response: Set gender"
+    },
+    "messageSCSetGenderCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrGenderIllegal",
+        "ErrGenderSet"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrGenderIllegal: Gender is illegal\n - ErrGenderSet: Gender has been set"
+    },
+    "messageSCUpdateName": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/messageSCUpdateNameCode",
+          "title": "Status code"
+        },
+        "isIllegal": {
+          "type": "boolean"
+        }
+      },
+      "title": "Response: Update name"
+    },
+    "messageSCUpdateNameCode": {
+      "type": "string",
+      "enum": [
+        "ErrUnspecified",
+        "Succeeded",
+        "ErrNameIllegal",
+        "ErrNameNotChanged"
+      ],
+      "default": "ErrUnspecified",
+      "title": "- ErrUnspecified: Please try again later\n - Succeeded: Succeeded\n - ErrNameIllegal: Name is illegal\n - ErrNameNotChanged: Name not changed"
+    },
+    "messageUserBasicProto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id, globally unique string"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "gender": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Gender. 0:default 1:male 2:female"
+        },
+        "rechargeAmounts": {
+          "type": "number",
+          "format": "float",
+          "title": "Recharge amount"
+        }
+      },
+      "title": "Basic information"
+    },
+    "messageUserHeroListProto": {
+      "type": "object",
+      "properties": {
+        "heroes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/messageHeroProto"
+          },
+          "title": "All heroes"
+        }
+      },
+      "title": "Hero list"
+    },
+    "messageUserProto": {
+      "type": "object",
+      "properties": {
+        "basic": {
+          "$ref": "#/definitions/messageUserBasicProto",
+          "title": "Basic information"
+        },
+        "storage": {
+          "$ref": "#/definitions/messageUserStorageProto",
+          "title": "Item storage"
+        },
+        "heroList": {
+          "$ref": "#/definitions/messageUserHeroListProto",
+          "title": "Hero list"
+        },
+        "room": {
+          "$ref": "#/definitions/messageUserRoomProto",
+          "title": "Room"
+        }
+      },
+      "title": "User data"
+    },
+    "messageUserRoomProto": {
+      "type": "object",
+      "properties": {
+        "roomId": {
+          "type": "string",
+          "format": "int64",
+          "title": "Room ID"
+        }
+      }
+    },
+    "messageUserStorageProto": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "uint64"
+          },
+          "title": "Items. item DataID -\u003e amount"
+        },
+        "packs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "uint64"
+          },
+          "title": "Packs. pack DataID -\u003e amount"
+        },
+        "recoveryInfos": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/messageItemRecoveryInfoProto"
+          },
+          "title": "Recoverable item infos. item DataID -\u003e properties"
+        }
+      },
+      "title": "Storage"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

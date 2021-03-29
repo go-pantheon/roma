@@ -1,0 +1,302 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "player/admin/recharge/v1/recharge.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "RechargeAdmin"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/admin/order/ack/update": {
+      "post": {
+        "summary": "Update order confirmation status by id",
+        "operationId": "RechargeAdmin_UpdateOrderAckStateById",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateOrderAckStateByIdResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdateOrderAckStateByIdRequest"
+            }
+          }
+        ],
+        "tags": [
+          "RechargeAdmin"
+        ]
+      }
+    },
+    "/admin/order/id": {
+      "get": {
+        "summary": "Query order by id",
+        "operationId": "RechargeAdmin_GetOrderById",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetOrderByIdResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "store",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "transId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RechargeAdmin"
+        ]
+      }
+    },
+    "/admin/order/list": {
+      "get": {
+        "summary": "Query order list by page",
+        "operationId": "RechargeAdmin_GetOrderList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetOrderListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "cond.store",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "cond.transId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "cond.uid",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "cond.ack",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "RechargeAdmin"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1GetOrderByIdResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "order": {
+          "$ref": "#/definitions/v1OrderProto"
+        }
+      }
+    },
+    "v1GetOrderListCond": {
+      "type": "object",
+      "properties": {
+        "store": {
+          "type": "string"
+        },
+        "transId": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "ack": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1GetOrderListResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1OrderProto"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "v1OrderProto": {
+      "type": "object",
+      "properties": {
+        "store": {
+          "type": "string"
+        },
+        "transId": {
+          "type": "string"
+        },
+        "ack": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "uid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "productId": {
+          "type": "string"
+        },
+        "purchasedAt": {
+          "type": "string",
+          "format": "int64"
+        },
+        "ackAt": {
+          "type": "string",
+          "format": "int64"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "v1UpdateOrderAckStateByIdRequest": {
+      "type": "object",
+      "properties": {
+        "store": {
+          "type": "string"
+        },
+        "transId": {
+          "type": "string"
+        },
+        "ack": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1UpdateOrderAckStateByIdResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
