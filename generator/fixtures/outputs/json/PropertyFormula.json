@@ -1,0 +1,1 @@
+[{"Id": 1,"Attribute": "steak_capacity","Formula": "user_steak_capacity"},{"Id": 2,"Attribute": "hero_atk","Formula": "hero_level_atk*(1+(hero_level/10000))"},{"Id": 3,"Attribute": "hero_hp","Formula": "hero_level_hp*((1+(hero_level/10000))^2)"}]

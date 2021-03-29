@@ -1,0 +1,53 @@
+GOPATH:=$(shell go env GOPATH)
+GOCMD=GO111MODULE=on CGO_ENABLED=0 go
+GOBUILD=${GOCMD} build
+GOTEST=${GOCMD} test
+APP_RELATIVE_PATH=$(shell a=`basename $$PWD` && echo $$a)
+APP_NAME=$(shell basename $(PWD))
+VERSION=$(shell git describe --tags --always --dirty)
+CTIME=$(shell date "+%G%m%d.%H%M%S")
+AZ := us
+TAG_VERSION=$(AZ)-$(CTIME)
+
+.PHONY: version
+# Show the generated version
+version:
+	@echo "$(APP_NAME):\n" \
+    " TIME=$(CTIME)\n" \
+    " ZONE=$(AZ)\n" \
+    " VERSION=$(TAG_VERSION)"
+
+.PHONY: wire
+# Generate wire
+wire:
+	cd cmd/server && wire
+
+.PHONY: build
+# Build executable file
+build:
+	@rm -rf bin/ && mkdir -p bin/ && $(GOBUILD) -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+
+.PHONY: test
+# Test
+test:
+	go test -v ./... -cover
+
+.PHONY: run
+run: start log
+
+.PHONY: start
+start:
+	@nohup $(shell pwd)/bin/server -conf=$(shell pwd)/configs -gamedata=../../gen/gamedata/json > bin/debug.log 2>&1 &
+
+.PHONY: stop
+stop:
+	@-pkill -f $(shell pwd)/bin
+
+.PHONY: log
+# tail -f app/player/bin/debug.log
+log:
+	@tail -20f bin/debug.log
+
+.PHONY: docker
+docker:
+	@cd ../.. && docker build -f deploy/build/Dockerfile --build-arg APP_RELATIVE_PATH=$(APP_RELATIVE_PATH) -t $(DOCKER_IMAGE) .
