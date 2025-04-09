@@ -7,18 +7,18 @@ import (
 
 	"sync/atomic"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/xcontext"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/fabrica-util/xsync"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
+	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
+	intrav1 "github.com/go-pantheon/roma/gen/api/server/gate/intra/v1"
+	"github.com/go-pantheon/roma/pkg/errs"
+	"github.com/go-pantheon/roma/pkg/universe/constants"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
-	cliseq "github.com/vulcan-frame/vulcan-game/gen/api/client/sequence"
-	intrav1 "github.com/vulcan-frame/vulcan-game/gen/api/server/gate/intra/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/errs"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/constants"
-	"github.com/vulcan-frame/vulcan-kit/xcontext"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
-	"github.com/vulcan-frame/vulcan-util/xsync"
 	"golang.org/x/sync/errgroup"
 )
 

@@ -1,7 +1,7 @@
 package errs
 
 import (
-	"github.com/go-kratos/kratos/errors"
+	"github.com/go-kratos/kratos/v2/errors"
 )
 
 var (

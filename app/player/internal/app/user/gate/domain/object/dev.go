@@ -3,8 +3,8 @@ package userobj
 import (
 	"time"
 
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
-	"github.com/vulcan-frame/vulcan-kit/profile"
+	"github.com/go-pantheon/fabrica-kit/profile"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 )
 
 type Dev struct {

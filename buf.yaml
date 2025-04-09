@@ -1,0 +1,40 @@
+# For details on buf.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-yaml
+version: v2
+modules:
+  - path: api/client
+    lint:
+      use:
+        - STANDARD
+      except:
+        - PACKAGE_VERSION_SUFFIX
+        - RPC_REQUEST_STANDARD_NAME
+        - RPC_RESPONSE_STANDARD_NAME
+        - FIELD_LOWER_SNAKE_CASE
+        - ENUM_ZERO_VALUE_SUFFIX
+        - ENUM_VALUE_PREFIX
+        - ENUM_VALUE_UPPER_SNAKE_CASE
+  - path: api/server
+    lint:
+      use:
+        - STANDARD
+      except:
+        - SERVICE_SUFFIX
+  - path: api/db
+    lint:
+      use:
+        - STANDARD
+  - path: third_party
+  - path: app
+    lint:
+      use:
+        - STANDARD
+      except:
+        - PACKAGE_VERSION_SUFFIX
+lint:
+  use:
+    - STANDARD
+  ignore:
+    - third_party
+breaking:
+  use:
+    - FILE

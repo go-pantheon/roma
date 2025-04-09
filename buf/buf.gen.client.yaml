@@ -1,0 +1,23 @@
+# For details on buf.gen.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-gen-yaml/
+version: v2
+clean: true
+plugins:
+  - local: protoc-gen-go
+    out: gen/api/client
+    opt: paths=source_relative
+  - local: protoc-gen-go-grpc
+    out: gen/api/client
+    opt: paths=source_relative
+  - local: protoc-gen-validate
+    out: gen/api/client
+    opt: paths=source_relative,lang=go
+  - local: protoc-gen-go-errors
+    out: gen/api/client
+    opt: paths=source_relative
+  - local: protoc-gen-go-http
+    out: gen/api/client
+    opt: paths=source_relative
+  - local: protoc-gen-openapiv2
+    out: gen/api/client
+inputs:
+  - directory: api/client

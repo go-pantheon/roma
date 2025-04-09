@@ -1,7 +1,7 @@
 package registry
 
 import (
-	room "github.com/vulcan-frame/vulcan-game/app/room/internal/app/room/admin/registry"
+	room "github.com/go-pantheon/roma/app/room/internal/app/room/admin/registry"
 )
 
 type AdminRegistrars struct {

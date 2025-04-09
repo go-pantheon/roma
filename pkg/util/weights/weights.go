@@ -6,9 +6,9 @@ It supports weighted random selection with exclusion capabilities and list gener
 package weights
 
 import (
+	"github.com/go-pantheon/roma/pkg/util/maths/u64"
+	"github.com/go-pantheon/roma/pkg/util/ranges"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/pkg/util/maths/u64"
-	"github.com/vulcan-frame/vulcan-game/pkg/util/ranges"
 )
 
 // Weights represents a collection of weighted ranges for probabilistic selection

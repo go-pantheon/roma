@@ -1,10 +1,10 @@
 package registry
 
 import (
-	gamedata "github.com/vulcan-frame/vulcan-game/app/player/internal/app/gamedata/admin/registry"
-	recharge "github.com/vulcan-frame/vulcan-game/app/player/internal/app/recharge/admin/registry"
-	storage "github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/admin/registry"
-	user "github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/admin/registry"
+	gamedata "github.com/go-pantheon/roma/app/player/internal/app/gamedata/admin/registry"
+	recharge "github.com/go-pantheon/roma/app/player/internal/app/recharge/admin/registry"
+	storage "github.com/go-pantheon/roma/app/player/internal/app/storage/admin/registry"
+	user "github.com/go-pantheon/roma/app/player/internal/app/user/admin/registry"
 )
 
 type AdminRegistrars struct {

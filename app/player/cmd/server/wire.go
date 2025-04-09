@@ -6,17 +6,17 @@
 package main
 
 import (
-	"github.com/go-kratos/kratos"
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-net/health"
+	"github.com/go-pantheon/roma/app/player/internal/app"
+	"github.com/go-pantheon/roma/app/player/internal/client"
+	"github.com/go-pantheon/roma/app/player/internal/conf"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	"github.com/go-pantheon/roma/app/player/internal/data"
+	"github.com/go-pantheon/roma/app/player/internal/intra"
+	"github.com/go-pantheon/roma/app/player/internal/server"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/client"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/conf"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/data"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/intra"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/server"
-	"github.com/vulcan-frame/vulcan-net/health"
 )
 
 // initApp init kratos application.

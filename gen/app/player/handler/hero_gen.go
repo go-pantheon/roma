@@ -5,10 +5,10 @@ package handler
 import (
 	"context"
 	"google.golang.org/protobuf/proto"
-	"github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	"github.com/vulcan-frame/vulcan-game/gen/api/client/sequence"
-	"github.com/vulcan-frame/vulcan-game/gen/app/codec"
-	"github.com/vulcan-frame/vulcan-game/gen/app/player/service"
+	"github.com/go-pantheon/roma/gen/api/client/message"
+	"github.com/go-pantheon/roma/gen/api/client/sequence"
+	"github.com/go-pantheon/roma/gen/app/codec"
+	"github.com/go-pantheon/roma/gen/app/player/service"
 	"github.com/pkg/errors"
 )
 

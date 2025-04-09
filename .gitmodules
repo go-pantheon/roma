@@ -1,0 +1,21 @@
+[submodule "api/server"]
+	path = api/server
+	url = https://github.com/go-pantheon/api-server
+[submodule "api/client"]
+	path = api/client
+	url = https://github.com/go-pantheon/api-client
+[submodule "api/db"]
+	path = api/db
+	url = https://github.com/go-pantheon/api-db
+[submodule "mercury/deps/fabrica-net"]
+	path = mercury/deps/fabrica-net
+	url = https://github.com/go-pantheon/fabrica-net
+[submodule "deps/fabrica-kit"]
+	path = deps/fabrica-kit
+	url = https://github.com/go-pantheon/fabrica-kit
+[submodule "deps/fabrica-util"]
+	path = deps/fabrica-util
+	url = https://github.com/go-pantheon/fabrica-util
+[submodule "exceldata"]
+	path = exceldata
+	url = https://github.com/go-pantheon/roma-exceldata

@@ -1,10 +1,10 @@
 package registry
 
 import (
-	"github.com/go-kratos/kratos/log"
-	"github.com/go-kratos/kratos/transport/grpc"
-	"github.com/go-kratos/kratos/transport/http"
-	intrav1 "github.com/vulcan-frame/vulcan-game/gen/api/server/room/intra/v1"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
+	intrav1 "github.com/go-pantheon/roma/gen/api/server/room/intra/v1"
 )
 
 type IntraRegistrar struct {

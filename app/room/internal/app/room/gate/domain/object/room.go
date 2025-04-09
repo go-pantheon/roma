@@ -3,9 +3,9 @@ package object
 import (
 	"time"
 
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/room/v1"
-	"github.com/vulcan-frame/vulcan-util/xtime"
+	"github.com/go-pantheon/fabrica-util/xtime"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/room/v1"
 )
 
 type Room struct {

@@ -1,11 +1,11 @@
 package domain
 
 import (
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/player/internal/app/hero/gate/domain/object"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	"github.com/go-pantheon/roma/gamedata"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/hero/gate/domain/object"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	"github.com/vulcan-frame/vulcan-game/gamedata"
 )
 
 type HeroDomain struct {

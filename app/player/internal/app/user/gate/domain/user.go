@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-kratos/kratos/log"
-	userobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/domain/object"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	userobj "github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/object"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 
 	"github.com/pkg/errors"
 )

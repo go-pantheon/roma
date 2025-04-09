@@ -1,13 +1,13 @@
 package room
 
 import (
-	"github.com/go-kratos/kratos/log"
-	"github.com/go-kratos/kratos/registry"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/data"
-	"github.com/vulcan-frame/vulcan-kit/router/balancer"
-	"github.com/vulcan-frame/vulcan-kit/router/conn"
-	"github.com/vulcan-frame/vulcan-kit/router/routetable"
-	"github.com/vulcan-frame/vulcan-kit/router/routetable/redis"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-pantheon/fabrica-kit/router/balancer"
+	"github.com/go-pantheon/fabrica-kit/router/conn"
+	"github.com/go-pantheon/fabrica-kit/router/routetable"
+	"github.com/go-pantheon/fabrica-kit/router/routetable/redis"
+	"github.com/go-pantheon/roma/app/player/internal/data"
 )
 
 const (

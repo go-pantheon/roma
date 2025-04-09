@@ -1,8 +1,8 @@
 package cmds
 
 import (
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 )
 
 type Commandable interface {

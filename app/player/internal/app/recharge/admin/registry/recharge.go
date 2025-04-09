@@ -1,10 +1,10 @@
 package registry
 
 import (
-	"github.com/go-kratos/kratos/log"
-	"github.com/go-kratos/kratos/transport/grpc"
-	"github.com/go-kratos/kratos/transport/http"
-	adminv1 "github.com/vulcan-frame/vulcan-game/gen/api/server/player/admin/recharge/v1"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
+	adminv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/recharge/v1"
 )
 
 type RechargeRegistrar struct {

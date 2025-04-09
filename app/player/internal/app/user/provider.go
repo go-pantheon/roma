@@ -1,9 +1,9 @@
 package user
 
 import (
+	"github.com/go-pantheon/roma/app/player/internal/app/user/admin"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/admin"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate"
 )
 
 var ProviderSet = wire.NewSet(

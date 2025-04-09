@@ -3,8 +3,8 @@ package domain
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
+	"github.com/go-kratos/kratos/v2/log"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 )
 
 type UserRepo interface {

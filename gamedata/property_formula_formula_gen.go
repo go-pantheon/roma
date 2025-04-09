@@ -2,7 +2,7 @@
 
 package gamedata
 
-import "github.com/vulcan-frame/vulcan-game/pkg/util/formula"
+import "github.com/go-pantheon/roma/pkg/util/formula"
 
 func (d *PropertyFormulaDataGen) CalcSteakCapacity(
 	UserSteakCapacity float64,

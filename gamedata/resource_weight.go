@@ -1,6 +1,6 @@
 package gamedata
 
-import "github.com/vulcan-frame/vulcan-game/pkg/util/weights"
+import "github.com/go-pantheon/roma/pkg/util/weights"
 
 type GroupWeights struct {
 	*weights.Weights

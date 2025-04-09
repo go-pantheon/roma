@@ -3,8 +3,8 @@ package life
 import (
 	"context"
 
-	intrav1 "github.com/vulcan-frame/vulcan-game/gen/api/server/gate/intra/v1"
-	"github.com/vulcan-frame/vulcan-kit/xcontext"
+	"github.com/go-pantheon/fabrica-kit/xcontext"
+	intrav1 "github.com/go-pantheon/roma/gen/api/server/gate/intra/v1"
 )
 
 func IsInnerContext(ctx context.Context) bool {

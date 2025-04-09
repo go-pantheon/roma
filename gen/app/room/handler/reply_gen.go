@@ -4,7 +4,7 @@ package handler
 
 import (
 	"google.golang.org/protobuf/proto"
-	"github.com/vulcan-frame/vulcan-game/gen/api/server/room/intra/v1"
+	"github.com/go-pantheon/roma/gen/api/server/room/intra/v1"
 	"github.com/pkg/errors"
 )
 

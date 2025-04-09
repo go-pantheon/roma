@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-kratos/kratos/log"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/admin/biz"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	adminv1 "github.com/vulcan-frame/vulcan-game/gen/api/server/player/admin/storage/v1"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/player/internal/app/storage/admin/biz"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	adminv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/storage/v1"
 )
 
 type StorageAdmin struct {

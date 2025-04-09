@@ -4,7 +4,7 @@ package service
 
 import (
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/gen/api/client/message"
+	"github.com/go-pantheon/roma/gen/api/client/message"
 )
 
 var PlayerServicesProviderSet = wire.NewSet(

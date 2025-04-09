@@ -5,8 +5,8 @@ import (
 
 	"maps"
 
+	"github.com/go-pantheon/roma/pkg/util/sorts"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/pkg/util/sorts"
 )
 
 func Contains(array []int64, v int64) bool {

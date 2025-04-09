@@ -1,8 +1,8 @@
 package plunder
 
 import (
+	"github.com/go-pantheon/roma/app/player/internal/app/plunder/gate/domain"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/plunder/gate/domain"
 )
 
 var ProviderSet = wire.NewSet(domain.ProviderSet)

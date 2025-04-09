@@ -1,8 +1,8 @@
 package app
 
 import (
+	"github.com/go-pantheon/roma/app/room/internal/app/room"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/room/internal/app/room"
 )
 
 var ProviderSet = wire.NewSet(room.ProviderSet)

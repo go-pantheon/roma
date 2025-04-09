@@ -1,11 +1,11 @@
 package dev
 
 import (
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/biz"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/cmdregistrar"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/registry"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/service"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/biz"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/cmds/cmdregistrar"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/registry"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/service"
 )
 
 var ProviderSet = wire.NewSet(

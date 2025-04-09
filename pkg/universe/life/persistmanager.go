@@ -5,11 +5,11 @@ import (
 
 	"sync/atomic"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/profile"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/roma/pkg/universe/constants"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/constants"
-	"github.com/vulcan-frame/vulcan-kit/profile"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
 )
 
 type PersistManager struct {
@@ -18,7 +18,7 @@ type PersistManager struct {
 
 	changed         atomic.Bool
 	immediatelyChan chan struct{}
-	saveChan        chan VersionProto
+	saveChan       chan VersionProto
 }
 
 func newPersistManager(log *log.Helper, persister Persistent) (s *PersistManager) {

@@ -1,11 +1,11 @@
 package biz
 
 import (
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/cmds"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
 )
 
 type DevUseCase struct {

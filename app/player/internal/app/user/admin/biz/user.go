@@ -3,10 +3,10 @@ package biz
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/admin/domain"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/admin/domain"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 )
 
 type UserUseCase struct {

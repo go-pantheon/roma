@@ -7,8 +7,8 @@ import (
 
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	cliseq "github.com/vulcan-frame/vulcan-game/gen/api/client/sequence"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
 )
 
 func UnmarshalCSHero(seq int32, data []byte) (p proto.Message, err error) {

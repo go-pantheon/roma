@@ -1,7 +1,7 @@
 package gamedata
 
 import (
-	"github.com/vulcan-frame/vulcan-game/pkg/errs"
+	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/pkg/errors"
 )
 

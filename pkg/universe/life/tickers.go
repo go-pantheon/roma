@@ -3,7 +3,7 @@ package life
 import (
 	"time"
 
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/constants"
+	"github.com/go-pantheon/roma/pkg/universe/constants"
 )
 
 type Tickers struct {

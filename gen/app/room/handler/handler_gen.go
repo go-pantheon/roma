@@ -4,9 +4,9 @@ package handler
 
 import (
 	"context"
-	"github.com/vulcan-frame/vulcan-game/gen/api/client/module"
-	"github.com/vulcan-frame/vulcan-game/gen/app/room/service"
-	"github.com/vulcan-frame/vulcan-kit/tunnel"
+	"github.com/go-pantheon/roma/gen/api/client/module"
+	"github.com/go-pantheon/roma/gen/app/room/service"
+	"github.com/go-pantheon/fabrica-kit/tunnel"
 	"github.com/pkg/errors"
 )
 

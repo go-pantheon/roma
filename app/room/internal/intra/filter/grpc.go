@@ -3,10 +3,10 @@ package filter
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/middleware"
-	"github.com/vulcan-frame/vulcan-game/app/room/internal/core"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
-	"github.com/vulcan-frame/vulcan-kit/xcontext"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-pantheon/fabrica-kit/xcontext"
+	"github.com/go-pantheon/roma/app/room/internal/core"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 type GrpcFilter struct {

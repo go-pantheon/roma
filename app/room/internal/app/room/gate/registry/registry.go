@@ -1,11 +1,11 @@
 package registry
 
 import (
-	"github.com/go-kratos/kratos/log"
-	"github.com/go-kratos/kratos/transport/grpc"
-	"github.com/go-kratos/kratos/transport/http"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 )
 
 func NewRoomRegistrar(svc climsg.RoomServiceServer) *RoomRegistrar {

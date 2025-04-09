@@ -1,7 +1,7 @@
 package player
 
 import (
-	userv1 "github.com/vulcan-frame/vulcan-game/gen/api/server/player/service/user/v1"
+	userv1 "github.com/go-pantheon/roma/gen/api/server/player/service/user/v1"
 )
 
 func NewUserClient(conn *Conn) userv1.UserServiceClient {

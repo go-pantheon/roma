@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
-	"github.com/vulcan-frame/vulcan-game/app/room/internal/app/room/gate/biz"
-	"github.com/vulcan-frame/vulcan-game/app/room/internal/core"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/room/internal/app/room/gate/biz"
+	"github.com/go-pantheon/roma/app/room/internal/core"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 )
 
 type RoomService struct {

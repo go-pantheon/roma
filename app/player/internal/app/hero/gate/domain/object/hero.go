@@ -5,11 +5,11 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/go-pantheon/roma/gamedata"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/gamedata"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/errs"
 )
 
 const DefaultHeroLevel = 1

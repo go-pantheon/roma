@@ -3,14 +3,14 @@ package data
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/roma/app/room/internal/app/room/admin/domain"
+	"github.com/go-pantheon/roma/app/room/internal/data"
+	dbv1 "github.com/go-pantheon/roma/gen/api/server/room/admin/room/v1"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/app/room/internal/app/room/admin/domain"
-	"github.com/vulcan-frame/vulcan-game/app/room/internal/data"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/server/room/admin/room/v1"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 var _ domain.RoomRepo = (*mongoRepo)(nil)

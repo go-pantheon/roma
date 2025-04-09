@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"github.com/go-kratos/kratos/middleware"
-	"github.com/go-kratos/kratos/transport"
-	"github.com/go-kratos/kratos/transport/http"
-	"github.com/vulcan-frame/vulcan-kit/profile"
-	"github.com/vulcan-frame/vulcan-kit/xcontext"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-pantheon/fabrica-kit/profile"
+	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"google.golang.org/grpc/metadata"
 )
 

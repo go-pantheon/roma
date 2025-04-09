@@ -3,15 +3,15 @@ package data
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/admin/domain"
+	"github.com/go-pantheon/roma/app/player/internal/data"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/admin/domain"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/data"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 var _ domain.UserRepo = (*userMongoRepo)(nil)

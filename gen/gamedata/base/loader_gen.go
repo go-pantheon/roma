@@ -3,10 +3,10 @@
 package base
 
 import (
-	"github.com/vulcan-frame/vulcan-game/gen/gamedata/base/hero"
-	"github.com/vulcan-frame/vulcan-game/gen/gamedata/base/property"
-	"github.com/vulcan-frame/vulcan-game/gen/gamedata/base/recharge"
-	"github.com/vulcan-frame/vulcan-game/gen/gamedata/base/resource"
+	"github.com/go-pantheon/roma/gen/gamedata/base/hero"
+	"github.com/go-pantheon/roma/gen/gamedata/base/property"
+	"github.com/go-pantheon/roma/gen/gamedata/base/recharge"
+	"github.com/go-pantheon/roma/gen/gamedata/base/resource"
 
 	"path/filepath"
 )

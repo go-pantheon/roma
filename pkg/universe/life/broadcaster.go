@@ -3,12 +3,12 @@ package life
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
+	servicev1 "github.com/go-pantheon/roma/gen/api/server/gate/service/push/v1"
+	"github.com/go-pantheon/roma/pkg/universe/constants"
+	"github.com/go-pantheon/roma/pkg/universe/data"
 	"github.com/pkg/errors"
-	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
-	servicev1 "github.com/vulcan-frame/vulcan-game/gen/api/server/gate/service/push/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/constants"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/data"
 	"google.golang.org/protobuf/proto"
 )
 

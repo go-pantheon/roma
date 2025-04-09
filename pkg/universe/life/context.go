@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vulcan-frame/vulcan-kit/xcontext"
+	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"google.golang.org/protobuf/proto"
 )
 

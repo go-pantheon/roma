@@ -1,8 +1,8 @@
 package server
 
 import (
+	"github.com/go-pantheon/roma/app/room/internal/server/registry"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/room/internal/server/registry"
 )
 
 var ProviderSet = wire.NewSet(

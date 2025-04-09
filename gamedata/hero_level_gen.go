@@ -3,7 +3,7 @@
 package gamedata
 
 import (
-	hero_base "github.com/vulcan-frame/vulcan-game/gen/gamedata/base/hero"
+	hero_base "github.com/go-pantheon/roma/gen/gamedata/base/hero"
 	"github.com/pkg/errors"
 )
 

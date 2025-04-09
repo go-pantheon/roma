@@ -1,9 +1,9 @@
 package client
 
 import (
+	"github.com/go-pantheon/roma/app/player/internal/client/gate"
+	"github.com/go-pantheon/roma/app/player/internal/client/room"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/client/gate"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/client/room"
 )
 
 var ProviderSet = wire.NewSet(

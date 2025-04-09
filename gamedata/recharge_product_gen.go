@@ -3,7 +3,7 @@
 package gamedata
 
 import (
-	recharge_base "github.com/vulcan-frame/vulcan-game/gen/gamedata/base/recharge"
+	recharge_base "github.com/go-pantheon/roma/gen/gamedata/base/recharge"
 	"github.com/pkg/errors"
 )
 

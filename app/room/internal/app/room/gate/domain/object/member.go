@@ -3,8 +3,8 @@ package object
 import (
 	"time"
 
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/room/v1"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/room/v1"
 )
 
 type Member struct {

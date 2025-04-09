@@ -1,6 +1,6 @@
 package gamedata
 
-import "github.com/vulcan-frame/vulcan-game/pkg/util/maths/u64"
+import "github.com/go-pantheon/roma/pkg/util/maths/u64"
 
 type ResourcePackData struct {
 	*ResourcePackDataGen

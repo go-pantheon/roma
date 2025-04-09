@@ -3,15 +3,15 @@ package logging
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/profile"
+	"github.com/go-pantheon/fabrica-kit/xcontext"
+	"github.com/go-pantheon/fabrica-kit/tunnel"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
+	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
+	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
+	"github.com/go-pantheon/roma/gen/app/codec"
 	jsoniter "github.com/json-iterator/go"
-	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
-	clipkt "github.com/vulcan-frame/vulcan-game/gen/api/client/packet"
-	cliseq "github.com/vulcan-frame/vulcan-game/gen/api/client/sequence"
-	"github.com/vulcan-frame/vulcan-game/gen/app/codec"
-	"github.com/vulcan-frame/vulcan-kit/profile"
-	"github.com/vulcan-frame/vulcan-kit/tunnel"
-	"github.com/vulcan-frame/vulcan-kit/xcontext"
 )
 
 func EmptyFilter(mod, seq int32) bool {

@@ -3,8 +3,8 @@ package ranges
 import (
 	"sort"
 
+	"github.com/go-pantheon/roma/pkg/util/maths/i64"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/pkg/util/maths/i64"
 )
 
 // Range is a wrapper around a list of Int64RangePair

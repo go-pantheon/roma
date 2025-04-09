@@ -3,7 +3,7 @@ package gamedata
 import (
 	"math"
 
-	"github.com/vulcan-frame/vulcan-game/pkg/util/maths/u64"
+	"github.com/go-pantheon/roma/pkg/util/maths/u64"
 )
 
 // DefaultMaxAmount is used when the item has no maximum amount.

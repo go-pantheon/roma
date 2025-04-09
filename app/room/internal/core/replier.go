@@ -3,15 +3,15 @@ package core
 import (
 	"sync/atomic"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
+	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
+	intrav1 "github.com/go-pantheon/roma/gen/api/server/room/intra/v1"
+	"github.com/go-pantheon/roma/gen/app/codec"
+	"github.com/go-pantheon/roma/gen/app/room/handler"
+	"github.com/go-pantheon/roma/pkg/universe/constants"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	jsoniter "github.com/json-iterator/go"
-	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
-	clipkt "github.com/vulcan-frame/vulcan-game/gen/api/client/packet"
-	intrav1 "github.com/vulcan-frame/vulcan-game/gen/api/server/room/intra/v1"
-	"github.com/vulcan-frame/vulcan-game/gen/app/codec"
-	"github.com/vulcan-frame/vulcan-game/gen/app/room/handler"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/constants"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
 	"google.golang.org/protobuf/proto"
 )
 

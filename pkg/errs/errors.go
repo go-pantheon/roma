@@ -4,9 +4,9 @@ import (
 	"context"
 	"io"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/fabrica-util/xsync"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
-	"github.com/vulcan-frame/vulcan-util/xsync"
 )
 
 func DontLog(err error) bool {

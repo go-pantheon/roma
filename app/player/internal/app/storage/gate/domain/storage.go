@@ -1,15 +1,15 @@
 package domain
 
 import (
-	"github.com/go-kratos/kratos/log"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/domain/object"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	"github.com/vulcan-frame/vulcan-game/gamedata"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
-	cliseq "github.com/vulcan-frame/vulcan-game/gen/api/client/sequence"
-	adv1 "github.com/vulcan-frame/vulcan-game/gen/api/server/player/admin/storage/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/errs"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/player/internal/app/storage/gate/domain/object"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	"github.com/go-pantheon/roma/gamedata"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
+	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
+	adv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/storage/v1"
+	"github.com/go-pantheon/roma/pkg/errs"
 )
 
 func NewStorageDomain(logger log.Logger) *StorageDomain {

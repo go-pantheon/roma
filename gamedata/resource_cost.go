@@ -1,8 +1,8 @@
 package gamedata
 
 import (
+	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/pkg/errs"
 )
 
 // Costs is a map of item id to item cost. It is built from game data and is immutable.

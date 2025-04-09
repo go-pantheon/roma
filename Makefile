@@ -1,6 +1,18 @@
 GOCMD=GO111MODULE=on CGO_ENABLED=0 go
 GOBUILD=${GOCMD} build
 
+.PHONY: init
+# Initialize environment
+init:
+	go install github.com/google/wire/cmd/wire@latest
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install github.com/envoyproxy/protoc-gen-validate@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
+	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
+	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2@latest
+	go install github.com/favadi/protoc-go-inject-tag@latest
+
 .PHONY: version
 # Show the generated version
 version:
@@ -11,7 +23,32 @@ version:
 # Generate wire
 wire:
 	@find app -type d -depth 1 -print | xargs -L 1 bash -c 'echo "wire: $$0" && cd "$$0" && $(MAKE) wire'
-	cd mock/cmd && wire
+	cd mercury/cmd && wire
+
+.PHONY: proto
+# Generate internal proto struct
+proto:
+	buf generate --template=buf/buf.gen.app.yaml
+	buf generate --template=buf/buf.gen.mercury.yaml
+
+.PHONY: api
+# Generate API
+api:
+	buf generate --template=buf/buf.gen.client.yaml
+	buf generate --template=buf/buf.gen.server.yaml
+
+.PHONY: db
+# Generate API
+db:
+	@buf generate --template=buf/buf.gen.db.yaml && \
+	cd gen/api/db/ && find . -type d -print0 | while IFS= read -r -d '' dir; do \
+		if [[ -z $$(find "$$dir" -mindepth 1 -type d) ]]; then \
+			if ls "$$dir"/*.pb.go &>/dev/null; then \
+				echo "Running protoc-go-inject-tag in $$dir"; \
+				protoc-go-inject-tag -input="$$dir/*.pb.go"; \
+			fi; \
+		fi; \
+	done
 
 .PHONY: build
 # build execute file
@@ -72,39 +109,39 @@ test:
 tools:
 	rm -rf bin/tools
 	mkdir -p bin/tools
-	$(GOBUILD) -o bin/tools/gen-api -ldflags "-X main.Version=0.0.1"  ./generator/app/api/cmd
-	$(GOBUILD) -o bin/tools/gen-mock -ldflags "-X main.Version=0.0.1"  ./generator/app/mock/cmd
-	$(GOBUILD) -o bin/tools/gen-data-json -ldflags "-X main.Version=0.0.1"  ./generator/app/gamedata/cmd/json
-	$(GOBUILD) -o bin/tools/gen-data-base -ldflags "-X main.Version=0.0.1"  ./generator/app/gamedata/cmd/base
-	$(GOBUILD) -o bin/tools/gen-datas -ldflags "-X main.Version=0.0.1"  ./generator/app/gamedata/cmd/data
+	$(GOBUILD) -o bin/tools/gen-api -ldflags "-X main.Version=0.0.1"  ./vulcan/app/api/cmd
+	$(GOBUILD) -o bin/tools/gen-mercury -ldflags "-X main.Version=0.0.1"  ./vulcan/app/mercury/cmd
+	$(GOBUILD) -o bin/tools/gen-data-json -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/json
+	$(GOBUILD) -o bin/tools/gen-data-base -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/base
+	$(GOBUILD) -o bin/tools/gen-datas -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/data
 
-.PHONY: mock
-# start mock server
-mock:
-	-pkill -f mock/bin/mock
-	cd mock \
-	  && rm -rf bin/mock && mkdir -p bin/mock && $(GOBUILD) -ldflags "-X main.Version=0.0.1" -o bin/mock/client ./cmd
-	cd mock \
-	  && nohup bin/mock/client -conf=configs -gamedata gen/gamedata/json > bin/mock/debug.log &
-	tail -f mock/bin/mock/debug.log
+.PHONY: mercury
+# start mercury client
+mercury:
+	-pkill -f mercury/bin/mercury
+	cd mercury \
+	  && rm -rf bin/mercury && mkdir -p bin/mercury && $(GOBUILD) -ldflags "-X main.Version=0.0.1" -o bin/mercury/client ./cmd
+	cd mercury \
+	  && nohup bin/mercury/client -conf=configs -gamedata gen/gamedata/json > bin/mercury/debug.log &
+	tail -f mercury/bin/mercury/debug.log
 
-.PHONY: mock-log
-mock-log:
-	tail -f mock/bin/mock/debug.log
+.PHONY: mercury-log
+mercury-log:
+	tail -f mercury/bin/mercury/debug.log
 
-.PHONY: mock-stop
-mock-stop:
-	-pkill -f mock/bin/mock
+.PHONY: mercury-stop
+mercury-stop:
+	-pkill -f mercury/bin/mercury
 
 .PHONY: gen-api
 # generate api code
 gen-api:
 	bin/tools/gen-api
 
-.PHONY: gen-mock	
-# generate mock code
-gen-mock:
-	bin/tools/gen-mock
+.PHONY: gen-mercury
+# generate mercury client code
+gen-mercury:
+	bin/tools/gen-mercury
 
 .PHONY: gen-data-json
 # generate data json file

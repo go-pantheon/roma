@@ -3,7 +3,7 @@
 package gamedata
 
 import (
-	property_base "github.com/vulcan-frame/vulcan-game/gen/gamedata/base/property"
+	property_base "github.com/go-pantheon/roma/gen/gamedata/base/property"
 	"github.com/pkg/errors"
 )
 

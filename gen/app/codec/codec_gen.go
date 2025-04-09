@@ -5,8 +5,8 @@ package codec
 import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
-	clipkt "github.com/vulcan-frame/vulcan-game/gen/api/client/packet"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
+	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
 )
 
 func UnmarshalCS(mod, seq int32, bytes []byte) (cs proto.Message, err error) {

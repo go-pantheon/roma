@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/room/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/room/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
 )
 
 type RoomRepo interface {

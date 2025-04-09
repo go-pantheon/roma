@@ -3,13 +3,13 @@ package object
 import (
 	"time"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/fabrica-util/xtime"
+	"github.com/go-pantheon/roma/gamedata"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/util/maths/u64"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/gamedata"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/util/maths/u64"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
-	"github.com/vulcan-frame/vulcan-util/xtime"
 )
 
 // RecoveryInfo Auto Recoverable Item Info

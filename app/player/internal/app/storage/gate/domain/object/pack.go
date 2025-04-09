@@ -1,8 +1,8 @@
 package object
 
 import (
-	"github.com/vulcan-frame/vulcan-game/gamedata"
-	"github.com/vulcan-frame/vulcan-game/pkg/util/maths/u64"
+	"github.com/go-pantheon/roma/gamedata"
+	"github.com/go-pantheon/roma/pkg/util/maths/u64"
 )
 
 type PackInfo struct {

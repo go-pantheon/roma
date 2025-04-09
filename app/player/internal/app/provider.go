@@ -1,15 +1,15 @@
 package app
 
 import (
+	"github.com/go-pantheon/roma/app/player/internal/app/dev"
+	"github.com/go-pantheon/roma/app/player/internal/app/gamedata"
+	"github.com/go-pantheon/roma/app/player/internal/app/hero"
+	"github.com/go-pantheon/roma/app/player/internal/app/plunder"
+	"github.com/go-pantheon/roma/app/player/internal/app/recharge"
+	"github.com/go-pantheon/roma/app/player/internal/app/storage"
+	"github.com/go-pantheon/roma/app/player/internal/app/system"
+	"github.com/go-pantheon/roma/app/player/internal/app/user"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/gamedata"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/hero"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/plunder"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/recharge"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/system"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user"
 )
 
 var ProviderSet = wire.NewSet(

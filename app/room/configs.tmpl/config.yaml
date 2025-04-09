@@ -16,7 +16,7 @@ server:
     timeout: 5s
 data: 
   mongo:
-    source: admin:${MONGO_PASSWORD}@localhost:27017/game?maxPoolSize=5000&socketTimeoutMS=1000
+    source: admin:${MONGO_PASSWORD}@localhost:27017/roma?maxPoolSize=5000&socketTimeoutMS=1000
     database: roma
     dial_timeout: 1s
   redis:

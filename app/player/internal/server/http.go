@@ -1,22 +1,22 @@
 package server
 
 import (
-	"github.com/go-kratos/kratos/log"
-	"github.com/go-kratos/kratos/middleware"
-	"github.com/go-kratos/kratos/middleware/logging"
-	"github.com/go-kratos/kratos/middleware/metadata"
-	"github.com/go-kratos/kratos/middleware/recovery"
-	"github.com/go-kratos/kratos/middleware/tracing"
-	"github.com/go-kratos/kratos/transport/http"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/conf"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/intra/filter"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/server/registry"
-	devmd "github.com/vulcan-frame/vulcan-game/pkg/universe/middleware/dev"
-	"github.com/vulcan-frame/vulcan-kit/metrics"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/middleware/logging"
+	"github.com/go-kratos/kratos/v2/middleware/metadata"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-pantheon/fabrica-kit/metrics"
+	"github.com/go-pantheon/roma/app/player/internal/conf"
+	"github.com/go-pantheon/roma/app/player/internal/intra/filter"
+	"github.com/go-pantheon/roma/app/player/internal/server/registry"
+	devmd "github.com/go-pantheon/roma/pkg/universe/middleware/dev"
 )
 
 func NewHTTPServer(
-	c *conf.Server, logger log.Logger, filter *filter.HttpFilter,
+	c *conf.Server, logger log.Logger, filter *filter.HttpFilter, 
 	svcRg *registry.ServiceRegistrars, gateRg *registry.GateRegistrars, adminRg *registry.AdminRegistrars,
 ) *http.Server {
 	var opts = []http.ServerOption{

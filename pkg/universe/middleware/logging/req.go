@@ -3,12 +3,12 @@ package logging
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/profile"
+	"github.com/go-pantheon/fabrica-kit/tunnel"
+	"github.com/go-pantheon/fabrica-kit/xcontext"
+	"github.com/go-pantheon/roma/gen/app/codec"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/vulcan-frame/vulcan-game/gen/app/codec"
-	"github.com/vulcan-frame/vulcan-kit/profile"
-	"github.com/vulcan-frame/vulcan-kit/tunnel"
-	"github.com/vulcan-frame/vulcan-kit/xcontext"
 )
 
 func Req(ctx context.Context, log *log.Helper, p tunnel.ForwardMessage, filter func(mod, seq int32) bool) {

@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/domain"
-	userobj "github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/domain/object"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/constants"
-	"github.com/vulcan-frame/vulcan-game/pkg/util/lru"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
+	userobj "github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/object"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/universe/constants"
+	"github.com/go-pantheon/roma/pkg/util/lru"
 	"google.golang.org/protobuf/proto"
 )
 

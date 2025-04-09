@@ -1,8 +1,8 @@
 package core
 
 import (
+	"github.com/go-pantheon/roma/pkg/universe/data"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/data"
 )
 
 var ProviderSet = wire.NewSet(NewManager, data.ProviderSet)

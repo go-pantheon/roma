@@ -3,7 +3,7 @@
 package gamedata
 
 import (
-	"github.com/vulcan-frame/vulcan-game/gen/gamedata/base"
+	"github.com/go-pantheon/roma/gen/gamedata/base"
 )
 
 var (

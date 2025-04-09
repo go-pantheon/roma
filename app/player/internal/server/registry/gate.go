@@ -1,11 +1,11 @@
 package registry
 
 import (
-	dev "github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/registry"
-	hero "github.com/vulcan-frame/vulcan-game/app/player/internal/app/hero/gate/registry"
-	storage "github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate/registry"
-	system "github.com/vulcan-frame/vulcan-game/app/player/internal/app/system/gate/registry"
-	user "github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/registry"
+	dev "github.com/go-pantheon/roma/app/player/internal/app/dev/gate/registry"
+	hero "github.com/go-pantheon/roma/app/player/internal/app/hero/gate/registry"
+	storage "github.com/go-pantheon/roma/app/player/internal/app/storage/gate/registry"
+	system "github.com/go-pantheon/roma/app/player/internal/app/system/gate/registry"
+	user "github.com/go-pantheon/roma/app/player/internal/app/user/gate/registry"
 )
 
 type GateRegistrars struct {

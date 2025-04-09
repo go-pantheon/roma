@@ -1,11 +1,11 @@
 package system
 
 import (
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/biz"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/cmds"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	"github.com/vulcan-frame/vulcan-util/xtime"
+	"github.com/go-pantheon/fabrica-util/xtime"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/biz"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 )
 
 var _ cmds.Commandable = (*ShowTimeCommander)(nil)

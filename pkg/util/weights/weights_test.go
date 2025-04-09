@@ -5,7 +5,7 @@ import (
 
 	"math"
 
-	"github.com/vulcan-frame/vulcan-game/pkg/util/maths/i64"
+	"github.com/go-pantheon/roma/pkg/util/maths/i64"
 )
 
 func TestTryNewWeights(t *testing.T) {

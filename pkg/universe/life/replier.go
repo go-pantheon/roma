@@ -1,7 +1,7 @@
 package life
 
 import (
-	climod "github.com/vulcan-frame/vulcan-game/gen/api/client/module"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	"google.golang.org/protobuf/proto"
 )
 

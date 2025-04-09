@@ -1,12 +1,12 @@
 package data
 
 import (
-	"github.com/go-kratos/kratos/log"
-	"github.com/redis/go-redis"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/conf"
-	"github.com/vulcan-frame/vulcan-util/data/cache"
-	"github.com/vulcan-frame/vulcan-util/data/db"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-util/data/cache"
+	"github.com/go-pantheon/fabrica-util/data/db"
+	"github.com/go-pantheon/roma/app/player/internal/conf"
+	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Data struct {

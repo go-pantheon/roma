@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/vulcan-frame/vulcan-game/gamedata"
+	"github.com/go-pantheon/roma/gamedata"
 )
 
 type UpdateType bool

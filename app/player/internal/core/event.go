@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/player/v1"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 )
 
 const RechargePrecision = int64(2)

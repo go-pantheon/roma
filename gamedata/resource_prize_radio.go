@@ -3,8 +3,8 @@ package gamedata
 import (
 	"slices"
 
+	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/pkg/errs"
 )
 
 var (

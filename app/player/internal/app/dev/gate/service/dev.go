@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/biz"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/cmds/cmdregistrar"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/core"
-	climsg "github.com/vulcan-frame/vulcan-game/gen/api/client/message"
-	"github.com/vulcan-frame/vulcan-kit/profile"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/profile"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/biz"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/cmdregistrar"
+	"github.com/go-pantheon/roma/app/player/internal/core"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

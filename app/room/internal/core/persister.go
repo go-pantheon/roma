@@ -6,12 +6,12 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/roma/app/room/internal/app/room/gate/domain"
+	roomobj "github.com/go-pantheon/roma/app/room/internal/app/room/gate/domain/object"
+	dbv1 "github.com/go-pantheon/roma/gen/api/db/room/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
-	"github.com/vulcan-frame/vulcan-game/app/room/internal/app/room/gate/domain"
-	roomobj "github.com/vulcan-frame/vulcan-game/app/room/internal/app/room/gate/domain/object"
-	dbv1 "github.com/vulcan-frame/vulcan-game/gen/api/db/room/v1"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
-	"github.com/vulcan-frame/vulcan-kit/xerrors"
 	"google.golang.org/protobuf/proto"
 )
 

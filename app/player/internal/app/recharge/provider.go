@@ -1,9 +1,9 @@
 package recharge
 
 import (
+	"github.com/go-pantheon/roma/app/player/internal/app/recharge/admin"
+	"github.com/go-pantheon/roma/app/player/internal/app/recharge/gate"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/recharge/admin"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/recharge/gate"
 )
 
 var ProviderSet = wire.NewSet(gate.ProviderSet, admin.ProviderSet)

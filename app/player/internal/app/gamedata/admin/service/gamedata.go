@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/go-kratos/kratos/log"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/gamedata/admin/biz"
-	adminv1 "github.com/vulcan-frame/vulcan-game/gen/api/server/player/admin/gamedata/v1"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/player/internal/app/gamedata/admin/biz"
+	adminv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/gamedata/v1"
 )
 
 type GamedataAdmin struct {

@@ -1,9 +1,9 @@
 package registry
 
 import (
-	"github.com/go-kratos/kratos/transport/grpc"
-	"github.com/go-kratos/kratos/transport/http"
-	intra "github.com/vulcan-frame/vulcan-game/app/room/internal/intra/registry"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
+	intra "github.com/go-pantheon/roma/app/room/internal/intra/registry"
 )
 
 type ServiceRegistrars struct {

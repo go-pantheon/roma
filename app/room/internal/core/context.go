@@ -3,8 +3,8 @@ package core
 import (
 	"context"
 
-	roomobj "github.com/vulcan-frame/vulcan-game/app/room/internal/app/room/gate/domain/object"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
+	roomobj "github.com/go-pantheon/roma/app/room/internal/app/room/gate/domain/object"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 type Context interface {

@@ -1,9 +1,9 @@
 package storage
 
 import (
+	"github.com/go-pantheon/roma/app/player/internal/app/storage/admin"
+	"github.com/go-pantheon/roma/app/player/internal/app/storage/gate"
 	"github.com/google/wire"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/admin"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/storage/gate"
 )
 
 var ProviderSet = wire.NewSet(

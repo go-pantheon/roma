@@ -1,9 +1,9 @@
 package cmdregistrar
 
 import (
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/cmds/storage"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/cmds/system"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/dev/gate/cmds/user"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/storage"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/system"
+	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/user"
 )
 
 type Registrar struct {

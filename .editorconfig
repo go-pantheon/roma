@@ -1,0 +1,34 @@
+root = true
+
+[*]
+!*.go
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{yaml,yml}]
+indent_style = tab
+indent_size = 1
+max_line_length = 120
+
+[*.proto]
+indent_style = tab
+indent_size = 1
+max_line_length = 120
+
+ij_protobuf_spaces_around_operators = true
+ij_protobuf_align_field_options = false
+ij_protobuf_keep_semicolons = false
+ij_protobuf_use_tabs = false
+
+ij_protobuf_enum_wrapping = 1
+ij_protobuf_field_alignment = align
+ij_protobuf_optional_braces = never
+ij_protobuf_optional_group_wrapping = 1
+
+ij_protobuf_string_quote_style = double
+
+ij_protobuf_space_after_colon = true
+ij_protobuf_space_before_colon = false
+ij_protobuf_space_inside_message_braces = false

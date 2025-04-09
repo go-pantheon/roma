@@ -3,10 +3,10 @@ package core
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/log"
-	"github.com/vulcan-frame/vulcan-game/app/player/internal/app/user/gate/domain"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/data"
-	"github.com/vulcan-frame/vulcan-game/pkg/universe/life"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
+	"github.com/go-pantheon/roma/pkg/universe/data"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 type Manager struct {
