@@ -19,7 +19,7 @@ type RoomDomain struct {
 func NewRoomDomain(pr RoomRepo, logger log.Logger) *RoomDomain {
 	return &RoomDomain{
 		repo: pr,
-		log:  log.NewHelper(log.With(logger, "module", "room/tcp/domain/room"))}
+		log:  log.NewHelper(log.With(logger, "module", "room/admin/domain/room"))}
 }
 
 func (do *RoomDomain) Load(ctx context.Context, id int64) (u *adminv1.RoomProto, err error) {

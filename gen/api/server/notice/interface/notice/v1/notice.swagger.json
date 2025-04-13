@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "account/interface/v1/notice.proto",
+    "title": "notice/interface/notice/v1/notice.proto",
     "version": "version not set"
   },
   "tags": [
@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/notice/list": {
+    "/notices/v1/list": {
       "get": {
         "summary": "Notice List",
         "operationId": "NoticeInterface_NoticeList",
@@ -41,6 +41,15 @@
     }
   },
   "definitions": {
+    "NoticeListResponseCode": {
+      "type": "string",
+      "enum": [
+        "CODE_ERR_UNSPECIFIED",
+        "CODE_SUCCEEDED"
+      ],
+      "default": "CODE_ERR_UNSPECIFIED",
+      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded"
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -87,7 +96,7 @@
       "type": "object",
       "properties": {
         "code": {
-          "$ref": "#/definitions/v1NoticeListResponseCode",
+          "$ref": "#/definitions/NoticeListResponseCode",
           "title": "Response code"
         },
         "list": {
@@ -99,15 +108,6 @@
           "title": "Notice list, up to 10 items"
         }
       }
-    },
-    "v1NoticeListResponseCode": {
-      "type": "string",
-      "enum": [
-        "CODE_ERR_UNSPECIFIED",
-        "CODE_SUCCEEDED"
-      ],
-      "default": "CODE_ERR_UNSPECIFIED",
-      "title": "- CODE_ERR_UNSPECIFIED: Please try again later\n - CODE_SUCCEEDED: Succeeded"
     }
   }
 }

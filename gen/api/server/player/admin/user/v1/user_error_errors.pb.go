@@ -22,27 +22,3 @@ func IsUserAdminErrorReasonUnspecified(err error) bool {
 func ErrorUserAdminErrorReasonUnspecified(format string, args ...interface{}) *errors.Error {
 	return errors.New(500, UserAdminErrorReason_USER_ADMIN_ERROR_REASON_UNSPECIFIED.String(), fmt.Sprintf(format, args...))
 }
-
-func IsUserAdminErrorReasonServer(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == UserAdminErrorReason_USER_ADMIN_ERROR_REASON_SERVER.String() && e.Code == 500
-}
-
-func ErrorUserAdminErrorReasonServer(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, UserAdminErrorReason_USER_ADMIN_ERROR_REASON_SERVER.String(), fmt.Sprintf(format, args...))
-}
-
-func IsUserAdminErrorReasonId(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == UserAdminErrorReason_USER_ADMIN_ERROR_REASON_ID.String() && e.Code == 401
-}
-
-func ErrorUserAdminErrorReasonId(format string, args ...interface{}) *errors.Error {
-	return errors.New(401, UserAdminErrorReason_USER_ADMIN_ERROR_REASON_ID.String(), fmt.Sprintf(format, args...))
-}

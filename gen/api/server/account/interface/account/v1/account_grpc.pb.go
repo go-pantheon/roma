@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: account/interface/v1/account.proto
+// source: account/interface/account/v1/account.proto
 
 package interfacev1
 
@@ -19,15 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountInterface_DevPing_FullMethodName            = "/account.interface.v1.AccountInterface/DevPing"
-	AccountInterface_Register_FullMethodName           = "/account.interface.v1.AccountInterface/Register"
-	AccountInterface_Login_FullMethodName              = "/account.interface.v1.AccountInterface/Login"
-	AccountInterface_Refresh_FullMethodName            = "/account.interface.v1.AccountInterface/Refresh"
-	AccountInterface_Token_FullMethodName              = "/account.interface.v1.AccountInterface/Token"
-	AccountInterface_AppleLogin_FullMethodName         = "/account.interface.v1.AccountInterface/AppleLogin"
-	AccountInterface_AppleLoginCallback_FullMethodName = "/account.interface.v1.AccountInterface/AppleLoginCallback"
-	AccountInterface_GoogleLogin_FullMethodName        = "/account.interface.v1.AccountInterface/GoogleLogin"
-	AccountInterface_FacebookLogin_FullMethodName      = "/account.interface.v1.AccountInterface/FacebookLogin"
+	AccountInterface_DevPing_FullMethodName            = "/account.interface.account.v1.AccountInterface/DevPing"
+	AccountInterface_UsernameRegister_FullMethodName   = "/account.interface.account.v1.AccountInterface/UsernameRegister"
+	AccountInterface_UsernameLogin_FullMethodName      = "/account.interface.account.v1.AccountInterface/UsernameLogin"
+	AccountInterface_Refresh_FullMethodName            = "/account.interface.account.v1.AccountInterface/Refresh"
+	AccountInterface_Token_FullMethodName              = "/account.interface.account.v1.AccountInterface/Token"
+	AccountInterface_AppleLogin_FullMethodName         = "/account.interface.account.v1.AccountInterface/AppleLogin"
+	AccountInterface_AppleLoginCallback_FullMethodName = "/account.interface.account.v1.AccountInterface/AppleLoginCallback"
+	AccountInterface_GoogleLogin_FullMethodName        = "/account.interface.account.v1.AccountInterface/GoogleLogin"
+	AccountInterface_FacebookLogin_FullMethodName      = "/account.interface.account.v1.AccountInterface/FacebookLogin"
 )
 
 // AccountInterfaceClient is the client API for AccountInterface service.
@@ -41,9 +41,9 @@ type AccountInterfaceClient interface {
 	// Connection test
 	DevPing(ctx context.Context, in *DevPingRequest, opts ...grpc.CallOption) (*DevPingResponse, error)
 	// Register
-	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	UsernameRegister(ctx context.Context, in *UsernameRegisterRequest, opts ...grpc.CallOption) (*UsernameRegisterResponse, error)
 	// Login
-	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	UsernameLogin(ctx context.Context, in *UsernameLoginRequest, opts ...grpc.CallOption) (*UsernameLoginResponse, error)
 	// Session renewal
 	Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*RefreshResponse, error)
 	// Get TCP handshake token
@@ -76,20 +76,20 @@ func (c *accountInterfaceClient) DevPing(ctx context.Context, in *DevPingRequest
 	return out, nil
 }
 
-func (c *accountInterfaceClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
+func (c *accountInterfaceClient) UsernameRegister(ctx context.Context, in *UsernameRegisterRequest, opts ...grpc.CallOption) (*UsernameRegisterResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RegisterResponse)
-	err := c.cc.Invoke(ctx, AccountInterface_Register_FullMethodName, in, out, cOpts...)
+	out := new(UsernameRegisterResponse)
+	err := c.cc.Invoke(ctx, AccountInterface_UsernameRegister_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *accountInterfaceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+func (c *accountInterfaceClient) UsernameLogin(ctx context.Context, in *UsernameLoginRequest, opts ...grpc.CallOption) (*UsernameLoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, AccountInterface_Login_FullMethodName, in, out, cOpts...)
+	out := new(UsernameLoginResponse)
+	err := c.cc.Invoke(ctx, AccountInterface_UsernameLogin_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -167,9 +167,9 @@ type AccountInterfaceServer interface {
 	// Connection test
 	DevPing(context.Context, *DevPingRequest) (*DevPingResponse, error)
 	// Register
-	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	UsernameRegister(context.Context, *UsernameRegisterRequest) (*UsernameRegisterResponse, error)
 	// Login
-	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	UsernameLogin(context.Context, *UsernameLoginRequest) (*UsernameLoginResponse, error)
 	// Session renewal
 	Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error)
 	// Get TCP handshake token
@@ -195,11 +195,11 @@ type UnimplementedAccountInterfaceServer struct{}
 func (UnimplementedAccountInterfaceServer) DevPing(context.Context, *DevPingRequest) (*DevPingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DevPing not implemented")
 }
-func (UnimplementedAccountInterfaceServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+func (UnimplementedAccountInterfaceServer) UsernameRegister(context.Context, *UsernameRegisterRequest) (*UsernameRegisterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UsernameRegister not implemented")
 }
-func (UnimplementedAccountInterfaceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+func (UnimplementedAccountInterfaceServer) UsernameLogin(context.Context, *UsernameLoginRequest) (*UsernameLoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UsernameLogin not implemented")
 }
 func (UnimplementedAccountInterfaceServer) Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Refresh not implemented")
@@ -258,38 +258,38 @@ func _AccountInterface_DevPing_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AccountInterface_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterRequest)
+func _AccountInterface_UsernameRegister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UsernameRegisterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountInterfaceServer).Register(ctx, in)
+		return srv.(AccountInterfaceServer).UsernameRegister(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AccountInterface_Register_FullMethodName,
+		FullMethod: AccountInterface_UsernameRegister_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountInterfaceServer).Register(ctx, req.(*RegisterRequest))
+		return srv.(AccountInterfaceServer).UsernameRegister(ctx, req.(*UsernameRegisterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AccountInterface_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoginRequest)
+func _AccountInterface_UsernameLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UsernameLoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountInterfaceServer).Login(ctx, in)
+		return srv.(AccountInterfaceServer).UsernameLogin(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AccountInterface_Login_FullMethodName,
+		FullMethod: AccountInterface_UsernameLogin_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountInterfaceServer).Login(ctx, req.(*LoginRequest))
+		return srv.(AccountInterfaceServer).UsernameLogin(ctx, req.(*UsernameLoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -406,7 +406,7 @@ func _AccountInterface_FacebookLogin_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AccountInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "account.interface.v1.AccountInterface",
+	ServiceName: "account.interface.account.v1.AccountInterface",
 	HandlerType: (*AccountInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -414,12 +414,12 @@ var AccountInterface_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AccountInterface_DevPing_Handler,
 		},
 		{
-			MethodName: "Register",
-			Handler:    _AccountInterface_Register_Handler,
+			MethodName: "UsernameRegister",
+			Handler:    _AccountInterface_UsernameRegister_Handler,
 		},
 		{
-			MethodName: "Login",
-			Handler:    _AccountInterface_Login_Handler,
+			MethodName: "UsernameLogin",
+			Handler:    _AccountInterface_UsernameLogin_Handler,
 		},
 		{
 			MethodName: "Refresh",
@@ -447,5 +447,5 @@ var AccountInterface_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "account/interface/v1/account.proto",
+	Metadata: "account/interface/account/v1/account.proto",
 }

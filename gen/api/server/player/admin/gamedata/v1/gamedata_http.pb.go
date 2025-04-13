@@ -28,7 +28,7 @@ type GamedataAdminHTTPServer interface {
 
 func RegisterGamedataAdminHTTPServer(s *http.Server, srv GamedataAdminHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/gamedata/item/list", _GamedataAdmin_GetItemList0_HTTP_Handler(srv))
+	r.GET("/admin/gamedata/items/list", _GamedataAdmin_GetItemList0_HTTP_Handler(srv))
 }
 
 func _GamedataAdmin_GetItemList0_HTTP_Handler(srv GamedataAdminHTTPServer) func(ctx http.Context) error {
@@ -64,7 +64,7 @@ func NewGamedataAdminHTTPClient(client *http.Client) GamedataAdminHTTPClient {
 
 func (c *GamedataAdminHTTPClientImpl) GetItemList(ctx context.Context, in *GetItemListRequest, opts ...http.CallOption) (*GetItemListResponse, error) {
 	var out GetItemListResponse
-	pattern := "/admin/gamedata/item/list"
+	pattern := "/admin/gamedata/items/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGamedataAdminGetItemList))
 	opts = append(opts, http.PathTemplate(pattern))

@@ -26,7 +26,7 @@ func NewRechargeUseCase(mgr *core.Manager, do *domain.OrderDomain, logger log.Lo
 	return uc
 }
 
-func (uc *RechargeUseCase) GetList(ctx context.Context, index, size int32, cond *dbv1.OrderProto) ([]*dbv1.OrderProto, int64, error) {
+func (uc *RechargeUseCase) GetList(ctx context.Context, index, size int64, cond *dbv1.OrderProto) ([]*dbv1.OrderProto, int64, error) {
 	return uc.do.GetList(ctx, index, size, cond)
 }
 

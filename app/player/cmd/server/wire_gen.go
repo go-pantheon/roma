@@ -77,8 +77,8 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 		cleanup()
 		return nil, nil, err
 	}
-	userProtoCache := data2.NewProtoCache()
-	userDomain := domain.NewUserDomain(userRepo, logger, userProtoCache)
+	userOfflineCache := data2.NewProtoCache()
+	userDomain := domain.NewUserDomain(userRepo, logger, userOfflineCache)
 	routeTable := gate.NewRouteTable(dataData)
 	discovery, err := client.NewDiscovery(confRegistry)
 	if err != nil {

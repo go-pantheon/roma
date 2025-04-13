@@ -22,27 +22,3 @@ func IsOrderAdminErrorReasonUnspecified(err error) bool {
 func ErrorOrderAdminErrorReasonUnspecified(format string, args ...interface{}) *errors.Error {
 	return errors.New(500, OrderAdminErrorReason_ORDER_ADMIN_ERROR_REASON_UNSPECIFIED.String(), fmt.Sprintf(format, args...))
 }
-
-func IsOrderAdminErrorReasonServer(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == OrderAdminErrorReason_ORDER_ADMIN_ERROR_REASON_SERVER.String() && e.Code == 500
-}
-
-func ErrorOrderAdminErrorReasonServer(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, OrderAdminErrorReason_ORDER_ADMIN_ERROR_REASON_SERVER.String(), fmt.Sprintf(format, args...))
-}
-
-func IsOrderAdminErrorReasonId(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == OrderAdminErrorReason_ORDER_ADMIN_ERROR_REASON_ID.String() && e.Code == 401
-}
-
-func ErrorOrderAdminErrorReasonId(format string, args ...interface{}) *errors.Error {
-	return errors.New(401, OrderAdminErrorReason_ORDER_ADMIN_ERROR_REASON_ID.String(), fmt.Sprintf(format, args...))
-}

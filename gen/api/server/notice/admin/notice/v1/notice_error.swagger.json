@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "account/admin/notice/v1/notice_error.proto",
+    "title": "notice/admin/notice/v1/notice_error.proto",
     "version": "version not set"
   },
   "consumes": [

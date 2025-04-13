@@ -22,27 +22,3 @@ func IsGamedataAdminErrorReasonUnspecified(err error) bool {
 func ErrorGamedataAdminErrorReasonUnspecified(format string, args ...interface{}) *errors.Error {
 	return errors.New(500, GamedataAdminErrorReason_GAMEDATA_ADMIN_ERROR_REASON_UNSPECIFIED.String(), fmt.Sprintf(format, args...))
 }
-
-func IsGamedataAdminErrorReasonServer(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == GamedataAdminErrorReason_GAMEDATA_ADMIN_ERROR_REASON_SERVER.String() && e.Code == 500
-}
-
-func ErrorGamedataAdminErrorReasonServer(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, GamedataAdminErrorReason_GAMEDATA_ADMIN_ERROR_REASON_SERVER.String(), fmt.Sprintf(format, args...))
-}
-
-func IsGamedataAdminErrorReasonId(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == GamedataAdminErrorReason_GAMEDATA_ADMIN_ERROR_REASON_ID.String() && e.Code == 401
-}
-
-func ErrorGamedataAdminErrorReasonId(format string, args ...interface{}) *errors.Error {
-	return errors.New(401, GamedataAdminErrorReason_GAMEDATA_ADMIN_ERROR_REASON_ID.String(), fmt.Sprintf(format, args...))
-}

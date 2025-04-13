@@ -27,13 +27,16 @@ type RoomAdminHTTPServer interface {
 
 func RegisterRoomAdminHTTPServer(s *http.Server, srv RoomAdminHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/room/id", _RoomAdmin_GetById0_HTTP_Handler(srv))
+	r.GET("/admin/rooms/{id}", _RoomAdmin_GetById0_HTTP_Handler(srv))
 }
 
 func _RoomAdmin_GetById0_HTTP_Handler(srv RoomAdminHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetByIdRequest
 		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationRoomAdminGetById)
@@ -63,7 +66,7 @@ func NewRoomAdminHTTPClient(client *http.Client) RoomAdminHTTPClient {
 
 func (c *RoomAdminHTTPClientImpl) GetById(ctx context.Context, in *GetByIdRequest, opts ...http.CallOption) (*GetByIdResponse, error) {
 	var out GetByIdResponse
-	pattern := "/admin/room/id"
+	pattern := "/admin/rooms/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRoomAdminGetById))
 	opts = append(opts, http.PathTemplate(pattern))

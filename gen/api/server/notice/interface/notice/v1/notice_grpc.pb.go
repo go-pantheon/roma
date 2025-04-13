@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: account/interface/v1/notice.proto
+// source: notice/interface/notice/v1/notice.proto
 
 package interfacev1
 
@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NoticeInterface_NoticeList_FullMethodName = "/account.interface.v1.NoticeInterface/NoticeList"
+	NoticeInterface_NoticeList_FullMethodName = "/notice.interface.notice.v1.NoticeInterface/NoticeList"
 )
 
 // NoticeInterfaceClient is the client API for NoticeInterface service.
@@ -118,7 +118,7 @@ func _NoticeInterface_NoticeList_Handler(srv interface{}, ctx context.Context, d
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var NoticeInterface_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "account.interface.v1.NoticeInterface",
+	ServiceName: "notice.interface.notice.v1.NoticeInterface",
 	HandlerType: (*NoticeInterfaceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -127,5 +127,5 @@ var NoticeInterface_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "account/interface/v1/notice.proto",
+	Metadata: "notice/interface/notice/v1/notice.proto",
 }

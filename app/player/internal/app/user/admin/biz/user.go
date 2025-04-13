@@ -34,8 +34,8 @@ func (uc *UserUseCase) GetByID(ctx context.Context, uid int64) (p *dbv1.UserProt
 	return p, nil
 }
 
-func (uc *UserUseCase) GetList(ctx context.Context, index, size int32, cond *dbv1.UserProto) ([]*dbv1.UserProto, int64, error) {
-	return uc.do.GetList(ctx, index, size, cond)
+func (uc *UserUseCase) GetList(ctx context.Context, start, limit int64, cond *dbv1.UserProto) ([]*dbv1.UserProto, int64, error) {
+	return uc.do.GetList(ctx, start, limit, cond)
 }
 
 func (uc *UserUseCase) UpdateUserByID(ctx context.Context, uid int64, proto *dbv1.UserProto) (err error) {

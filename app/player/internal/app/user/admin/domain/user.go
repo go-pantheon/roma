@@ -9,7 +9,7 @@ import (
 
 type UserRepo interface {
 	GetByID(ctx context.Context, uid int64) (*dbv1.UserProto, error)
-	GetList(ctx context.Context, index, limit int32, cond *dbv1.UserProto) ([]*dbv1.UserProto, int64, error)
+	GetList(ctx context.Context, start, limit int64, cond *dbv1.UserProto) ([]*dbv1.UserProto, int64, error)
 	UpdateByID(ctx context.Context, uid int64, user *dbv1.UserProto) error
 }
 
@@ -29,8 +29,8 @@ func (do *UserDomain) GetByID(ctx context.Context, uid int64) (u *dbv1.UserProto
 	return do.repo.GetByID(ctx, uid)
 }
 
-func (do *UserDomain) GetList(ctx context.Context, index, size int32, cond *dbv1.UserProto) ([]*dbv1.UserProto, int64, error) {
-	return do.repo.GetList(ctx, index, size, cond)
+func (do *UserDomain) GetList(ctx context.Context, start, limit int64, cond *dbv1.UserProto) ([]*dbv1.UserProto, int64, error) {
+	return do.repo.GetList(ctx, start, limit, cond)
 }
 
 func (do *UserDomain) UpdateByID(ctx context.Context, uid int64, proto *dbv1.UserProto) (err error) {

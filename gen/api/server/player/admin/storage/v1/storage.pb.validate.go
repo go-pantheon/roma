@@ -161,10 +161,6 @@ func (m *AddItemResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Code
-
-	// no validation rules for Message
-
 	// no validation rules for Items
 
 	if len(errors) > 0 {

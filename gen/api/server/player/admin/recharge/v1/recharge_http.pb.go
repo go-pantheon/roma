@@ -34,9 +34,9 @@ type RechargeAdminHTTPServer interface {
 
 func RegisterRechargeAdminHTTPServer(s *http.Server, srv RechargeAdminHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/order/list", _RechargeAdmin_GetOrderList0_HTTP_Handler(srv))
-	r.GET("/admin/order/id", _RechargeAdmin_GetOrderById0_HTTP_Handler(srv))
-	r.POST("/admin/order/ack/update", _RechargeAdmin_UpdateOrderAckStateById0_HTTP_Handler(srv))
+	r.GET("/admin/orders/list", _RechargeAdmin_GetOrderList0_HTTP_Handler(srv))
+	r.GET("/admin/orders/{store}/{trans_id}", _RechargeAdmin_GetOrderById0_HTTP_Handler(srv))
+	r.PATCH("/admin/orders/{store}/{trans_id}/ack/update", _RechargeAdmin_UpdateOrderAckStateById0_HTTP_Handler(srv))
 }
 
 func _RechargeAdmin_GetOrderList0_HTTP_Handler(srv RechargeAdminHTTPServer) func(ctx http.Context) error {
@@ -64,6 +64,9 @@ func _RechargeAdmin_GetOrderById0_HTTP_Handler(srv RechargeAdminHTTPServer) func
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
 		http.SetOperation(ctx, OperationRechargeAdminGetOrderById)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GetOrderById(ctx, req.(*GetOrderByIdRequest))
@@ -84,6 +87,9 @@ func _RechargeAdmin_UpdateOrderAckStateById0_HTTP_Handler(srv RechargeAdminHTTPS
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationRechargeAdminUpdateOrderAckStateById)
@@ -115,7 +121,7 @@ func NewRechargeAdminHTTPClient(client *http.Client) RechargeAdminHTTPClient {
 
 func (c *RechargeAdminHTTPClientImpl) GetOrderById(ctx context.Context, in *GetOrderByIdRequest, opts ...http.CallOption) (*GetOrderByIdResponse, error) {
 	var out GetOrderByIdResponse
-	pattern := "/admin/order/id"
+	pattern := "/admin/orders/{store}/{trans_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRechargeAdminGetOrderById))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -128,7 +134,7 @@ func (c *RechargeAdminHTTPClientImpl) GetOrderById(ctx context.Context, in *GetO
 
 func (c *RechargeAdminHTTPClientImpl) GetOrderList(ctx context.Context, in *GetOrderListRequest, opts ...http.CallOption) (*GetOrderListResponse, error) {
 	var out GetOrderListResponse
-	pattern := "/admin/order/list"
+	pattern := "/admin/orders/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRechargeAdminGetOrderList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -141,11 +147,11 @@ func (c *RechargeAdminHTTPClientImpl) GetOrderList(ctx context.Context, in *GetO
 
 func (c *RechargeAdminHTTPClientImpl) UpdateOrderAckStateById(ctx context.Context, in *UpdateOrderAckStateByIdRequest, opts ...http.CallOption) (*UpdateOrderAckStateByIdResponse, error) {
 	var out UpdateOrderAckStateByIdResponse
-	pattern := "/admin/order/ack/update"
+	pattern := "/admin/orders/{store}/{trans_id}/ack/update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRechargeAdminUpdateOrderAckStateById))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

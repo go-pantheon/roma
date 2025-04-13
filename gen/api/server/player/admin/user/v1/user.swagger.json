@@ -16,39 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/admin/user/id": {
-      "get": {
-        "summary": "Query player by id",
-        "operationId": "UserAdmin_GetById",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetByIdResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "UserAdmin"
-        ]
-      }
-    },
-    "/admin/user/list": {
+    "/admin/users/list": {
       "get": {
         "summary": "Query player list by page",
         "operationId": "UserAdmin_UserList",
@@ -71,21 +39,53 @@
             "name": "page",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "format": "int64"
           },
           {
             "name": "pageSize",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "format": "int64"
           },
           {
             "name": "cond.name",
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "UserAdmin"
+        ]
+      }
+    },
+    "/admin/users/{id}": {
+      "get": {
+        "summary": "Query player by id",
+        "operationId": "UserAdmin_GetById",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetByIdResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -126,13 +126,6 @@
     "v1GetByIdResponse": {
       "type": "object",
       "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
         "user": {
           "$ref": "#/definitions/v1UserProto"
         }
@@ -149,13 +142,6 @@
     "v1UserListResponse": {
       "type": "object",
       "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
         "users": {
           "type": "array",
           "items": {
@@ -164,7 +150,7 @@
           }
         },
         "total": {
-          "type": "integer",
+          "type": "string",
           "format": "int64"
         }
       }

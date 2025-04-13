@@ -19,35 +19,35 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationAccountAdminAccountList = "/account.admin.account.v1.AccountAdmin/AccountList"
 const OperationAccountAdminGetById = "/account.admin.account.v1.AccountAdmin/GetById"
+const OperationAccountAdminList = "/account.admin.account.v1.AccountAdmin/List"
 
 type AccountAdminHTTPServer interface {
-	AccountList(context.Context, *AccountListRequest) (*AccountListResponse, error)
 	GetById(context.Context, *GetByIdRequest) (*GetByIdResponse, error)
+	List(context.Context, *ListRequest) (*ListResponse, error)
 }
 
 func RegisterAccountAdminHTTPServer(s *http.Server, srv AccountAdminHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/account/list", _AccountAdmin_AccountList0_HTTP_Handler(srv))
-	r.GET("/admin/account/id", _AccountAdmin_GetById0_HTTP_Handler(srv))
+	r.GET("/admin/accounts/list", _AccountAdmin_List0_HTTP_Handler(srv))
+	r.GET("/admin/accounts/{id}", _AccountAdmin_GetById0_HTTP_Handler(srv))
 }
 
-func _AccountAdmin_AccountList0_HTTP_Handler(srv AccountAdminHTTPServer) func(ctx http.Context) error {
+func _AccountAdmin_List0_HTTP_Handler(srv AccountAdminHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in AccountListRequest
+		var in ListRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationAccountAdminAccountList)
+		http.SetOperation(ctx, OperationAccountAdminList)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.AccountList(ctx, req.(*AccountListRequest))
+			return srv.List(ctx, req.(*ListRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*AccountListResponse)
+		reply := out.(*ListResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -56,6 +56,9 @@ func _AccountAdmin_GetById0_HTTP_Handler(srv AccountAdminHTTPServer) func(ctx ht
 	return func(ctx http.Context) error {
 		var in GetByIdRequest
 		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationAccountAdminGetById)
@@ -72,8 +75,8 @@ func _AccountAdmin_GetById0_HTTP_Handler(srv AccountAdminHTTPServer) func(ctx ht
 }
 
 type AccountAdminHTTPClient interface {
-	AccountList(ctx context.Context, req *AccountListRequest, opts ...http.CallOption) (rsp *AccountListResponse, err error)
 	GetById(ctx context.Context, req *GetByIdRequest, opts ...http.CallOption) (rsp *GetByIdResponse, err error)
+	List(ctx context.Context, req *ListRequest, opts ...http.CallOption) (rsp *ListResponse, err error)
 }
 
 type AccountAdminHTTPClientImpl struct {
@@ -84,11 +87,11 @@ func NewAccountAdminHTTPClient(client *http.Client) AccountAdminHTTPClient {
 	return &AccountAdminHTTPClientImpl{client}
 }
 
-func (c *AccountAdminHTTPClientImpl) AccountList(ctx context.Context, in *AccountListRequest, opts ...http.CallOption) (*AccountListResponse, error) {
-	var out AccountListResponse
-	pattern := "/admin/account/list"
+func (c *AccountAdminHTTPClientImpl) GetById(ctx context.Context, in *GetByIdRequest, opts ...http.CallOption) (*GetByIdResponse, error) {
+	var out GetByIdResponse
+	pattern := "/admin/accounts/{id}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationAccountAdminAccountList))
+	opts = append(opts, http.Operation(OperationAccountAdminGetById))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -97,11 +100,11 @@ func (c *AccountAdminHTTPClientImpl) AccountList(ctx context.Context, in *Accoun
 	return &out, nil
 }
 
-func (c *AccountAdminHTTPClientImpl) GetById(ctx context.Context, in *GetByIdRequest, opts ...http.CallOption) (*GetByIdResponse, error) {
-	var out GetByIdResponse
-	pattern := "/admin/account/id"
+func (c *AccountAdminHTTPClientImpl) List(ctx context.Context, in *ListRequest, opts ...http.CallOption) (*ListResponse, error) {
+	var out ListResponse
+	pattern := "/admin/accounts/list"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationAccountAdminGetById))
+	opts = append(opts, http.Operation(OperationAccountAdminList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

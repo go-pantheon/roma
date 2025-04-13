@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/admin/storage/item/add": {
+    "/admin/storage/items/add": {
       "post": {
         "operationId": "StorageAdmin_AddItem",
         "responses": {
@@ -98,13 +98,6 @@
     "v1AddItemResponse": {
       "type": "object",
       "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
         "items": {
           "type": "object",
           "additionalProperties": {

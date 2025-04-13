@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "account/admin/notice/v1/notice.proto",
+    "title": "notice/admin/notice/v1/notice.proto",
     "version": "version not set"
   },
   "tags": [
@@ -16,15 +16,15 @@
     "application/json"
   ],
   "paths": {
-    "/admin/notice/create": {
+    "/admin/notices/create": {
       "post": {
         "summary": "Create notice",
-        "operationId": "NoticeAdmin_CreateNotice",
+        "operationId": "NoticeAdmin_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1CreateNoticeResponse"
+              "$ref": "#/definitions/v1CreateResponse"
             }
           },
           "default": {
@@ -40,7 +40,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1CreateNoticeRequest"
+              "$ref": "#/definitions/v1CreateRequest"
             }
           }
         ],
@@ -49,80 +49,15 @@
         ]
       }
     },
-    "/admin/notice/delete": {
-      "post": {
-        "summary": "Delete notice",
-        "operationId": "NoticeAdmin_DeleteNotice",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1DeleteNoticeResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1DeleteNoticeRequest"
-            }
-          }
-        ],
-        "tags": [
-          "NoticeAdmin"
-        ]
-      }
-    },
-    "/admin/notice/id": {
-      "get": {
-        "summary": "Query notice by id",
-        "operationId": "NoticeAdmin_GetNoticeById",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetNoticeByIdResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "NoticeAdmin"
-        ]
-      }
-    },
-    "/admin/notice/list": {
+    "/admin/notices/list": {
       "get": {
         "summary": "Query notice page list",
-        "operationId": "NoticeAdmin_GetNoticeList",
+        "operationId": "NoticeAdmin_GetList",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1GetNoticeListResponse"
+              "$ref": "#/definitions/v1GetListResponse"
             }
           },
           "default": {
@@ -137,15 +72,15 @@
             "name": "page",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "format": "int64"
           },
           {
             "name": "pageSize",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -153,15 +88,15 @@
         ]
       }
     },
-    "/admin/notice/update": {
-      "post": {
-        "summary": "Update notice",
-        "operationId": "NoticeAdmin_UpdateNotice",
+    "/admin/notices/{id}": {
+      "get": {
+        "summary": "Query notice by id",
+        "operationId": "NoticeAdmin_GetById",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1UpdateNoticeResponse"
+              "$ref": "#/definitions/v1GetByIdResponse"
             }
           },
           "default": {
@@ -173,11 +108,78 @@
         },
         "parameters": [
           {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "NoticeAdmin"
+        ]
+      },
+      "delete": {
+        "summary": "Delete notice",
+        "operationId": "NoticeAdmin_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "NoticeAdmin"
+        ]
+      },
+      "put": {
+        "summary": "Update notice",
+        "operationId": "NoticeAdmin_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1UpdateNoticeRequest"
+              "$ref": "#/definitions/NoticeAdminUpdateBody"
             }
           }
         ],
@@ -188,6 +190,14 @@
     }
   },
   "definitions": {
+    "NoticeAdminUpdateBody": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/v1NoticeProto"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -216,7 +226,7 @@
         }
       }
     },
-    "v1CreateNoticeRequest": {
+    "v1CreateRequest": {
       "type": "object",
       "properties": {
         "item": {
@@ -224,7 +234,7 @@
         }
       }
     },
-    "v1CreateNoticeResponse": {
+    "v1CreateResponse": {
       "type": "object",
       "properties": {
         "code": {
@@ -236,16 +246,7 @@
         }
       }
     },
-    "v1DeleteNoticeRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "v1DeleteNoticeResponse": {
+    "v1DeleteResponse": {
       "type": "object",
       "properties": {
         "code": {
@@ -257,7 +258,7 @@
         }
       }
     },
-    "v1GetNoticeByIdResponse": {
+    "v1GetByIdResponse": {
       "type": "object",
       "properties": {
         "code": {
@@ -272,7 +273,7 @@
         }
       }
     },
-    "v1GetNoticeListResponse": {
+    "v1GetListResponse": {
       "type": "object",
       "properties": {
         "code": {
@@ -290,7 +291,7 @@
           }
         },
         "total": {
-          "type": "integer",
+          "type": "string",
           "format": "int64"
         }
       }
@@ -337,15 +338,7 @@
         }
       }
     },
-    "v1UpdateNoticeRequest": {
-      "type": "object",
-      "properties": {
-        "item": {
-          "$ref": "#/definitions/v1NoticeProto"
-        }
-      }
-    },
-    "v1UpdateNoticeResponse": {
+    "v1UpdateResponse": {
       "type": "object",
       "properties": {
         "code": {

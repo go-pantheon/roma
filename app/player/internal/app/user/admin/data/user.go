@@ -38,14 +38,14 @@ func (r *userMongoRepo) GetByID(ctx context.Context, uid int64) (*dbv1.UserProto
 	result := r.collection.FindOne(ctx, filter)
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, xerrors.ErrDBRecordNotFound
+			return nil, xerrors.APINotFound("query user failed. uid=%d", uid)
 		}
-		return nil, errors.Wrapf(err, "query user failed. uid=%d", uid)
+		return nil, xerrors.APIDBFailed("query user failed. uid=%d", uid).WithCause(err)
 	}
 
 	bo := &dbv1.UserProto{}
 	if err := result.Decode(bo); err != nil {
-		return nil, errors.Wrapf(err, "decode user failed. uid=%d", uid)
+		return nil, xerrors.APICodecFailed("decode user failed. uid=%d", uid).WithCause(err)
 	}
 	return bo, nil
 }
@@ -58,30 +58,30 @@ var userListFields = bson.D{
 	bson.E{Key: "lastOnlineIp", Value: 1},
 }
 
-func (r *userMongoRepo) GetList(ctx context.Context, index, limit int32, cond *dbv1.UserProto) (result []*dbv1.UserProto, count int64, err error) {
+func (r *userMongoRepo) GetList(ctx context.Context, start, limit int64, cond *dbv1.UserProto) (result []*dbv1.UserProto, count int64, err error) {
 	filter := r.buildFilter(ctx, cond)
 
 	count, err = r.collection.CountDocuments(ctx, filter)
 	if err != nil {
-		err = errors.Wrapf(err, "query user count failed.")
+		err = xerrors.APIDBFailed("query user count failed").WithCause(err)
 		return
 	}
 
-	opts := options.Find().SetSort(bson.D{bson.E{Key: "lastOnlineAt", Value: -1}}).SetSkip(int64(index)).SetLimit(int64(limit))
+	opts := options.Find().SetSort(bson.D{bson.E{Key: "lastOnlineAt", Value: -1}}).SetSkip(start).SetLimit(limit)
 	opts = opts.SetProjection(userListFields)
 	cursor, err := r.collection.Find(ctx, filter, opts)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			err = xerrors.ErrDBRecordNotFound
+			result = make([]*dbv1.UserProto, 0)
 			return
 		}
-		err = errors.Wrapf(err, "query user list failed.")
+		err = xerrors.APIDBFailed("query user list failed").WithCause(err)
 		return
 	}
 
 	users := make([]dbv1.UserProto, 0, limit)
 	if err = cursor.All(ctx, &users); err != nil {
-		err = errors.Wrapf(err, "create user list failed.")
+		err = xerrors.APIDBFailed("create user list failed").WithCause(err)
 		return
 	}
 
@@ -98,15 +98,15 @@ func (r *userMongoRepo) UpdateByID(ctx context.Context, uid int64, user *dbv1.Us
 	}
 	replace, err := bson.Marshal(user)
 	if err != nil {
-		return errors.Wrapf(err, "encode user bson failed. uid=%d", uid)
+		return xerrors.APICodecFailed("encode user bson failed. uid=%d", uid).WithCause(err)
 	}
 
 	result, err := r.collection.ReplaceOne(ctx, filter, replace)
 	if err != nil {
-		return errors.Wrapf(err, "update user failed. uid=%d", uid)
+		return xerrors.APIDBFailed("update user failed. uid=%d", uid).WithCause(err)
 	}
 	if result.ModifiedCount < 1 {
-		return errors.Wrapf(xerrors.ErrDBRecordNotAffected, "update user failed. uid=%d version=%d", uid, user.Version)
+		return xerrors.APIDBNoAffected("update user failed. uid=%d version=%d", uid, user.Version)
 	}
 	return nil
 }

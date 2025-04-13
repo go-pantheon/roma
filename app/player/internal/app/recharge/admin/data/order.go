@@ -42,14 +42,14 @@ func (r *orderMongoRepo) GetByID(ctx context.Context, store pkg.Store, transId s
 	result := r.collection.FindOne(ctx, filter)
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, xerrors.ErrDBRecordNotFound
+			return nil, xerrors.APINotFound("transId=%s store=%s", transId, store)
 		}
-		return nil, errors.Wrapf(err, "get order failed. store=%s transId=%s", store, transId)
+		return nil, xerrors.APIDBFailed("store=%s transId=%s", store, transId).WithCause(err)
 	}
 
 	bo := &dbv1.OrderProto{}
 	if err := result.Decode(bo); err != nil {
-		return nil, errors.Wrapf(err, "decode order failed. store=%s transId=%s", store, transId)
+		return nil, xerrors.APICodecFailed("store=%s transId=%s", store, transId).WithCause(err)
 	}
 	return bo, nil
 }
@@ -64,12 +64,12 @@ var orderListFields = bson.D{
 	bson.E{Key: "ackAt", Value: 1},
 }
 
-func (r *orderMongoRepo) GetList(ctx context.Context, index, limit int32, cond *dbv1.OrderProto) (result []*dbv1.OrderProto, count int64, err error) {
+func (r *orderMongoRepo) GetList(ctx context.Context, index, limit int64, cond *dbv1.OrderProto) (ret []*dbv1.OrderProto, count int64, err error) {
 	filter := r.buildFilter(ctx, cond)
 
 	count, err = r.collection.CountDocuments(ctx, filter)
 	if err != nil {
-		err = errors.Wrapf(err, "get order list failed. count documents failed.")
+		err = xerrors.APIDBFailed("count documents failed").WithCause(err)
 		return
 	}
 
@@ -78,22 +78,22 @@ func (r *orderMongoRepo) GetList(ctx context.Context, index, limit int32, cond *
 	cursor, err := r.collection.Find(ctx, filter, opts)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			err = xerrors.ErrDBRecordNotFound
+			ret = make([]*dbv1.OrderProto, 0)
 			return
 		}
-		err = errors.Wrapf(err, "get order list failed.")
+		err = xerrors.APIDBFailed("get order list failed").WithCause(err)
 		return
 	}
 
 	orders := make([]dbv1.OrderProto, 0, limit)
 	if err = cursor.All(ctx, &orders); err != nil {
-		err = errors.Wrapf(err, "create order list failed.")
+		err = xerrors.APIDBFailed("create order list failed").WithCause(err)
 		return
 	}
 
-	result = make([]*dbv1.OrderProto, 0, len(orders))
+	ret = make([]*dbv1.OrderProto, 0, len(orders))
 	for i := 0; i < len(orders); i++ {
-		result = append(result, &orders[i])
+		ret = append(ret, &orders[i])
 	}
 	return
 }
@@ -126,10 +126,10 @@ func (r *orderMongoRepo) UpdateAckStateByID(ctx context.Context, store pkg.Store
 		}},
 	})
 	if err != nil {
-		return errors.Wrapf(err, "update order failed. store=%s transId=%s ack=%d", store, transId, state)
+		return xerrors.APIDBFailed("store=%s transId=%s ack=%d", store, transId, state).WithCause(err)
 	}
 	if result.ModifiedCount < 1 {
-		return errors.Wrapf(xerrors.ErrDBRecordNotAffected, "update order failed. store=%s transId=%s ack=%d", store, transId, state)
+		return xerrors.APIDBNoAffected("store=%s transId=%s ack=%d", store, transId, state)
 	}
 	return nil
 }

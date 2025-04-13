@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/admin/room/id": {
+    "/admin/rooms/{id}": {
       "get": {
         "operationId": "RoomAdmin_GetById",
         "responses": {
@@ -36,8 +36,8 @@
         "parameters": [
           {
             "name": "id",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "string",
             "format": "int64"
           }
@@ -80,13 +80,6 @@
     "v1GetByIdResponse": {
       "type": "object",
       "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
         "item": {
           "$ref": "#/definitions/v1RoomProto"
         }

@@ -3,25 +3,15 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/admin/biz"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/pkg"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	adminv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/recharge/v1"
-	"github.com/go-pantheon/roma/pkg/util/maths/i32"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-)
-
-const (
-	maxPageSize     = 200
-	defaultPageSize = 10
 )
 
 type RechargeAdmin struct {
@@ -39,20 +29,19 @@ func NewRechargeAdmin(logger log.Logger, uc *biz.RechargeUseCase) adminv1.Rechar
 }
 
 func (s *RechargeAdmin) GetOrderList(ctx context.Context, req *adminv1.GetOrderListRequest) (*adminv1.GetOrderListResponse, error) {
-	cond, page, pageSize, err := buildGetOrderListCond(req)
+	cond, start, limit, err := buildGetOrderListCond(req)
 	if err != nil {
 		return nil, err
 	}
 
-	protos, count, err := s.uc.GetList(ctx, i32.Max(page-1, 0)*pageSize, pageSize, cond)
+	protos, count, err := s.uc.GetList(ctx, start, limit, cond)
 	if err != nil {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminQueryFailedReason, err.Error())
+		return nil, err
 	}
 
 	reply := &adminv1.GetOrderListResponse{
-		Code:   http.StatusOK,
 		Orders: make([]*adminv1.OrderProto, 0, len(protos)),
-		Total:  uint32(count),
+		Total:  count,
 	}
 
 	for _, p := range protos {
@@ -66,22 +55,12 @@ func (s *RechargeAdmin) GetOrderList(ctx context.Context, req *adminv1.GetOrderL
 	return reply, nil
 }
 
-func buildGetOrderListCond(req *adminv1.GetOrderListRequest) (cond *dbv1.OrderProto, page, pageSize int32, err error) {
-	if req.PageSize > maxPageSize {
-		err = kerrors.BadRequest(xerrors.ErrAdminParamReason, fmt.Sprintf("page size must be less than %d", maxPageSize))
-		return
-	}
-
-	if page = req.Page; page <= 0 {
-		page = 1
-	}
-	if pageSize = req.PageSize; pageSize <= 0 {
-		pageSize = defaultPageSize
-	}
+func buildGetOrderListCond(req *adminv1.GetOrderListRequest) (cond *dbv1.OrderProto, start, limit int64, err error) {
+	start, limit = profile.PageStartLimit(req.Page, req.PageSize)
 
 	cond = &dbv1.OrderProto{}
 	if req.Cond == nil {
-		err = kerrors.BadRequest(xerrors.ErrAdminConditionReason, "condition is empty")
+		err = xerrors.APIParamInvalid("condition is empty")
 		return
 	}
 
@@ -102,63 +81,61 @@ func buildGetOrderListCond(req *adminv1.GetOrderListRequest) (cond *dbv1.OrderPr
 
 func (s *RechargeAdmin) GetOrderById(ctx context.Context, req *adminv1.GetOrderByIdRequest) (*adminv1.GetOrderByIdResponse, error) {
 	if req.TransId == "" {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminParamReason, "transId is empty")
+		return nil, xerrors.APIParamInvalid("transId is empty")
 	}
 	if req.Store == "" {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminParamReason, "store is empty")
+		return nil, xerrors.APIParamInvalid("store is empty")
 	}
 
 	store, err := pkg.StoreFromString(req.Store)
 	if err != nil {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminParamReason, "invalid store")
+		return nil, xerrors.APIParamInvalid("invalid store").WithCause(err)
 	}
 
 	p, err := s.uc.GetById(ctx, store, req.TransId)
 	if err != nil {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminQueryFailedReason, err.Error())
+		return nil, err
 	}
 
 	u, err := toOrderProto(p)
 	if err != nil {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminQueryFailedReason, err.Error())
+		return nil, err
 	}
 
-	reply := &adminv1.GetOrderByIdResponse{
+	return &adminv1.GetOrderByIdResponse{
 		Code:  http.StatusOK,
 		Order: u,
-	}
-	return reply, nil
+	}, nil
 }
 
 func (s *RechargeAdmin) UpdateOrderAckStateById(ctx context.Context, req *adminv1.UpdateOrderAckStateByIdRequest) (*adminv1.UpdateOrderAckStateByIdResponse, error) {
 	if req.TransId == "" {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminParamReason, "transId is empty")
+		return nil, xerrors.APIParamInvalid("transId is empty")
 	}
 	if req.Store == "" {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminParamReason, "store is empty")
+		return nil, xerrors.APIParamInvalid("store is empty")
 	}
 
 	store, err := pkg.StoreFromString(req.Store)
 	if err != nil {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminParamReason, "invalid store")
+		return nil, xerrors.APIParamInvalid("invalid store").WithCause(err)
 	}
 
 	if _, ok := dbv1.OrderAckState_name[req.Ack]; !ok {
-		return nil, kerrors.BadRequest(xerrors.ErrAdminParamReason, "invalid ack state")
+		return nil, xerrors.APIParamInvalid("ack state not exists")
 	}
 
 	if req.Ack != int32(dbv1.OrderAckState_ORDER_ACK_STATE_GM_SUCCEEDED) && req.Ack != int32(dbv1.OrderAckState_ORDER_ACK_STATE_GM_CANCELED) {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid ack state")
+		return nil, xerrors.APIParamInvalid("invalid ack state")
 	}
 
 	if err := s.uc.UpdateAckStateByID(ctx, store, req.TransId, dbv1.OrderAckState(req.Ack)); err != nil {
-		return nil, errors.BadRequest("update failed", err.Error())
+		return nil, err
 	}
 
-	reply := &adminv1.UpdateOrderAckStateByIdResponse{
+	return &adminv1.UpdateOrderAckStateByIdResponse{
 		Code: http.StatusOK,
-	}
-	return reply, nil
+	}, nil
 }
 
 func toOrderProto(p *dbv1.OrderProto) (*adminv1.OrderProto, error) {
@@ -166,7 +143,7 @@ func toOrderProto(p *dbv1.OrderProto) (*adminv1.OrderProto, error) {
 
 	bytes, err := json.Marshal(p)
 	if err != nil {
-		return nil, errors.InternalServer("json marshal failed", err.Error())
+		return nil, xerrors.APICodecFailed("json marshal failed").WithCause(err)
 	}
 
 	u := &adminv1.OrderProto{

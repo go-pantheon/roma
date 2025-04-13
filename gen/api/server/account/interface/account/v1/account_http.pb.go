@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.8.4
 // - protoc             (unknown)
-// source: account/interface/v1/account.proto
+// source: account/interface/account/v1/account.proto
 
 package interfacev1
 
@@ -19,15 +19,15 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationAccountInterfaceAppleLogin = "/account.interface.v1.AccountInterface/AppleLogin"
-const OperationAccountInterfaceAppleLoginCallback = "/account.interface.v1.AccountInterface/AppleLoginCallback"
-const OperationAccountInterfaceDevPing = "/account.interface.v1.AccountInterface/DevPing"
-const OperationAccountInterfaceFacebookLogin = "/account.interface.v1.AccountInterface/FacebookLogin"
-const OperationAccountInterfaceGoogleLogin = "/account.interface.v1.AccountInterface/GoogleLogin"
-const OperationAccountInterfaceLogin = "/account.interface.v1.AccountInterface/Login"
-const OperationAccountInterfaceRefresh = "/account.interface.v1.AccountInterface/Refresh"
-const OperationAccountInterfaceRegister = "/account.interface.v1.AccountInterface/Register"
-const OperationAccountInterfaceToken = "/account.interface.v1.AccountInterface/Token"
+const OperationAccountInterfaceAppleLogin = "/account.interface.account.v1.AccountInterface/AppleLogin"
+const OperationAccountInterfaceAppleLoginCallback = "/account.interface.account.v1.AccountInterface/AppleLoginCallback"
+const OperationAccountInterfaceDevPing = "/account.interface.account.v1.AccountInterface/DevPing"
+const OperationAccountInterfaceFacebookLogin = "/account.interface.account.v1.AccountInterface/FacebookLogin"
+const OperationAccountInterfaceGoogleLogin = "/account.interface.account.v1.AccountInterface/GoogleLogin"
+const OperationAccountInterfaceRefresh = "/account.interface.account.v1.AccountInterface/Refresh"
+const OperationAccountInterfaceToken = "/account.interface.account.v1.AccountInterface/Token"
+const OperationAccountInterfaceUsernameLogin = "/account.interface.account.v1.AccountInterface/UsernameLogin"
+const OperationAccountInterfaceUsernameRegister = "/account.interface.account.v1.AccountInterface/UsernameRegister"
 
 type AccountInterfaceHTTPServer interface {
 	// AppleLogin Apple login
@@ -40,27 +40,27 @@ type AccountInterfaceHTTPServer interface {
 	FacebookLogin(context.Context, *FacebookLoginRequest) (*FacebookLoginResponse, error)
 	// GoogleLogin Google login
 	GoogleLogin(context.Context, *GoogleLoginRequest) (*GoogleLoginResponse, error)
-	// Login Login
-	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// Refresh Session renewal
 	Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error)
-	// Register Register
-	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	// Token Get TCP handshake token
 	Token(context.Context, *TokenRequest) (*TokenResponse, error)
+	// UsernameLogin Login
+	UsernameLogin(context.Context, *UsernameLoginRequest) (*UsernameLoginResponse, error)
+	// UsernameRegister Register
+	UsernameRegister(context.Context, *UsernameRegisterRequest) (*UsernameRegisterResponse, error)
 }
 
 func RegisterAccountInterfaceHTTPServer(s *http.Server, srv AccountInterfaceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/v1/dev/ping", _AccountInterface_DevPing0_HTTP_Handler(srv))
-	r.POST("/v1/register", _AccountInterface_Register0_HTTP_Handler(srv))
-	r.POST("/v1/login", _AccountInterface_Login0_HTTP_Handler(srv))
-	r.POST("/v1/refresh", _AccountInterface_Refresh0_HTTP_Handler(srv))
-	r.POST("/v1/token", _AccountInterface_Token0_HTTP_Handler(srv))
-	r.POST("/v1/apple/login", _AccountInterface_AppleLogin0_HTTP_Handler(srv))
-	r.POST("/v1/apple/login/callback", _AccountInterface_AppleLoginCallback0_HTTP_Handler(srv))
-	r.POST("/v1/google/login", _AccountInterface_GoogleLogin0_HTTP_Handler(srv))
-	r.POST("/v1/fb/login", _AccountInterface_FacebookLogin0_HTTP_Handler(srv))
+	r.GET("/accounts/v1/dev/ping", _AccountInterface_DevPing0_HTTP_Handler(srv))
+	r.POST("/accounts/v1/username/register", _AccountInterface_UsernameRegister0_HTTP_Handler(srv))
+	r.POST("/accounts/v1/username/login", _AccountInterface_UsernameLogin0_HTTP_Handler(srv))
+	r.POST("/accounts/v1/refresh", _AccountInterface_Refresh0_HTTP_Handler(srv))
+	r.POST("/accounts/v1/token", _AccountInterface_Token0_HTTP_Handler(srv))
+	r.POST("/accounts/v1/apple/login", _AccountInterface_AppleLogin0_HTTP_Handler(srv))
+	r.POST("/accounts/v1/apple/login/callback", _AccountInterface_AppleLoginCallback0_HTTP_Handler(srv))
+	r.POST("/accounts/v1/google/login", _AccountInterface_GoogleLogin0_HTTP_Handler(srv))
+	r.POST("/accounts/v1/fb/login", _AccountInterface_FacebookLogin0_HTTP_Handler(srv))
 }
 
 func _AccountInterface_DevPing0_HTTP_Handler(srv AccountInterfaceHTTPServer) func(ctx http.Context) error {
@@ -82,46 +82,46 @@ func _AccountInterface_DevPing0_HTTP_Handler(srv AccountInterfaceHTTPServer) fun
 	}
 }
 
-func _AccountInterface_Register0_HTTP_Handler(srv AccountInterfaceHTTPServer) func(ctx http.Context) error {
+func _AccountInterface_UsernameRegister0_HTTP_Handler(srv AccountInterfaceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in RegisterRequest
+		var in UsernameRegisterRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationAccountInterfaceRegister)
+		http.SetOperation(ctx, OperationAccountInterfaceUsernameRegister)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Register(ctx, req.(*RegisterRequest))
+			return srv.UsernameRegister(ctx, req.(*UsernameRegisterRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*RegisterResponse)
+		reply := out.(*UsernameRegisterResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _AccountInterface_Login0_HTTP_Handler(srv AccountInterfaceHTTPServer) func(ctx http.Context) error {
+func _AccountInterface_UsernameLogin0_HTTP_Handler(srv AccountInterfaceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in LoginRequest
+		var in UsernameLoginRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationAccountInterfaceLogin)
+		http.SetOperation(ctx, OperationAccountInterfaceUsernameLogin)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Login(ctx, req.(*LoginRequest))
+			return srv.UsernameLogin(ctx, req.(*UsernameLoginRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*LoginResponse)
+		reply := out.(*UsernameLoginResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -264,10 +264,10 @@ type AccountInterfaceHTTPClient interface {
 	DevPing(ctx context.Context, req *DevPingRequest, opts ...http.CallOption) (rsp *DevPingResponse, err error)
 	FacebookLogin(ctx context.Context, req *FacebookLoginRequest, opts ...http.CallOption) (rsp *FacebookLoginResponse, err error)
 	GoogleLogin(ctx context.Context, req *GoogleLoginRequest, opts ...http.CallOption) (rsp *GoogleLoginResponse, err error)
-	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	Refresh(ctx context.Context, req *RefreshRequest, opts ...http.CallOption) (rsp *RefreshResponse, err error)
-	Register(ctx context.Context, req *RegisterRequest, opts ...http.CallOption) (rsp *RegisterResponse, err error)
 	Token(ctx context.Context, req *TokenRequest, opts ...http.CallOption) (rsp *TokenResponse, err error)
+	UsernameLogin(ctx context.Context, req *UsernameLoginRequest, opts ...http.CallOption) (rsp *UsernameLoginResponse, err error)
+	UsernameRegister(ctx context.Context, req *UsernameRegisterRequest, opts ...http.CallOption) (rsp *UsernameRegisterResponse, err error)
 }
 
 type AccountInterfaceHTTPClientImpl struct {
@@ -280,7 +280,7 @@ func NewAccountInterfaceHTTPClient(client *http.Client) AccountInterfaceHTTPClie
 
 func (c *AccountInterfaceHTTPClientImpl) AppleLogin(ctx context.Context, in *AppleLoginRequest, opts ...http.CallOption) (*AppleLoginResponse, error) {
 	var out AppleLoginResponse
-	pattern := "/v1/apple/login"
+	pattern := "/accounts/v1/apple/login"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAccountInterfaceAppleLogin))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -293,7 +293,7 @@ func (c *AccountInterfaceHTTPClientImpl) AppleLogin(ctx context.Context, in *App
 
 func (c *AccountInterfaceHTTPClientImpl) AppleLoginCallback(ctx context.Context, in *AppleLoginCallbackRequest, opts ...http.CallOption) (*AppleLoginCallbackResponse, error) {
 	var out AppleLoginCallbackResponse
-	pattern := "/v1/apple/login/callback"
+	pattern := "/accounts/v1/apple/login/callback"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAccountInterfaceAppleLoginCallback))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -306,7 +306,7 @@ func (c *AccountInterfaceHTTPClientImpl) AppleLoginCallback(ctx context.Context,
 
 func (c *AccountInterfaceHTTPClientImpl) DevPing(ctx context.Context, in *DevPingRequest, opts ...http.CallOption) (*DevPingResponse, error) {
 	var out DevPingResponse
-	pattern := "/v1/dev/ping"
+	pattern := "/accounts/v1/dev/ping"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAccountInterfaceDevPing))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -319,7 +319,7 @@ func (c *AccountInterfaceHTTPClientImpl) DevPing(ctx context.Context, in *DevPin
 
 func (c *AccountInterfaceHTTPClientImpl) FacebookLogin(ctx context.Context, in *FacebookLoginRequest, opts ...http.CallOption) (*FacebookLoginResponse, error) {
 	var out FacebookLoginResponse
-	pattern := "/v1/fb/login"
+	pattern := "/accounts/v1/fb/login"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAccountInterfaceFacebookLogin))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -332,7 +332,7 @@ func (c *AccountInterfaceHTTPClientImpl) FacebookLogin(ctx context.Context, in *
 
 func (c *AccountInterfaceHTTPClientImpl) GoogleLogin(ctx context.Context, in *GoogleLoginRequest, opts ...http.CallOption) (*GoogleLoginResponse, error) {
 	var out GoogleLoginResponse
-	pattern := "/v1/google/login"
+	pattern := "/accounts/v1/google/login"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAccountInterfaceGoogleLogin))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -343,22 +343,9 @@ func (c *AccountInterfaceHTTPClientImpl) GoogleLogin(ctx context.Context, in *Go
 	return &out, nil
 }
 
-func (c *AccountInterfaceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginResponse, error) {
-	var out LoginResponse
-	pattern := "/v1/login"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationAccountInterfaceLogin))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 func (c *AccountInterfaceHTTPClientImpl) Refresh(ctx context.Context, in *RefreshRequest, opts ...http.CallOption) (*RefreshResponse, error) {
 	var out RefreshResponse
-	pattern := "/v1/refresh"
+	pattern := "/accounts/v1/refresh"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAccountInterfaceRefresh))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -369,11 +356,11 @@ func (c *AccountInterfaceHTTPClientImpl) Refresh(ctx context.Context, in *Refres
 	return &out, nil
 }
 
-func (c *AccountInterfaceHTTPClientImpl) Register(ctx context.Context, in *RegisterRequest, opts ...http.CallOption) (*RegisterResponse, error) {
-	var out RegisterResponse
-	pattern := "/v1/register"
+func (c *AccountInterfaceHTTPClientImpl) Token(ctx context.Context, in *TokenRequest, opts ...http.CallOption) (*TokenResponse, error) {
+	var out TokenResponse
+	pattern := "/accounts/v1/token"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationAccountInterfaceRegister))
+	opts = append(opts, http.Operation(OperationAccountInterfaceToken))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -382,11 +369,24 @@ func (c *AccountInterfaceHTTPClientImpl) Register(ctx context.Context, in *Regis
 	return &out, nil
 }
 
-func (c *AccountInterfaceHTTPClientImpl) Token(ctx context.Context, in *TokenRequest, opts ...http.CallOption) (*TokenResponse, error) {
-	var out TokenResponse
-	pattern := "/v1/token"
+func (c *AccountInterfaceHTTPClientImpl) UsernameLogin(ctx context.Context, in *UsernameLoginRequest, opts ...http.CallOption) (*UsernameLoginResponse, error) {
+	var out UsernameLoginResponse
+	pattern := "/accounts/v1/username/login"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationAccountInterfaceToken))
+	opts = append(opts, http.Operation(OperationAccountInterfaceUsernameLogin))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AccountInterfaceHTTPClientImpl) UsernameRegister(ctx context.Context, in *UsernameRegisterRequest, opts ...http.CallOption) (*UsernameRegisterResponse, error) {
+	var out UsernameRegisterResponse
+	pattern := "/accounts/v1/username/register"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAccountInterfaceUsernameRegister))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

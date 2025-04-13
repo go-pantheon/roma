@@ -31,8 +31,8 @@ type UserAdminHTTPServer interface {
 
 func RegisterUserAdminHTTPServer(s *http.Server, srv UserAdminHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/user/list", _UserAdmin_UserList0_HTTP_Handler(srv))
-	r.GET("/admin/user/id", _UserAdmin_GetById0_HTTP_Handler(srv))
+	r.GET("/admin/users/list", _UserAdmin_UserList0_HTTP_Handler(srv))
+	r.GET("/admin/users/{id}", _UserAdmin_GetById0_HTTP_Handler(srv))
 }
 
 func _UserAdmin_UserList0_HTTP_Handler(srv UserAdminHTTPServer) func(ctx http.Context) error {
@@ -58,6 +58,9 @@ func _UserAdmin_GetById0_HTTP_Handler(srv UserAdminHTTPServer) func(ctx http.Con
 	return func(ctx http.Context) error {
 		var in GetByIdRequest
 		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationUserAdminGetById)
@@ -88,7 +91,7 @@ func NewUserAdminHTTPClient(client *http.Client) UserAdminHTTPClient {
 
 func (c *UserAdminHTTPClientImpl) GetById(ctx context.Context, in *GetByIdRequest, opts ...http.CallOption) (*GetByIdResponse, error) {
 	var out GetByIdResponse
-	pattern := "/admin/user/id"
+	pattern := "/admin/users/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserAdminGetById))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -101,7 +104,7 @@ func (c *UserAdminHTTPClientImpl) GetById(ctx context.Context, in *GetByIdReques
 
 func (c *UserAdminHTTPClientImpl) UserList(ctx context.Context, in *UserListRequest, opts ...http.CallOption) (*UserListResponse, error) {
 	var out UserListResponse
-	pattern := "/admin/user/list"
+	pattern := "/admin/users/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserAdminUserList))
 	opts = append(opts, http.PathTemplate(pattern))

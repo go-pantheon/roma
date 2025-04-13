@@ -2,9 +2,7 @@ package service
 
 import (
 	"context"
-	"net/http"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/roma/app/room/internal/app/room/admin/biz"
 	adminv1 "github.com/go-pantheon/roma/gen/api/server/room/admin/room/v1"
@@ -27,11 +25,9 @@ func NewRoomAdmin(logger log.Logger, uc *biz.RoomUseCase) adminv1.RoomAdminServe
 func (s *RoomAdmin) GetById(ctx context.Context, req *adminv1.GetByIdRequest) (*adminv1.GetByIdResponse, error) {
 	p, err := s.uc.GetById(ctx, req.Id)
 	if err != nil {
-		return nil, errors.BadRequest("查询失败", err.Error())
+		return nil, err
 	}
-	reply := &adminv1.GetByIdResponse{
-		Code: http.StatusOK,
+	return &adminv1.GetByIdResponse{
 		Item: p,
-	}
-	return reply, nil
+	}, nil
 }

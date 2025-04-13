@@ -159,10 +159,6 @@ func (m *GetByIdResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Code
-
-	// no validation rules for Message
-
 	if all {
 		switch v := interface{}(m.GetItem()).(type) {
 		case interface{ ValidateAll() error }:

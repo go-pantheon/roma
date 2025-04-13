@@ -159,10 +159,6 @@ func (m *GetByIdResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Code
-
-	// no validation rules for Message
-
 	if all {
 		switch v := interface{}(m.GetUser()).(type) {
 		case interface{ ValidateAll() error }:
@@ -424,10 +420,6 @@ func (m *UserListResponse) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for Code
-
-	// no validation rules for Message
 
 	for idx, item := range m.GetUsers() {
 		_, _ = idx, item

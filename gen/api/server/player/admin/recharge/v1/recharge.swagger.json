@@ -16,77 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/admin/order/ack/update": {
-      "post": {
-        "summary": "Update order confirmation status by id",
-        "operationId": "RechargeAdmin_UpdateOrderAckStateById",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateOrderAckStateByIdResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1UpdateOrderAckStateByIdRequest"
-            }
-          }
-        ],
-        "tags": [
-          "RechargeAdmin"
-        ]
-      }
-    },
-    "/admin/order/id": {
-      "get": {
-        "summary": "Query order by id",
-        "operationId": "RechargeAdmin_GetOrderById",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetOrderByIdResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "store",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "transId",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "RechargeAdmin"
-        ]
-      }
-    },
-    "/admin/order/list": {
+    "/admin/orders/list": {
       "get": {
         "summary": "Query order list by page",
         "operationId": "RechargeAdmin_GetOrderList",
@@ -109,15 +39,15 @@
             "name": "page",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "format": "int64"
           },
           {
             "name": "pageSize",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "format": "int64"
           },
           {
             "name": "cond.store",
@@ -150,9 +80,100 @@
           "RechargeAdmin"
         ]
       }
+    },
+    "/admin/orders/{store}/{transId}": {
+      "get": {
+        "summary": "Query order by id",
+        "operationId": "RechargeAdmin_GetOrderById",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetOrderByIdResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "store",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "transId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "RechargeAdmin"
+        ]
+      }
+    },
+    "/admin/orders/{store}/{transId}/ack/update": {
+      "patch": {
+        "summary": "Update order confirmation status by id",
+        "operationId": "RechargeAdmin_UpdateOrderAckStateById",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateOrderAckStateByIdResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "store",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "transId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RechargeAdminUpdateOrderAckStateByIdBody"
+            }
+          }
+        ],
+        "tags": [
+          "RechargeAdmin"
+        ]
+      }
     }
   },
   "definitions": {
+    "RechargeAdminUpdateOrderAckStateByIdBody": {
+      "type": "object",
+      "properties": {
+        "ack": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -218,13 +239,6 @@
     "v1GetOrderListResponse": {
       "type": "object",
       "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
         "orders": {
           "type": "array",
           "items": {
@@ -233,7 +247,7 @@
           }
         },
         "total": {
-          "type": "integer",
+          "type": "string",
           "format": "int64"
         }
       }
@@ -268,21 +282,6 @@
         },
         "detail": {
           "type": "string"
-        }
-      }
-    },
-    "v1UpdateOrderAckStateByIdRequest": {
-      "type": "object",
-      "properties": {
-        "store": {
-          "type": "string"
-        },
-        "transId": {
-          "type": "string"
-        },
-        "ack": {
-          "type": "integer",
-          "format": "int32"
         }
       }
     },

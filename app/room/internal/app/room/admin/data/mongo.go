@@ -28,7 +28,7 @@ type mongoRepo struct {
 func NewMongoRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, error) {
 	r := &mongoRepo{
 		data: data,
-		log:  log.NewHelper(log.With(logger, "module", "room/tcp/data/room")),
+		log:  log.NewHelper(log.With(logger, "module", "room/admin/data/room")),
 	}
 	r.collection = data.Mdb.Collection(_collectionName)
 	return r, nil
@@ -41,14 +41,14 @@ func (r *mongoRepo) GetByID(ctx context.Context, id int64) (*dbv1.RoomProto, err
 	result := r.collection.FindOne(ctx, filter)
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errors.Wrapf(xerrors.ErrDBRecordNotFound, "[mongoRepo.GetByID] 查询数据失败。room<%d>", id)
+			return nil, xerrors.APIDBFailed("query room failed. room=%d", id)
 		}
-		return nil, errors.Wrapf(err, "[mongoRepo.GetByID] 查询数据失败。room<%d>", id)
+		return nil, xerrors.APIDBFailed("query room failed. room=%d", id).WithCause(err)
 	}
 
 	bo := &dbv1.RoomProto{}
 	if err := result.Decode(bo); err != nil {
-		return nil, errors.Wrapf(err, "[mongoRepo.GetByID] 解码失败。room<%d>", id)
+		return nil, xerrors.APICodecFailed("decode room failed. room=%d", id).WithCause(err)
 	}
 	return bo, nil
 }

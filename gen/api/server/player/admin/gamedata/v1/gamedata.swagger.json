@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/admin/gamedata/item/list": {
+    "/admin/gamedata/items/list": {
       "get": {
         "summary": "Query all configuration items",
         "operationId": "GamedataAdmin_GetItemList",

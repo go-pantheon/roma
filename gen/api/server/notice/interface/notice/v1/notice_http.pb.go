@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.8.4
 // - protoc             (unknown)
-// source: account/interface/v1/notice.proto
+// source: notice/interface/notice/v1/notice.proto
 
 package interfacev1
 
@@ -19,7 +19,7 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationNoticeInterfaceNoticeList = "/account.interface.v1.NoticeInterface/NoticeList"
+const OperationNoticeInterfaceNoticeList = "/notice.interface.notice.v1.NoticeInterface/NoticeList"
 
 type NoticeInterfaceHTTPServer interface {
 	// NoticeList Notice List
@@ -28,7 +28,7 @@ type NoticeInterfaceHTTPServer interface {
 
 func RegisterNoticeInterfaceHTTPServer(s *http.Server, srv NoticeInterfaceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/v1/notice/list", _NoticeInterface_NoticeList0_HTTP_Handler(srv))
+	r.GET("/notices/v1/list", _NoticeInterface_NoticeList0_HTTP_Handler(srv))
 }
 
 func _NoticeInterface_NoticeList0_HTTP_Handler(srv NoticeInterfaceHTTPServer) func(ctx http.Context) error {
@@ -64,7 +64,7 @@ func NewNoticeInterfaceHTTPClient(client *http.Client) NoticeInterfaceHTTPClient
 
 func (c *NoticeInterfaceHTTPClientImpl) NoticeList(ctx context.Context, in *NoticeListRequest, opts ...http.CallOption) (*NoticeListResponse, error) {
 	var out NoticeListResponse
-	pattern := "/v1/notice/list"
+	pattern := "/notices/v1/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationNoticeInterfaceNoticeList))
 	opts = append(opts, http.PathTemplate(pattern))

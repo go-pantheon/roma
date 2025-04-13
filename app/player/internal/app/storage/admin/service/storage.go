@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/roma/app/player/internal/app/storage/admin/biz"
@@ -32,9 +31,7 @@ func (s *StorageAdmin) AddItem(ctx context.Context, req *adminv1.AddItemRequest)
 		return nil, err
 	}
 
-	reply := &adminv1.AddItemResponse{
-		Code:  http.StatusOK,
+	return &adminv1.AddItemResponse{
 		Items: amounts,
-	}
-	return reply, nil
+	}, nil
 }

@@ -16,7 +16,63 @@
     "application/json"
   ],
   "paths": {
-    "/admin/account/id": {
+    "/admin/accounts/list": {
+      "get": {
+        "operationId": "AccountAdmin_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "condition.name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "condition.appleId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "condition.googleId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountAdmin"
+        ]
+      }
+    },
+    "/admin/accounts/{id}": {
       "get": {
         "operationId": "AccountAdmin_GetById",
         "responses": {
@@ -36,66 +92,10 @@
         "parameters": [
           {
             "name": "id",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "string",
             "format": "int64"
-          }
-        ],
-        "tags": [
-          "AccountAdmin"
-        ]
-      }
-    },
-    "/admin/account/list": {
-      "get": {
-        "operationId": "AccountAdmin_AccountList",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1AccountListResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "condition.name",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "condition.appleId",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "condition.googleId",
-            "in": "query",
-            "required": false,
-            "type": "string"
           }
         ],
         "tags": [
@@ -130,43 +130,6 @@
             "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
-        }
-      }
-    },
-    "v1AccountListCondition": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "appleId": {
-          "type": "string"
-        },
-        "googleId": {
-          "type": "string"
-        }
-      }
-    },
-    "v1AccountListResponse": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
-        "accounts": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1AccountProto"
-          }
-        },
-        "total": {
-          "type": "integer",
-          "format": "int64"
         }
       }
     },
@@ -217,6 +180,43 @@
         },
         "account": {
           "$ref": "#/definitions/v1AccountProto"
+        }
+      }
+    },
+    "v1ListCondition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "appleId": {
+          "type": "string"
+        },
+        "googleId": {
+          "type": "string"
+        }
+      }
+    },
+    "v1ListResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "accounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1AccountProto"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
         }
       }
     }

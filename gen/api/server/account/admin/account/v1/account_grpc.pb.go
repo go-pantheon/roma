@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountAdmin_AccountList_FullMethodName = "/account.admin.account.v1.AccountAdmin/AccountList"
-	AccountAdmin_GetById_FullMethodName     = "/account.admin.account.v1.AccountAdmin/GetById"
+	AccountAdmin_List_FullMethodName    = "/account.admin.account.v1.AccountAdmin/List"
+	AccountAdmin_GetById_FullMethodName = "/account.admin.account.v1.AccountAdmin/GetById"
 )
 
 // AccountAdminClient is the client API for AccountAdmin service.
@@ -31,7 +31,7 @@ const (
 // Open to the server cluster
 // Provide gRPC interfaceseditorconfig
 type AccountAdminClient interface {
-	AccountList(ctx context.Context, in *AccountListRequest, opts ...grpc.CallOption) (*AccountListResponse, error)
+	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	GetById(ctx context.Context, in *GetByIdRequest, opts ...grpc.CallOption) (*GetByIdResponse, error)
 }
 
@@ -43,10 +43,10 @@ func NewAccountAdminClient(cc grpc.ClientConnInterface) AccountAdminClient {
 	return &accountAdminClient{cc}
 }
 
-func (c *accountAdminClient) AccountList(ctx context.Context, in *AccountListRequest, opts ...grpc.CallOption) (*AccountListResponse, error) {
+func (c *accountAdminClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AccountListResponse)
-	err := c.cc.Invoke(ctx, AccountAdmin_AccountList_FullMethodName, in, out, cOpts...)
+	out := new(ListResponse)
+	err := c.cc.Invoke(ctx, AccountAdmin_List_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *accountAdminClient) GetById(ctx context.Context, in *GetByIdRequest, op
 // Open to the server cluster
 // Provide gRPC interfaceseditorconfig
 type AccountAdminServer interface {
-	AccountList(context.Context, *AccountListRequest) (*AccountListResponse, error)
+	List(context.Context, *ListRequest) (*ListResponse, error)
 	GetById(context.Context, *GetByIdRequest) (*GetByIdResponse, error)
 	mustEmbedUnimplementedAccountAdminServer()
 }
@@ -83,8 +83,8 @@ type AccountAdminServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAccountAdminServer struct{}
 
-func (UnimplementedAccountAdminServer) AccountList(context.Context, *AccountListRequest) (*AccountListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AccountList not implemented")
+func (UnimplementedAccountAdminServer) List(context.Context, *ListRequest) (*ListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedAccountAdminServer) GetById(context.Context, *GetByIdRequest) (*GetByIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetById not implemented")
@@ -110,20 +110,20 @@ func RegisterAccountAdminServer(s grpc.ServiceRegistrar, srv AccountAdminServer)
 	s.RegisterService(&AccountAdmin_ServiceDesc, srv)
 }
 
-func _AccountAdmin_AccountList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AccountListRequest)
+func _AccountAdmin_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountAdminServer).AccountList(ctx, in)
+		return srv.(AccountAdminServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AccountAdmin_AccountList_FullMethodName,
+		FullMethod: AccountAdmin_List_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountAdminServer).AccountList(ctx, req.(*AccountListRequest))
+		return srv.(AccountAdminServer).List(ctx, req.(*ListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -154,8 +154,8 @@ var AccountAdmin_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AccountAdminServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "AccountList",
-			Handler:    _AccountAdmin_AccountList_Handler,
+			MethodName: "List",
+			Handler:    _AccountAdmin_List_Handler,
 		},
 		{
 			MethodName: "GetById",

@@ -10,7 +10,7 @@ import (
 
 type OrderRepo interface {
 	GetByID(ctx context.Context, store pkg.Store, transId string) (*dbv1.OrderProto, error)
-	GetList(ctx context.Context, index, limit int32, cond *dbv1.OrderProto) ([]*dbv1.OrderProto, int64, error)
+	GetList(ctx context.Context, index, limit int64, cond *dbv1.OrderProto) ([]*dbv1.OrderProto, int64, error)
 	UpdateAckStateByID(ctx context.Context, store pkg.Store, transId string, state dbv1.OrderAckState) error
 }
 
@@ -30,7 +30,7 @@ func (do *OrderDomain) GetByID(ctx context.Context, store pkg.Store, transId str
 	return do.repo.GetByID(ctx, store, transId)
 }
 
-func (do *OrderDomain) GetList(ctx context.Context, index, size int32, cond *dbv1.OrderProto) ([]*dbv1.OrderProto, int64, error) {
+func (do *OrderDomain) GetList(ctx context.Context, index, size int64, cond *dbv1.OrderProto) ([]*dbv1.OrderProto, int64, error) {
 	return do.repo.GetList(ctx, index, size, cond)
 }
 

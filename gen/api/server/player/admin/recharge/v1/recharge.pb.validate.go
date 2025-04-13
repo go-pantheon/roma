@@ -192,10 +192,6 @@ func (m *GetOrderListResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Code
-
-	// no validation rules for Message
-
 	for idx, item := range m.GetOrders() {
 		_, _ = idx, item
 

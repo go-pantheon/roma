@@ -27,7 +27,7 @@ type StorageAdminHTTPServer interface {
 
 func RegisterStorageAdminHTTPServer(s *http.Server, srv StorageAdminHTTPServer) {
 	r := s.Route("/")
-	r.POST("/admin/storage/item/add", _StorageAdmin_AddItem0_HTTP_Handler(srv))
+	r.POST("/admin/storage/items/add", _StorageAdmin_AddItem0_HTTP_Handler(srv))
 }
 
 func _StorageAdmin_AddItem0_HTTP_Handler(srv StorageAdminHTTPServer) func(ctx http.Context) error {
@@ -66,7 +66,7 @@ func NewStorageAdminHTTPClient(client *http.Client) StorageAdminHTTPClient {
 
 func (c *StorageAdminHTTPClientImpl) AddItem(ctx context.Context, in *AddItemRequest, opts ...http.CallOption) (*AddItemResponse, error) {
 	var out AddItemResponse
-	pattern := "/admin/storage/item/add"
+	pattern := "/admin/storage/items/add"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationStorageAdminAddItem))
 	opts = append(opts, http.PathTemplate(pattern))
