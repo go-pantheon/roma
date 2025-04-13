@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package room.internal.conf;
 
-option go_package = "github.com/luffy2025/rec-player/app/room/internal/conf;conf";
+option go_package = "app/room/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 

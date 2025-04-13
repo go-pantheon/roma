@@ -7,6 +7,9 @@ label:
   language: "${LANGUAGE:en}"
 trace:
   endpoint: http://localhost:14268/api/traces
+log:
+  type: zap
+  level: debug
 server:
   http:
     addr: 0.0.0.0:8102

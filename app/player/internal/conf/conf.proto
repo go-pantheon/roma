@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package player.internal.conf;
 
-option go_package = "github.com/go-pantheon/roma/app/player/internal/conf;conf";
+option go_package = "app/player/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 
