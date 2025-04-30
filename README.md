@@ -2,6 +2,8 @@
 
 Roma is a high-performance game server framework based on microservice architecture, developed in Go. This framework aims to provide scalable game server infrastructure that supports various game types. Roma is a core component of the go-pantheon ecosystem, responsible for implementing specific game logic.
 
+For more, please check out: [deepwiki/go-pantheon/roma](https://deepwiki.com/go-pantheon/roma)
+
 ## go-pantheon Ecosystem
 
 **go-pantheon** is an out-of-the-box game server framework providing a high-performance, highly available game server cluster solution based on microservices architecture. Roma, as the game logic implementation component, works alongside other core services to form a complete game service ecosystem:
