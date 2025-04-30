@@ -28,10 +28,11 @@ type UserPersister struct {
 }
 
 func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
-	p := do.OfflineCache(ctx, uid, time.Now())
+	p := do.LoadCachedProto(ctx, uid, time.Now())
+
 	if p == nil {
-		p := do.GetProtoFromPool()
-		defer do.PutBackProtoIntoPool(p)
+		p, putFunc := do.GetProto()
+		defer putFunc()
 
 		p.Id = uid
 		if err = do.Load(ctx, uid, p); err != nil {
@@ -68,12 +69,15 @@ func (s *UserPersister) Refresh(ctx context.Context) (err error) {
 	return
 }
 
-func (s *UserPersister) PrepareToPersist(ctx context.Context) (vp life.VersionProto) {
+func (s *UserPersister) PrepareToPersist(ctx context.Context) (ret life.VersionProto) {
 	_ = s.Lock(func() error {
-		s.user.Version += 1          // update version first
-		p := s.do.GetProtoFromPool() // p will be reset by Persist() soon
+		s.user.Version += 1 // update version first
+
+		p, putFunc := s.do.GetProto()
+		defer putFunc()
+
 		s.user.EncodeServer(p)
-		vp = p
+		ret = p
 		return nil
 	})
 	return
@@ -84,7 +88,7 @@ func (s *UserPersister) refreshProto() {
 }
 
 func (s *UserPersister) Persist(ctx context.Context, uid int64, proto life.VersionProto) (err error) {
-	defer s.do.PutBackProtoIntoPool(proto.(*dbv1.UserProto))
+	defer s.do.PutBackProto(proto.(*dbv1.UserProto))
 	return s.do.Persist(ctx, uid, proto)
 }
 
@@ -93,10 +97,10 @@ func (s *UserPersister) IncVersion(ctx context.Context, uid int64, newVersion in
 }
 
 func (s *UserPersister) OnStop(ctx context.Context, id int64, p life.VersionProto) (err error) {
-	cache := s.do.GetProtoFromPool() // cache will be reset on remove from offlineCache
+	cache, _ := s.do.GetProto() // cache will be reset on remove from UserProtoPool.cache
 	proto.Merge(cache, p)
 
-	s.do.UpdateOfflineCache(ctx, s.uid, cache, time.Now())
+	s.do.CacheProto(ctx, s.uid, cache, time.Now())
 	return nil
 }
 

@@ -23,24 +23,24 @@ type UserRepo interface {
 	IncVersion(ctx context.Context, uid int64, newVersion int64) error
 }
 
-type UserOfflineCache interface {
-	Put(ctx context.Context, uid int64, user *dbv1.UserProto, ctime time.Time)
-	Get(ctx context.Context, uid int64, ctime time.Time) *dbv1.UserProto
-	Create() *dbv1.UserProto
-	Reset(p *dbv1.UserProto)
+type UserProtoPool interface {
+	Cache(ctx context.Context, uid int64, user *dbv1.UserProto, ctime time.Time)
+	Load(ctx context.Context, uid int64, ctime time.Time) (ret *dbv1.UserProto)
+	Get() (ret *dbv1.UserProto, putFunc func())
+	Put(user *dbv1.UserProto)
 }
 
 type UserDomain struct {
-	log   *log.Helper
-	repo  UserRepo
-	cache UserOfflineCache
+	log       *log.Helper
+	repo      UserRepo
+	protoPool UserProtoPool
 }
 
-func NewUserDomain(pr UserRepo, logger log.Logger, cache UserOfflineCache) *UserDomain {
+func NewUserDomain(pr UserRepo, logger log.Logger, cache UserProtoPool) *UserDomain {
 	return &UserDomain{
-		repo:  pr,
-		cache: cache,
-		log:   log.NewHelper(log.With(logger, "module", "player/user/gate/domain")),
+		repo:      pr,
+		protoPool: cache,
+		log:       log.NewHelper(log.With(logger, "module", "player/user/gate/domain")),
 	}
 }
 
@@ -84,18 +84,18 @@ func (do *UserDomain) IncVersion(ctx context.Context, uid int64, newVersion int6
 	return do.repo.IncVersion(ctx, uid, newVersion)
 }
 
-func (do *UserDomain) UpdateOfflineCache(ctx context.Context, uid int64, proto *dbv1.UserProto, ctime time.Time) {
-	do.cache.Put(ctx, uid, proto, ctime)
+func (do *UserDomain) CacheProto(ctx context.Context, uid int64, proto *dbv1.UserProto, ctime time.Time) {
+	do.protoPool.Cache(ctx, uid, proto, ctime)
 }
 
-func (do *UserDomain) OfflineCache(ctx context.Context, uid int64, ctime time.Time) *dbv1.UserProto {
-	return do.cache.Get(ctx, uid, ctime)
+func (do *UserDomain) LoadCachedProto(ctx context.Context, uid int64, ctime time.Time) (ret *dbv1.UserProto) {
+	return do.protoPool.Load(ctx, uid, ctime)
 }
 
-func (do *UserDomain) GetProtoFromPool() (p *dbv1.UserProto) {
-	return do.cache.Create()
+func (do *UserDomain) GetProto() (ret *dbv1.UserProto, putFunc func()) {
+	return do.protoPool.Get()
 }
 
-func (do *UserDomain) PutBackProtoIntoPool(p *dbv1.UserProto) {
-	do.cache.Reset(p)
+func (do *UserDomain) PutBackProto(proto *dbv1.UserProto) {
+	do.protoPool.Put(proto)
 }

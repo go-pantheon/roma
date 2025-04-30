@@ -145,7 +145,7 @@ func (w *Worker) Work(bctx *base.Context) error {
 	eg.Go(func() error {
 		select {
 		case <-w.StopTriggered():
-			return xsync.GroupStopping
+			return xsync.ErrGroupStopping
 		case <-ctx.Done():
 			return ctx.Err()
 		}
@@ -206,7 +206,7 @@ func (w *Worker) receive(ctx *base.Context, t task.Taskable) (done bool, err err
 
 	select {
 	case <-w.StopTriggered():
-		err = xsync.GroupStopping
+		err = xsync.ErrGroupStopping
 		return
 	case <-timeout.C:
 		err = errors.Errorf("worker receive response timeout")

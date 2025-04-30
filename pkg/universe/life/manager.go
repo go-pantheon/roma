@@ -169,7 +169,7 @@ func (m *Manager) run() error {
 	eg.Go(func() error {
 		select {
 		case <-m.StopTriggered():
-			return xsync.GroupStopping
+			return xsync.ErrGroupStopping
 		case <-ctx.Done():
 			return ctx.Err()
 		}

@@ -1,7 +1,6 @@
 package security
 
 import (
-	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -18,8 +17,7 @@ var (
 	clientPriKey *rsa.PrivateKey
 	ClientPubKey []byte
 
-	tokenAESKey   []byte
-	tokenAESBlock cipher.Block
+	tokenAESKey []byte
 )
 
 func Init(aesKeyStr, serverPubKeyStr, clientPriKeyStr string) error {
@@ -43,9 +41,6 @@ func Init(aesKeyStr, serverPubKeyStr, clientPriKeyStr string) error {
 	}
 
 	tokenAESKey = []byte(aesKeyStr)
-	if tokenAESBlock, err = aes.NewBlock(tokenAESKey); err != nil {
-		return errors.WithStack(err)
-	}
 
 	if pubKeyBytes, err = base64.StdEncoding.DecodeString(serverPubKeyStr); err != nil {
 		return errors.WithStack(err)
@@ -61,7 +56,7 @@ func Init(aesKeyStr, serverPubKeyStr, clientPriKeyStr string) error {
 
 // EncryptToken simulate account service create AuthToken
 func EncryptToken(org []byte) (string, error) {
-	secret, err := aes.Encrypt(tokenAESKey, tokenAESBlock, org)
+	secret, err := aes.Encrypt(tokenAESKey, org)
 	if err != nil {
 		return "", err
 	}
@@ -83,25 +78,17 @@ func DecryptSCHandshake(secret []byte) (org []byte, err error) {
 }
 
 type Crypto struct {
-	protoAESKey   []byte
-	protoAESBlock cipher.Block
+	protoAESKey []byte
 }
 
 // InitProtoAES initialize proto's AES key and block
 func (c *Crypto) InitProtoAES(key []byte) error {
-	block, err := aes.NewBlock(key)
-	if err != nil {
-		return errors.Wrap(err, "init proto's AES key and block failed.")
-	}
-
-	c.protoAESBlock = block
 	c.protoAESKey = key
-
 	return nil
 }
 
 func (c *Crypto) EncryptProto(org []byte) (secret []byte, err error) {
-	secret, err = aes.Encrypt(c.protoAESKey, c.protoAESBlock, org)
+	secret, err = aes.Encrypt(c.protoAESKey, org)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +96,7 @@ func (c *Crypto) EncryptProto(org []byte) (secret []byte, err error) {
 }
 
 func (c *Crypto) DecryptProto(secret []byte) (org []byte, err error) {
-	org, err = aes.Decrypt(c.protoAESKey, c.protoAESBlock, secret)
+	org, err = aes.Decrypt(c.protoAESKey, secret)
 	if err != nil {
 		return nil, err
 	}

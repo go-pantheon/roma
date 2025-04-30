@@ -7,14 +7,10 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
-	"github.com/go-pantheon/fabrica-util/id"
+	"github.com/go-pantheon/fabrica-util/xid"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/admin/biz"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	adminv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/user/v1"
-)
-
-const (
-	pageSizeMax = 200
 )
 
 type UserAdmin struct {
@@ -95,7 +91,7 @@ func toUserProto(p *dbv1.UserProto) (*adminv1.UserProto, error) {
 		return nil, xerrors.APICodecFailed("json marshal failed").WithCause(err)
 	}
 
-	idStr, err := id.EncodeId(p.Id)
+	idStr, err := xid.EncodeID(p.Id)
 	if err != nil {
 		return nil, xerrors.APICodecFailed("id encode failed").WithCause(err)
 	}

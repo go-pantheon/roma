@@ -15,6 +15,7 @@ import (
 	message "github.com/go-pantheon/roma/gen/api/client/message"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 type User struct {
@@ -97,6 +98,18 @@ func (o *User) EncodeServer(p *dbv1.UserProto) *dbv1.UserProto {
 	o.Room.EncodeServer(p.Room)
 
 	return p
+}
+
+// UserProtoSize returns the estimated memory size of UserProto
+// TODO: optimize the size calculation
+func UserProtoSize(p *dbv1.UserProto) int {
+	return proto.Size(p) * 10
+}
+
+// UserSize returns the estimated memory size of User
+// TODO: optimize the size calculation
+func UserSize(o *User) int {
+	return 512
 }
 
 func (o *User) DecodeServer(ctx context.Context, p *dbv1.UserProto) (err error) {

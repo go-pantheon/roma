@@ -74,7 +74,7 @@ func newWorker(ctx context.Context, log *log.Helper,
 	}
 
 	w.Stoppable = xsync.NewStopper(10*time.Second, xsync.WithLog(w.log))
-	w.disconnectErr.Store(xsync.GroupStopping)
+	w.disconnectErr.Store(xsync.ErrGroupStopping)
 	w.events = make(chan EventFunc, constants.WorkerEventSize)
 
 	w.status = OnlineStatus(xcontext.Status(ctx))
