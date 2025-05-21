@@ -49,6 +49,7 @@ db:
 			fi; \
 		fi; \
 	done
+	bin/tools/gen-api-db
 
 .PHONY: build
 # build execute file
@@ -109,7 +110,8 @@ test:
 tools:
 	rm -rf bin/tools
 	mkdir -p bin/tools
-	$(GOBUILD) -o bin/tools/gen-api -ldflags "-X main.Version=0.0.1"  ./vulcan/app/api/cmd
+	$(GOBUILD) -o bin/tools/gen-api-db -ldflags "-X main.Version=0.0.1"  ./vulcan/app/api/db/cmd
+	$(GOBUILD) -o bin/tools/gen-api-client -ldflags "-X main.Version=0.0.1"  ./vulcan/app/api/client/cmd
 	$(GOBUILD) -o bin/tools/gen-mercury -ldflags "-X main.Version=0.0.1"  ./vulcan/app/mercury/cmd
 	$(GOBUILD) -o bin/tools/gen-data-json -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/json
 	$(GOBUILD) -o bin/tools/gen-data-base -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/base
@@ -133,10 +135,15 @@ mercury-log:
 mercury-stop:
 	-pkill -f mercury/bin/mercury
 
-.PHONY: gen-api
+.PHONY: gen-api-client
 # generate api code
-gen-api:
-	bin/tools/gen-api
+gen-api-client:
+	bin/tools/gen-api-client
+
+.PHONY: gen-api-db
+# generate api code
+gen-api-db:
+	bin/tools/gen-api-db
 
 .PHONY: gen-mercury
 # generate mercury client code

@@ -1,0 +1,61 @@
+package dbv1
+
+import (
+	"sync"
+)
+
+var (
+	UserHeroListProtoPool = newUserHeroListProtoPool()
+	UserHeroProtoPool     = newUserHeroProtoPool()
+)
+
+type userHeroListProtoPool struct {
+	sync.Pool
+}
+
+func newUserHeroListProtoPool() *userHeroListProtoPool {
+	return &userHeroListProtoPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserHeroListProto{}
+			},
+		},
+	}
+}
+
+func (pool *userHeroListProtoPool) Get() *UserHeroListProto {
+	return pool.Pool.Get().(*UserHeroListProto)
+}
+
+func (pool *userHeroListProtoPool) Put(p *UserHeroListProto) {
+	for _, v := range p.Heroes {
+		UserHeroProtoPool.Put(v)
+	}
+
+	p.Reset()
+	pool.Pool.Put(p)
+}
+
+type userHeroProtoPool struct {
+	sync.Pool
+}
+
+func newUserHeroProtoPool() *userHeroProtoPool {
+	return &userHeroProtoPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserHeroProto{}
+			},
+		},
+	}
+}
+
+func (pool *userHeroProtoPool) Get() *UserHeroProto {
+	return pool.Pool.Get().(*UserHeroProto)
+}
+
+func (pool *userHeroProtoPool) Put(p *UserHeroProto) {
+
+	p.Reset()
+	pool.Pool.Put(p)
+}

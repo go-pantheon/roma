@@ -1,0 +1,61 @@
+package dbv1
+
+import (
+	"sync"
+)
+
+var (
+	RoomProtoPool       = newRoomProtoPool()
+	RoomMemberProtoPool = newRoomMemberProtoPool()
+)
+
+type roomProtoPool struct {
+	sync.Pool
+}
+
+func newRoomProtoPool() *roomProtoPool {
+	return &roomProtoPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &RoomProto{}
+			},
+		},
+	}
+}
+
+func (pool *roomProtoPool) Get() *RoomProto {
+	return pool.Pool.Get().(*RoomProto)
+}
+
+func (pool *roomProtoPool) Put(p *RoomProto) {
+	for _, v := range p.Members {
+		RoomMemberProtoPool.Put(v)
+	}
+
+	p.Reset()
+	pool.Pool.Put(p)
+}
+
+type roomMemberProtoPool struct {
+	sync.Pool
+}
+
+func newRoomMemberProtoPool() *roomMemberProtoPool {
+	return &roomMemberProtoPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &RoomMemberProto{}
+			},
+		},
+	}
+}
+
+func (pool *roomMemberProtoPool) Get() *RoomMemberProto {
+	return pool.Pool.Get().(*RoomMemberProto)
+}
+
+func (pool *roomMemberProtoPool) Put(p *RoomMemberProto) {
+
+	p.Reset()
+	pool.Pool.Put(p)
+}

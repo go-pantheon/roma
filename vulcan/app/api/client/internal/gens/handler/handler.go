@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/go-pantheon/roma/vulcan/app/api/internal/template/handler"
+	"github.com/go-pantheon/roma/vulcan/app/api/client/internal/template/handler"
 	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 	"github.com/go-pantheon/roma/vulcan/pkg/filewriter"
 	"github.com/pkg/errors"

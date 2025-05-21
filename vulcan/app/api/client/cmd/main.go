@@ -6,9 +6,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/go-pantheon/roma/vulcan/app/api/internal/gens/codec"
-	"github.com/go-pantheon/roma/vulcan/app/api/internal/gens/handler"
-	"github.com/go-pantheon/roma/vulcan/app/api/internal/gens/service"
+	"github.com/go-pantheon/roma/vulcan/app/api/client/internal/gens/codec"
+	"github.com/go-pantheon/roma/vulcan/app/api/client/internal/gens/handler"
+	"github.com/go-pantheon/roma/vulcan/app/api/client/internal/gens/service"
 	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 	"github.com/go-pantheon/roma/vulcan/pkg/filewriter"
 	"github.com/pkg/errors"
