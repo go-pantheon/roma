@@ -1,8 +1,8 @@
-go 1.23.0
+go 1.24.0
 
 use (
-    .
-    ./deps/fabrica-kit
-    ./deps/fabrica-util
-    ./mercury/deps/fabrica-net
+	.
+	./deps/fabrica-kit
+	./deps/fabrica-net
+	./deps/fabrica-util
 )
