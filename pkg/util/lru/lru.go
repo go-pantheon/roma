@@ -33,7 +33,7 @@ func WithTTL(ttl time.Duration) LRUOption {
 	}
 }
 
-func WithOnRemove(onRemove func(key int64, value proto.Message)) LRUOption {
+func 	WithOnRemove(onRemove func(key int64, value proto.Message)) LRUOption {
 	return func(l *LRU) {
 		l.onRemove = onRemove
 	}

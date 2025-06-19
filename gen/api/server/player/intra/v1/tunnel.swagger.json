@@ -72,6 +72,11 @@
           "type": "integer",
           "format": "int32",
           "title": "Module message ID, unique within the module"
+        },
+        "index": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Index of the message in the stream, same as the request"
         }
       }
     }

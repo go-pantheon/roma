@@ -1,152 +1,93 @@
 package userobj
 
 import (
-	"context"
 	"time"
 
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/version"
-	"github.com/go-pantheon/fabrica-util/xtime"
-	basicobj "github.com/go-pantheon/roma/app/player/internal/app/basic/gate/domain/object"
-	heroobj "github.com/go-pantheon/roma/app/player/internal/app/hero/gate/domain/object"
-	plunderobj "github.com/go-pantheon/roma/app/player/internal/app/plunder/gate/domain/object"
-	roomobj "github.com/go-pantheon/roma/app/player/internal/app/room/gate/domain/object"
-	storageobj "github.com/go-pantheon/roma/app/player/internal/app/storage/gate/domain/object"
+	"github.com/go-pantheon/fabrica-util/xid"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	message "github.com/go-pantheon/roma/gen/api/client/message"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
 )
 
 type User struct {
-	Id           int64
-	Name         string
-	LoginAt      time.Time
-	LastOnlineAt time.Time
-	LogoutAt     time.Time
-	CreatedAt    time.Time
-	LastOnlineIP string
-	Version      int64
-	newborn      bool
+	ID  int64
+	SID int64
 
-	NextDailyResetAt    time.Time
-	DailyOnlineDuration time.Duration
-	TotalOnlineDuration time.Duration
-	ServerVersion       string
+	newborn bool
 
-	Basic *basicobj.Basic
+	Version       int64
+	ServerVersion string
 
-	Dev      *Dev
-	System   *System
-	Plunders *plunderobj.Plunders
-	Storage  *storageobj.Storage
-	HeroList *heroobj.HeroList
-	Room     *roomobj.Room
+	Modules map[life.ModuleKey]life.Module
 }
 
-func NewUser(id int64, name string) *User {
+func NewUser(id int64, sid int64, serverVersion string) *User {
 	u := &User{
-		Id:   id,
-		Name: name,
+		ID:            id,
+		SID:           sid,
+		ServerVersion: serverVersion,
+		Modules:       make(map[life.ModuleKey]life.Module, 16),
 	}
 
-	u.Basic = basicobj.NewBasic()
-	u.Dev = NewDev()
-	u.System = NewSystem()
-	u.Plunders = plunderobj.NewPlunders()
-	u.Storage = storageobj.NewStorage()
-	u.HeroList = heroobj.NewHeroList()
-	u.Room = roomobj.NewRoom()
+	userregister.ForEach(func(key life.ModuleKey, module life.Module) {
+		u.Modules[key] = module
+	})
 
 	return u
 }
 
-func NewUserProto() *dbv1.UserProto {
-	p := &dbv1.UserProto{}
-	p.Basic = basicobj.NewBasicProto()
-	p.Dev = NewDevProto()
-	p.System = NewSystemProto()
-	p.Plunders = plunderobj.NewPlundersProto()
-	p.Storage = storageobj.NewStorageProto()
-	p.HeroList = heroobj.NewHeroListProto()
-	p.Room = roomobj.NewRoomProto()
-	return p
+func (o *User) Unmarshal(p *dbv1.UserProto) error {
+	userVersion, err := checkServerVersion(o.ServerVersion, p.ServerVersion)
+	if err != nil {
+		return err
+	}
+
+	o.Version = p.Version
+	o.ServerVersion = userVersion
+
+	for key, data := range p.Modules {
+		if mod := o.Modules[life.ModuleKey(key)]; mod != nil {
+			if err := mod.Unmarshal(data); err != nil {
+				return errors.WithMessagef(err, "module unmarshal failed. uid=%d, mod=%s", o.ID, key)
+			}
+		}
+	}
+
+	return nil
 }
 
-func (o *User) EncodeServer(p *dbv1.UserProto) *dbv1.UserProto {
-	p.Id = o.Id
-	p.Name = o.Name
-
-	p.LoginAt = o.LoginAt.Unix()
-	p.LogoutAt = o.LogoutAt.Unix()
-	p.LastOnlineAt = o.LastOnlineAt.Unix()
-	p.CreatedAt = o.CreatedAt.Unix()
-	p.LastOnlineIp = o.LastOnlineIP
+func (o *User) EncodeServer(p *dbv1.UserProto, modules []life.ModuleKey, all bool) (err error) {
 	p.Version = o.Version
-
-	p.NextDailyResetAt = o.NextDailyResetAt.Unix()
-	p.DailyOnlineSeconds = int64(o.DailyOnlineDuration.Seconds())
-	p.TotalOnlineSeconds = int64(o.TotalOnlineDuration.Seconds())
 	p.ServerVersion = o.ServerVersion
 
-	o.Basic.EncodeServer(p.Basic)
-	o.Dev.EncodeServer(p.Dev)
-	o.System.EncodeServer(p.System)
-	o.Plunders.EncodeServer(p.Plunders)
-	o.Storage.EncodeServer(p.Storage)
-	o.HeroList.EncodeServer(p.HeroList)
-	o.Room.EncodeServer(p.Room)
+	p.Modules = make(map[string][]byte, 16)
 
-	return p
-}
+	if all {
+		for key, mod := range o.Modules {
+			data, err := mod.Marshal()
+			if err != nil {
+				return err
+			}
 
-// UserProtoSize returns the estimated memory size of UserProto
-// TODO: optimize the size calculation
-func UserProtoSize(p *dbv1.UserProto) int {
-	return proto.Size(p) * 10
-}
+			p.Modules[string(key)] = data
+		}
+	} else {
+		for _, key := range modules {
+			if mod := o.Modules[key]; mod != nil {
+				data, err := mod.Marshal()
+				if err != nil {
+					return err
+				}
 
-// UserSize returns the estimated memory size of User
-// TODO: optimize the size calculation
-func UserSize(o *User) int {
-	return 512
-}
-
-func (o *User) DecodeServer(ctx context.Context, p *dbv1.UserProto) (err error) {
-	if p == nil {
-		return
+				p.Modules[string(key)] = data
+			}
+		}
 	}
 
-	newServerVersion, err := checkServerVersion(profile.Version(), p.ServerVersion)
-	if err != nil {
-		return errors.WithMessagef(err, "serverVersion unmarshal failed. uid=%d", o.Id)
-	}
-	o.ServerVersion = newServerVersion
-
-	o.Id = p.Id
-	o.Name = p.Name
-	o.LoginAt = xtime.Time(p.LoginAt)
-	o.LogoutAt = xtime.Time(p.LogoutAt)
-	o.LastOnlineAt = xtime.Time(p.LastOnlineAt)
-	o.CreatedAt = xtime.Time(p.CreatedAt)
-	o.LastOnlineIP = p.LastOnlineIp
-	o.Version = p.Version
-
-	o.NextDailyResetAt = xtime.Time(p.NextDailyResetAt)
-	o.DailyOnlineDuration = time.Duration(p.DailyOnlineSeconds) * time.Second
-	o.TotalOnlineDuration = time.Duration(p.TotalOnlineSeconds) * time.Second
-
-	if err = o.Basic.DecodeServer(p.Basic); err != nil {
-		return errors.WithMessagef(err, "basic unmarshal failed. uid=%d", o.Id)
-	}
-	o.Dev.DecodeServer(p.Dev)
-	o.System.DecodeServer(p.System)
-	o.Plunders.DecodeServer(p.Plunders)
-	o.Storage.DecodeServer(ctx, p.Storage)
-	o.Room.DecodeServer(p.Room)
-	if err = o.HeroList.DecodeServer(ctx, p.HeroList); err != nil {
-		return errors.WithMessagef(err, "heroList unmarshal failed. uid=%d", o.Id)
-	}
 	return nil
 }
 
@@ -181,14 +122,37 @@ func checkServerVersion(serverVersion, userVersion string) (newUserVersion strin
 	return
 }
 
-func (o *User) EncodeClient() *message.UserProto {
-	p := &message.UserProto{
-		Basic:    o.Basic.EncodeClient(),
-		Storage:  o.Storage.EncodeClient(),
-		HeroList: o.HeroList.EncodeClient(),
-		Room:     o.Room.EncodeClient(),
+func (o *User) EncodeClient() (*message.UserProto, error) {
+	basic, err := o.EncodeClientBasic()
+	if err != nil {
+		return nil, err
 	}
-	return p
+
+	p := &message.UserProto{
+		Basic:    basic,
+		Storage:  o.Storage().EncodeClient(),
+		HeroList: o.HeroList().EncodeClient(),
+		Room:     o.Room().EncodeClient(),
+	}
+
+	return p, nil
+}
+
+func (o *User) EncodeClientBasic() (p *message.UserBasicProto, err error) {
+	p = &message.UserBasicProto{
+		Name:            o.Basic().Name,
+		Gender:          o.Basic().Gender,
+		RechargeAmounts: o.Recharge().EncodeClient(),
+	}
+
+	p.Id, err = xid.EncodeID(o.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	p.RechargeAmounts = o.Recharge().EncodeClient()
+
+	return p, nil
 }
 
 func (o *User) SetNewborn(b bool) {
@@ -199,4 +163,11 @@ func (o *User) GetAndResetNewborn() bool {
 	b := o.newborn
 	o.newborn = false
 	return b
+}
+
+func (o *User) Now() time.Time {
+	if profile.IsDev() {
+		return time.Now().Add(o.Dev().TimeOffset())
+	}
+	return time.Now()
 }

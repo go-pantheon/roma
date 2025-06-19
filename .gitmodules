@@ -17,10 +17,11 @@
 [submodule "deps/fabrica-util"]
   path = deps/fabrica-util
   url = https://github.com/go-pantheon/fabrica-util
+	
+[submodule "deps/fabrica-net"]
+	path = deps/fabrica-net
+	url = https://github.com/go-pantheon/fabrica-net
 
 [submodule "exceldata"]
   path = exceldata
   url = https://github.com/go-pantheon/roma-exceldata
-[submodule "deps/fabrica-net"]
-	path = deps/fabrica-net
-	url = https://github.com/go-pantheon/fabrica-net

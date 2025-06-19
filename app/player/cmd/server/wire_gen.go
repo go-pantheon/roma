@@ -9,7 +9,7 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-pantheon/fabrica-net/health"
+	"github.com/go-pantheon/fabrica-net/http/health"
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/biz"
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/cmdregistrar"
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/storage"
@@ -77,8 +77,8 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 		cleanup()
 		return nil, nil, err
 	}
-	userOfflineCache := data2.NewUserProtoPool()
-	userDomain := domain.NewUserDomain(userRepo, logger, userOfflineCache)
+	userProtoCache := data2.NewUserProtoCache()
+	userDomain := domain.NewUserDomain(userRepo, logger, userProtoCache)
 	routeTable := gate.NewRouteTable(dataData)
 	discovery, err := client.NewDiscovery(confRegistry)
 	if err != nil {

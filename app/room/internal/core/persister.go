@@ -27,17 +27,17 @@ type RoomPersister struct {
 	do *domain.RoomDomain
 }
 
-func newRoomPersister(ctx context.Context, do *domain.RoomDomain, rid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
-	p := do.OfflineCache(ctx, rid, time.Now())
+func newRoomPersister(ctx context.Context, do *domain.RoomDomain, oid, sid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
+	p := do.OfflineCache(ctx, oid, time.Now())
 	if p == nil {
 		p := do.GetProtoFromPool()
 		defer do.PutBackProtoIntoPool(p)
 
-		p.Id = rid
-		if err = do.Load(ctx, rid, p); err != nil {
+		p.Id = oid
+		if err = do.Load(ctx, oid, p); err != nil {
 			if errors.Is(err, xerrors.ErrDBRecordNotFound) {
 				if allowCreate {
-					err = do.Create(ctx, rid, time.Now(), p)
+					err = do.Create(ctx, oid, time.Now(), p)
 					newborn = true
 				}
 			}
@@ -66,15 +66,16 @@ func (s *RoomPersister) Refresh(ctx context.Context) (err error) {
 	return
 }
 
-func (s *RoomPersister) PrepareToPersist(ctx context.Context) (vp life.VersionProto) {
+func (s *RoomPersister) PrepareToPersist(ctx context.Context, keys []life.ModuleKey) life.VersionProto {
 	_ = s.Lock(func() error {
 		s.room.Version += 1          // update version first
 		p := s.do.GetProtoFromPool() // p is get from sync.Pool, and will be reset by Persist() soon
 		s.room.EncodeServer(p)
-		vp = p
 		return nil
 	})
-	return
+
+	// TODO: implement
+	return nil
 }
 
 func (s *RoomPersister) refreshProto() {
@@ -117,4 +118,8 @@ func (s *RoomPersister) Lock(f func() error) error {
 	defer s.mu.Unlock()
 
 	return f()
+}
+
+func (s *RoomPersister) Version() int64 {
+	return s.room.Version
 }

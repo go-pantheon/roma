@@ -46,10 +46,15 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 	var (
 		w   life.Workable
 		oid int64
+		sid int64
 		err error
 	)
 
 	if oid, err = xcontext.OID(ctx); err != nil {
+		return err
+	}
+
+	if sid, err = xcontext.SID(ctx); err != nil {
 		return err
 	}
 
@@ -65,7 +70,7 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return nil
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
+	if w, err = s.mgr.Worker(ctx, oid, sid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
 		return err
 	}
 	return s.run(ctx, w, stream)
@@ -80,7 +85,7 @@ func (s *TunnelService) run(ctx context.Context, w life.Workable, stream intrav1
 		return ctx.Err()
 	})
 	eg.Go(func() error {
-		return xsync.RunSafe(func() error {
+		return xsync.Run(func() error {
 			for {
 				var in *intrav1.TunnelRequest
 				if in, err = stream.Recv(); err != nil {
@@ -99,8 +104,7 @@ func (s *TunnelService) run(ctx context.Context, w life.Workable, stream intrav1
 	if err = eg.Wait(); err != nil {
 		id := w.ID()
 		s.log.WithContext(ctx).Debugf("tunnel is stopping. uid=%d signal=%v", id, err.Error())
-		w.TriggerStop()
-		w.WaitStopped()
+		w.Stop(ctx)
 		s.log.WithContext(ctx).Debugf("tunnel stopped. uid=%d", id)
 		return nil
 	}

@@ -1,70 +1,39 @@
 package object
 
 import (
+	"maps"
+
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 )
 
-type Plunders struct {
-	States map[int64]*PlunderState
-}
+const defaultWeightsSize = 8
 
-func NewPlunders() *Plunders {
-	p := &Plunders{
-		States: make(map[int64]*PlunderState),
-	}
-	return p
-}
-
-func NewPlundersProto() *dbv1.PlundersProto {
-	p := &dbv1.PlundersProto{}
-	p.Plunders = make(map[int64]*dbv1.PlunderStateProto, 8)
-	return p
-}
-
-func (os *Plunders) EncodeServer(p *dbv1.PlundersProto) {
-	p.Plunders = make(map[int64]*dbv1.PlunderStateProto, len(os.States))
-	for k, o := range os.States {
-		p.Plunders[k] = NewPlunderStateProto()
-		o.EncodeServer(p.Plunders[k])
-	}
-}
-
-type PlunderState struct {
+type Plunder struct {
 	Weights map[int64]int64
 }
 
-func NewPlunderState() *PlunderState {
-	p := &PlunderState{
-		Weights: make(map[int64]int64, 8),
+func NewPlunder() *Plunder {
+	p := &Plunder{
+		Weights: make(map[int64]int64, defaultWeightsSize),
 	}
 	return p
 }
 
-func NewPlunderStateProto() *dbv1.PlunderStateProto {
-	p := &dbv1.PlunderStateProto{}
+func NewPlunderProto() *dbv1.PlunderProto {
+	p := &dbv1.PlunderProto{}
 	return p
 }
 
-func (o *PlunderState) EncodeServer(p *dbv1.PlunderStateProto) {
-	p.Weights = o.Weights
+func (o *Plunder) encodeServer(p *dbv1.PlunderProto) {
+	p.Weights = make(map[int64]int64, len(o.Weights))
+	maps.Copy(p.Weights, o.Weights)
 }
 
-func (os *Plunders) DecodeServer(ps *dbv1.PlundersProto) {
-	if ps == nil {
-		return
-	}
-
-	for k, p := range ps.Plunders {
-		o := NewPlunderState()
-		o.DecodeServer(p)
-		os.States[k] = o
-	}
-}
-
-func (o *PlunderState) DecodeServer(p *dbv1.PlunderStateProto) {
+func (o *Plunder) decodeServer(p *dbv1.PlunderProto) {
 	if p == nil || p.Weights == nil {
 		return
 	}
 
-	o.Weights = p.Weights
+	o.Weights = make(map[int64]int64, len(p.Weights))
+	maps.Copy(o.Weights, p.Weights)
 }

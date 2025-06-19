@@ -56,14 +56,14 @@ func (c *ChangeTimeCommander) Func(ctx core.Context, args map[string]string) (sc
 	}
 
 	if minutes == 0 {
-		user.Dev.ResetTimeOffset()
+		user.Dev().ResetTimeOffset()
 	} else {
 		dur = time.Duration(minutes) * time.Minute
-		user.Dev.SetTimeOffset(dur)
+		user.Dev().SetTimeOffset(dur)
 	}
 
 	ctx.Changed()
 	sc.Code = climsg.SCDevExecute_Succeeded
-	sc.Message = fmt.Sprintf("New time is changed to %s. Offset to %.2fm", xtime.Format(ctx.Now()), user.Dev.TimeOffset().Minutes())
+	sc.Message = fmt.Sprintf("New time is changed to %s. Offset to %.2fm", xtime.Format(ctx.Now()), user.Dev().TimeOffset().Minutes())
 	return
 }

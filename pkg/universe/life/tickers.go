@@ -15,10 +15,10 @@ type Tickers struct {
 }
 
 type PreparedTickFuncs struct {
-	secondTickFuncs     []func(ctx Context)
-	minuteTickFuncs     []func(ctx Context)
-	onCreatedEventFuncs []func(ctx Context)
-	onLoadEventFuncs    []func(ctx Context)
+	secondTickFuncs     []func(ctx Context) error
+	minuteTickFuncs     []func(ctx Context) error
+	onCreatedEventFuncs []func(ctx Context) error
+	onLoadEventFuncs    []func(ctx Context) error
 }
 
 func newPreparedTickFuncs() *PreparedTickFuncs {
@@ -41,19 +41,19 @@ func (t *Tickers) stop() {
 	t.minuteTicker.Stop()
 }
 
-func (tf *PreparedTickFuncs) SecondTickRegister(f func(ctx Context)) {
+func (tf *PreparedTickFuncs) SecondTickRegister(f func(ctx Context) error) {
 	tf.secondTickFuncs = append(tf.secondTickFuncs, f)
 }
 
-func (tf *PreparedTickFuncs) MinuteTickRegister(f func(ctx Context)) {
+func (tf *PreparedTickFuncs) MinuteTickRegister(f func(ctx Context) error) {
 	tf.minuteTickFuncs = append(tf.minuteTickFuncs, f)
 }
 
-func (tf *PreparedTickFuncs) OnLoadEventRegister(f func(ctx Context)) {
+func (tf *PreparedTickFuncs) OnLoadEventRegister(f func(ctx Context) error) {
 	tf.onLoadEventFuncs = append(tf.onLoadEventFuncs, f)
 }
 
-func (tf *PreparedTickFuncs) OnCreatedEventRegister(f func(ctx Context)) {
+func (tf *PreparedTickFuncs) OnCreatedEventRegister(f func(ctx Context) error) {
 	tf.onCreatedEventFuncs = append(tf.onCreatedEventFuncs, f)
 }
 

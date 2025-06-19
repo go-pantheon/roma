@@ -114,11 +114,6 @@ func (r *userMongoRepo) UpdateByID(ctx context.Context, uid int64, user *dbv1.Us
 func (r *userMongoRepo) buildFilter(_ context.Context, cond *dbv1.UserProto) bson.D {
 	filter := make(bson.D, 0, 8)
 	filter = append(filter, bson.E{Key: "_id", Value: bson.D{bson.E{Key: "$gt", Value: 0}}})
-	if len(cond.Name) > 0 {
-		filter = append(filter, bson.E{Key: "name", Value: bson.D{bson.E{Key: "$regex", Value: bson.Regex{
-			Pattern: cond.Name,
-		}}}})
-	}
 
 	return filter
 }

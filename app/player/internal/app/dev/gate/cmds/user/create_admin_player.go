@@ -41,7 +41,7 @@ func (c *CreateAdminPlayerCommander) Func(ctx core.Context, args map[string]stri
 	// add all heroes
 	for _, d := range gamedata.GetHeroBaseDataList() {
 		r, _ := heroobj.NewHero(d.ID)
-		ctx.User().HeroList.Heroes[r.Id] = r
+		ctx.User().HeroList().Heroes[r.Id] = r
 	}
 
 	// add all necessary items

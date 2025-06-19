@@ -36,7 +36,7 @@ func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.Update
 		}
 	)
 
-	storage := ctx.User().Storage
+	storage := ctx.User().Storage()
 
 	updateInfo.WalkItem(func(d *gamedata.ResourceItemData, amount uint64) {
 		id := d.Id()
@@ -68,7 +68,7 @@ func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.Update
 }
 
 func (do *StorageDomain) UsePack(ctx core.Context, packData *gamedata.ResourcePackData) (*gamedata.ItemPrizes, error) {
-	storage := ctx.User().Storage
+	storage := ctx.User().Storage()
 
 	pack := storage.Packs[packData.Id()]
 	if pack == nil {
@@ -103,7 +103,7 @@ func (do *StorageDomain) UsePack(ctx core.Context, packData *gamedata.ResourcePa
 }
 
 func (do *StorageDomain) Recover(ctx core.Context) error {
-	storage := ctx.User().Storage
+	storage := ctx.User().Storage()
 	ctime := ctx.Now()
 
 	prizeList := make([]*gamedata.ItemPrize, 0, len(storage.RecoveryInfos))

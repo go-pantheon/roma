@@ -62,7 +62,7 @@ func do(c context.Context, w *worker.Worker, jobs []*job.Job) {
 		return
 	}
 
-	defer w.Stop()
+	defer w.Stop(ctx)
 
 	if err := w.Handshake(ctx); err != nil {
 		w.Log().Errorf("%+v", err)
@@ -71,7 +71,7 @@ func do(c context.Context, w *worker.Worker, jobs []*job.Job) {
 
 	for _, j := range jobs {
 		for _, t := range j.Tasks {
-			if w.IsStopping() {
+			if w.OnStopping() {
 				return
 			}
 			w.DistributeTask(t)
@@ -86,8 +86,8 @@ func do(c context.Context, w *worker.Worker, jobs []*job.Job) {
 	w.WorkingTime = time.Since(startTime)
 }
 
-func (ws *Workshop) Stop() {
+func (ws *Workshop) Stop(ctx context.Context) {
 	for _, w := range ws.Workers {
-		w.TriggerStop()
+		w.Stop(ctx)
 	}
 }

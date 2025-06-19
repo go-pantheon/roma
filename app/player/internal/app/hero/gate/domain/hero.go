@@ -19,7 +19,7 @@ func NewHeroDomain(logger log.Logger) *HeroDomain {
 }
 
 func (do *HeroDomain) UnlockHero(ctx core.Context, d *gamedata.HeroBaseData) (hero *object.Hero, err error) {
-	heroList := ctx.User().HeroList
+	heroList := ctx.User().HeroList()
 	if heroList.Heroes[d.ID] != nil {
 		err = errors.Errorf("hero already unlocked. id=%d", d.ID)
 		return

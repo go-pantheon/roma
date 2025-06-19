@@ -57,11 +57,17 @@ func (m *CSHandshake) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Pub
+
+	// no validation rules for Sign
+
 	// no validation rules for Token
 
 	// no validation rules for ServerId
 
-	// no validation rules for Pub
+	// no validation rules for Timestamp
+
+	// no validation rules for CertVersion
 
 	if len(errors) > 0 {
 		return CSHandshakeMultiError(errors)
@@ -162,9 +168,15 @@ func (m *SCHandshake) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for StartIndex
-
 	// no validation rules for Pub
+
+	// no validation rules for Sign
+
+	// no validation rules for Timestamp
+
+	// no validation rules for CertVersion
+
+	// no validation rules for StartIndex
 
 	if len(errors) > 0 {
 		return SCHandshakeMultiError(errors)

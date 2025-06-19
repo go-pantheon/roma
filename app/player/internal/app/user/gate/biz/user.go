@@ -27,10 +27,7 @@ type UserUseCase struct {
 	storageDo *storagedo.StorageDomain
 }
 
-func NewUserUseCase(mgr *core.Manager,
-	do *domain.UserDomain,
-	storageDo *storagedo.StorageDomain,
-	logger log.Logger) *UserUseCase {
+func NewUserUseCase(mgr *core.Manager, do *domain.UserDomain, storageDo *storagedo.StorageDomain, logger log.Logger) *UserUseCase {
 	uc := &UserUseCase{
 		log:       log.NewHelper(log.With(logger, "module", "player/user/gate/biz")),
 		mgr:       mgr,
@@ -45,17 +42,22 @@ func NewUserUseCase(mgr *core.Manager,
 	return uc
 }
 
-func (uc *UserUseCase) onCreated(ctx core.Context) {
+func (uc *UserUseCase) onCreated(ctx core.Context) error {
 	ctime := ctx.Now()
-	ctx.User().CreatedAt = ctime
-	ctx.User().LoginAt = ctime
-	ctx.User().LastOnlineAt = ctime
+
+	ctx.User().Basic().CreatedAt = ctime
+	ctx.User().Status().LoginAt = ctime
+	ctx.User().Status().LatestOnlineAt = ctime
 
 	ctx.Changed()
+
+	return nil
 }
 
-func (uc *UserUseCase) onLoad(ctx core.Context) {
-	ctx.User().LastOnlineIP = ctx.ClientIP()
+func (uc *UserUseCase) onLoad(ctx core.Context) error {
+	ctx.User().Status().ClientIP = ctx.ClientIP()
+
+	return nil
 }
 
 func (uc *UserUseCase) dailyReset(ctx core.Context) (changed bool) {
@@ -63,30 +65,32 @@ func (uc *UserUseCase) dailyReset(ctx core.Context) (changed bool) {
 		user  = ctx.User()
 		ctime = ctx.Now()
 	)
-	if ctime.Before(user.NextDailyResetAt) {
+	if ctime.Before(user.Status().NextDailyResetAt) {
 		return
 	}
-	user.DailyOnlineDuration = 0
-	user.NextDailyResetAt = xtime.NextDailyTime(ctime, 0)
+	user.Status().DailyOnlineDuration = 0
+	user.Status().NextDailyResetAt = xtime.NextDailyTime(ctime, 0)
 	changed = true
 	return
 }
 
-func (uc *UserUseCase) secondTick(ctx core.Context) {
+func (uc *UserUseCase) secondTick(ctx core.Context) error {
 	user := ctx.User()
 	ctime := ctx.Now()
 
-	if dur := ctime.Sub(user.LastOnlineAt); dur > 0 && dur < minOfflineDuration {
-		user.DailyOnlineDuration += dur
-		user.TotalOnlineDuration += dur
-		user.LastOnlineAt = ctime
+	if dur := ctime.Sub(user.Status().LatestOnlineAt); dur > 0 && dur < minOfflineDuration {
+		user.Status().DailyOnlineDuration += dur
+		user.Status().TotalOnlineDuration += dur
+		user.Status().LatestOnlineAt = ctime
 	} else {
 		// set re-login if offline for a long time
-		user.LoginAt = ctime
-		user.LogoutAt = user.LastOnlineAt
-		user.LastOnlineAt = ctime
+		user.Status().LoginAt = ctime
+		user.Status().LogoutAt = user.Status().LatestOnlineAt
+		user.Status().LatestOnlineAt = ctime
 		ctx.Changed()
 	}
+
+	return nil
 }
 
 func (uc *UserUseCase) Login(ctx core.Context, cs *climsg.CSLogin) (sc *climsg.SCLogin, err error) {
@@ -95,12 +99,17 @@ func (uc *UserUseCase) Login(ctx core.Context, cs *climsg.CSLogin) (sc *climsg.S
 
 	uc.dailyReset(ctx)
 
+	sc.User, err = user.EncodeClient()
+	if err != nil {
+		return
+	}
+
 	sc.Code = climsg.SCLogin_Succeeded
-	sc.User = user.EncodeClient()
+
 	sc.ServerTime = time.Now().Unix()
 	sc.Newborn = user.GetAndResetNewborn()
 
-	return
+	return sc, nil
 }
 
 func (uc *UserUseCase) UpdateName(ctx core.Context, cs *climsg.CSUpdateName) (sc *climsg.SCUpdateName, err error) {
@@ -113,12 +122,14 @@ func (uc *UserUseCase) UpdateName(ctx core.Context, cs *climsg.CSUpdateName) (sc
 		return
 	}
 
-	if name == ctx.User().Name {
+	basic := ctx.User().Basic()
+
+	if name == basic.Name {
 		sc.Code = climsg.SCUpdateName_ErrNameNotChanged
 		return
 	}
 
-	ctx.User().Name = name
+	basic.Name = name
 	ctx.Changed()
 
 	sc.Code = climsg.SCUpdateName_Succeeded
@@ -133,7 +144,7 @@ func (uc *UserUseCase) SetGender(ctx core.Context, cs *climsg.CSSetGender) (sc *
 		return
 	}
 
-	o := ctx.User().Basic
+	o := ctx.User().Basic()
 	if o.Gender != object.GenderUnset {
 		sc.Code = climsg.SCSetGender_ErrGenderSet
 		return

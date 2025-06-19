@@ -16,7 +16,7 @@ import (
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/trace"
 	"github.com/go-pantheon/fabrica-kit/xlog"
-	"github.com/go-pantheon/fabrica-net/health"
+	"github.com/go-pantheon/fabrica-net/http/health"
 	"github.com/go-pantheon/fabrica-util/xtime"
 	"github.com/go-pantheon/roma/app/player/internal/conf"
 	"github.com/go-pantheon/roma/gamedata"
@@ -34,11 +34,11 @@ func init() {
 
 func newApp(logger log.Logger, hs *http.Server, gs *grpc.Server, health *health.Server, label *conf.Label, rr registry.Registrar) *kratos.App {
 	md := map[string]string{
-		profile.SERVICE: label.Service,
-		profile.PROFILE: label.Profile,
-		profile.VERSION: label.Version,
-		profile.COLOR:   label.Color,
-		profile.NODE:    label.Node,
+		profile.ServiceKey: label.Service,
+		profile.ProfileKey: label.Profile,
+		profile.VersionKey: label.Version,
+		profile.ColorKey:   label.Color,
+		profile.NodeKey:    label.Node,
 	}
 
 	url, err := gs.Endpoint()
@@ -73,7 +73,7 @@ func main() {
 
 	c := config.New(
 		config.WithSource(
-			env.NewSource(profile.ORG_PREFIX),
+			env.NewSource(profile.OrgPrefix),
 			file.NewSource(flagConf),
 		),
 	)
@@ -86,7 +86,9 @@ func main() {
 		panic(err)
 	}
 
-	xtime.Init(bc.Label.Language)
+	xtime.Init(xtime.Config{
+		Language: xtime.Language(bc.Label.Language),
+	})
 
 	var rc conf.Registry
 	if err := c.Scan(&rc); err != nil {

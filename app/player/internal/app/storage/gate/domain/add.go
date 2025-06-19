@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"slices"
+
 	"github.com/go-pantheon/roma/app/player/internal/app/storage/gate/domain/object"
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	"github.com/go-pantheon/roma/gamedata"
@@ -9,100 +11,100 @@ import (
 	"github.com/pkg/errors"
 )
 
-type AddOption func(o *AddOptions)
+type AddOpt func(o AddOption)
 
-type AddOptions struct {
-	Items      []*gamedata.ItemPrize
-	Packs      []*gamedata.PackPrize
-	Prizes     []*gamedata.Prizes
-	ItemSource adv1.ItemSource
-	Silent     bool
+type AddOption struct {
+	items      []*gamedata.ItemPrize
+	packs      []*gamedata.PackPrize
+	prizes     []*gamedata.Prizes
+	itemSource adv1.ItemSource
+	silent     bool
 }
 
-func WithItems(items ...*gamedata.ItemPrize) AddOption {
-	return func(o *AddOptions) {
-		o.Items = items
+func WithItems(items ...*gamedata.ItemPrize) AddOpt {
+	return func(o AddOption) {
+		o.items = slices.Clone(items)
 	}
 }
 
-func WithPacks(packs ...*gamedata.PackPrize) AddOption {
-	return func(o *AddOptions) {
-		o.Packs = packs
+func WithPacks(packs ...*gamedata.PackPrize) AddOpt {
+	return func(o AddOption) {
+		o.packs = slices.Clone(packs)
 	}
 }
 
-func WithPrizes(prizes ...*gamedata.Prizes) AddOption {
-	return func(o *AddOptions) {
-		o.Prizes = prizes
+func WithPrizes(prizes ...*gamedata.Prizes) AddOpt {
+	return func(o AddOption) {
+		o.prizes = slices.Clone(prizes)
 	}
 }
 
-func WithItemSource(itemSource adv1.ItemSource) AddOption {
-	return func(o *AddOptions) {
-		o.ItemSource = itemSource
+func WithItemSource(itemSource adv1.ItemSource) AddOpt {
+	return func(o AddOption) {
+		o.itemSource = itemSource
 	}
 }
 
-func WithSilent(silent bool) AddOption {
-	return func(o *AddOptions) {
-		o.Silent = silent
+func WithSilent(silent bool) AddOpt {
+	return func(o AddOption) {
+		o.silent = silent
 	}
 }
 
-func (do *StorageDomain) Add(ctx core.Context, opts ...AddOption) error {
+func (do *StorageDomain) Add(ctx core.Context, opts ...AddOpt) error {
 	if err := do.Recover(ctx); err != nil {
 		do.log.WithContext(ctx).Errorf("recover failed before add. uid=%d %+v", ctx.UID(), err)
 	}
 
-	option := &AddOptions{}
+	option := AddOption{}
 	for _, opt := range opts {
 		opt(option)
 	}
 
 	// check first
-	if len(option.Prizes) > 0 {
-		if err := do.CanAddPrizes(option.Prizes...); err != nil {
+	if len(option.prizes) > 0 {
+		if err := do.CanAddPrizes(option.prizes...); err != nil {
 			return err
 		}
 	}
-	if len(option.Items) > 0 {
-		if err := do.CanAddItemPrizes(option.Items...); err != nil {
+	if len(option.items) > 0 {
+		if err := do.CanAddItemPrizes(option.items...); err != nil {
 			return err
 		}
 	}
-	if len(option.Packs) > 0 {
-		if err := do.CanAddPackPrizes(option.Packs...); err != nil {
+	if len(option.packs) > 0 {
+		if err := do.CanAddPackPrizes(option.packs...); err != nil {
 			return err
 		}
 	}
 
 	updateInfo := object.NewUpdateInfo(ctx.Now(), object.UpdateTypeAdd)
 
-	if len(option.Prizes) > 0 {
-		if up, err := do.addPrizes(ctx, option.Prizes...); err != nil {
+	if len(option.prizes) > 0 {
+		if up, err := do.addPrizes(ctx, option.prizes...); err != nil {
 			return err
 		} else {
 			_ = updateInfo.Merge(up)
 		}
 	}
 
-	if len(option.Items) > 0 {
-		if up, err := do.addItems(ctx, option.Items...); err != nil {
+	if len(option.items) > 0 {
+		if up, err := do.addItems(ctx, option.items...); err != nil {
 			return err
 		} else {
 			_ = updateInfo.Merge(up)
 		}
 	}
 
-	if len(option.Packs) > 0 {
-		if up, err := do.addPacks(ctx, option.Packs...); err != nil {
+	if len(option.packs) > 0 {
+		if up, err := do.addPacks(ctx, option.packs...); err != nil {
 			return err
 		} else {
 			_ = updateInfo.Merge(up)
 		}
 	}
 	ctx.Changed()
-	do.AfterUpdate(ctx, updateInfo, option.ItemSource, option.Silent)
+	do.AfterUpdate(ctx, updateInfo, option.itemSource, option.silent)
 	return nil
 }
 
@@ -116,7 +118,7 @@ func (do *StorageDomain) addItems(ctx core.Context, prizes ...*gamedata.ItemPriz
 
 	for _, prize := range prizes {
 		data := prize.Data()
-		if err := storage.AddItem(data, prize.Amount()); err != nil {
+		if err := storage().AddItem(data, prize.Amount()); err != nil {
 			return nil, err
 		}
 		updateInfo.AddItem(data, prize.Amount())
@@ -150,7 +152,7 @@ func (do *StorageDomain) addPacks(ctx core.Context, packs ...*gamedata.PackPrize
 	updateInfo = object.NewUpdateInfo(ctx.Now(), object.UpdateTypeAdd)
 
 	for _, item := range packs {
-		if err := storage.AddPack(item.Data(), item.Amount()); err != nil {
+		if err := storage().AddPack(item.Data(), item.Amount()); err != nil {
 			return nil, err
 		}
 		updateInfo.AddPack(item.Data(), item.Amount())

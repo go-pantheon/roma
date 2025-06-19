@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
-	"github.com/go-pantheon/fabrica-util/data/db"
+	xmongo "github.com/go-pantheon/fabrica-util/data/db/mongo"
 	"github.com/go-pantheon/roma/app/room/internal/app/room/gate/domain"
 	"github.com/go-pantheon/roma/app/room/internal/data"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/room/v1"
@@ -50,7 +50,7 @@ func NewMongoRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	if err := db.InitIncrementIDDoc(ctx, r.idCollection, _collectionName); err != nil {
+	if err := xmongo.InitIncrementIDDoc(ctx, r.idCollection, _collectionName); err != nil {
 		return nil, err
 	}
 	return r, nil
@@ -165,7 +165,7 @@ func (r *mongoRepo) IncrementID(ctx context.Context) (int64, error) {
 }
 
 func (r *mongoRepo) resetIncrementIdGen(ctx context.Context) (err error) {
-	r.maxId, err = db.IncrementBatchID(ctx, r.idCollection, _collectionName, batchInc)
+	r.maxId, err = xmongo.IncrementBatchID(ctx, r.idCollection, _collectionName, batchInc)
 	if err != nil {
 		return
 	}

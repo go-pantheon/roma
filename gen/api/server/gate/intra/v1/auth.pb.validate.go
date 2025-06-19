@@ -57,19 +57,21 @@ func (m *AuthToken) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Location
-
-	// no validation rules for AccountId
-
 	// no validation rules for Rand
-
-	// no validation rules for Timeout
-
-	// no validation rules for Unencrypted
 
 	// no validation rules for Color
 
+	// no validation rules for AccountId
+
+	// no validation rules for ServerId
+
+	// no validation rules for Timeout
+
+	// no validation rules for Location
+
 	// no validation rules for Status
+
+	// no validation rules for Unencrypted
 
 	if len(errors) > 0 {
 		return AuthTokenMultiError(errors)

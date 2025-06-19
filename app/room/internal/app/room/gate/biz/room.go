@@ -30,16 +30,19 @@ func NewRoomUseCase(mgr *core.Manager,
 	return uc
 }
 
-func (uc *RoomUseCase) onCreated(ctx core.Context) {
+func (uc *RoomUseCase) onCreated(ctx core.Context) error {
 	uc.log.WithContext(ctx).Debugf("room is created. id=%d", ctx.OID())
+	return nil
 }
 
-func (uc *RoomUseCase) onMinuteTick(ctx core.Context) {
+func (uc *RoomUseCase) onMinuteTick(ctx core.Context) error {
 	uc.log.WithContext(ctx).Debugf("room on minute tick. id=%d", ctx.OID())
+	return nil
 }
 
-func (uc *RoomUseCase) onSecondTick(ctx core.Context) {
+func (uc *RoomUseCase) onSecondTick(ctx core.Context) error {
 	uc.log.WithContext(ctx).Debugf("room on second tick. id=%d", ctx.OID())
+	return nil
 }
 
 func (uc *RoomUseCase) RoomList(ctx core.Context, cs *climsg.CSRoomList) (sc *climsg.SCRoomList, err error) {

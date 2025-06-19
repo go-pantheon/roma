@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync/atomic"
@@ -98,7 +99,7 @@ func (w *Worker) Start(ctx *base.Context) (err error) {
 
 	w.log.Infof("worker-%d connect to gate: %s", w.userId, addr)
 
-	xsync.GoSafe("worker.start", func() error {
+	xsync.Go("worker.start", func() error {
 		return w.Work(ctx)
 	}, DontLog)
 	return nil
@@ -116,18 +117,19 @@ func (w *Worker) GetClientUser() (*climsg.UserProto, error) {
 	return w.clientUser, nil
 }
 
-func (w *Worker) Stop() {
-	w.stop()
+func (w *Worker) Stop(ctx context.Context) {
+	w.stop(ctx)
 	w.log.Infof(w.Output())
 }
 
-func (w *Worker) stop() {
-	w.DoStop(func() {
-		w.tcpCli.TriggerStop()
+func (w *Worker) stop(ctx context.Context) {
+	w.TurnOff(func() (err error) {
+		w.tcpCli.Stop(ctx)
 		w.tcpCli.WaitStopped()
 		close(w.redirectChan)
 
 		w.log.Debugf("worker-%d closed", w.UID())
+		return err
 	})
 }
 
@@ -139,19 +141,19 @@ func (w *Worker) Work(bctx *base.Context) error {
 	heartbeatTicker := time.NewTicker(base.App().HeartbeatInterval.AsDuration())
 	heartbeat := system.NewHeartbeatTask()
 
-	defer w.stop()
+	defer w.stop(bctx)
 
 	eg, ctx := errgroup.WithContext(bctx)
 	eg.Go(func() error {
 		select {
 		case <-w.StopTriggered():
-			return xsync.ErrGroupStopping
+			return xsync.ErrStopByTrigger
 		case <-ctx.Done():
 			return ctx.Err()
 		}
 	})
 	eg.Go(func() error {
-		return xsync.RunSafe(func() error {
+		return xsync.Run(func() error {
 			for {
 				select {
 				case t := <-w.taskChan:
@@ -182,7 +184,7 @@ func (w *Worker) work(ctx *base.Context, t task.Taskable) error {
 	}
 
 	for {
-		if w.IsStopping() {
+		if w.OnStopping() {
 			return nil
 		}
 		done, err := w.receive(ctx, t)
@@ -206,7 +208,7 @@ func (w *Worker) receive(ctx *base.Context, t task.Taskable) (done bool, err err
 
 	select {
 	case <-w.StopTriggered():
-		err = xsync.ErrGroupStopping
+		err = xsync.ErrStopByTrigger
 		return
 	case <-timeout.C:
 		err = errors.Errorf("worker receive response timeout")

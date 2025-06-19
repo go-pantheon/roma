@@ -2,8 +2,7 @@ package life
 
 import (
 	"context"
-
-	"sync/atomic"
+	"sync"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
@@ -16,15 +15,48 @@ type PersistManager struct {
 	log       *log.Helper
 	persister Persistent
 
-	changed         atomic.Bool
+	changedModules *ChangedModules
+
 	immediatelyChan chan struct{}
-	saveChan       chan VersionProto
+	saveChan        chan VersionProto
+}
+
+type ChangedModules struct {
+	sync.Mutex
+
+	modules map[ModuleKey]struct{}
+}
+
+func (c *ChangedModules) Add(modules []ModuleKey) {
+	c.Lock()
+	defer c.Unlock()
+
+	for _, module := range modules {
+		c.modules[module] = struct{}{}
+	}
+}
+
+func (c *ChangedModules) Take() []ModuleKey {
+	c.Lock()
+	defer c.Unlock()
+
+	ret := make([]ModuleKey, 0, len(c.modules))
+	for module := range c.modules {
+		ret = append(ret, module)
+	}
+
+	c.modules = make(map[ModuleKey]struct{}, len(ret))
+
+	return ret
 }
 
 func newPersistManager(log *log.Helper, persister Persistent) (s *PersistManager) {
 	s = &PersistManager{
 		log:       log,
 		persister: persister,
+		changedModules: &ChangedModules{
+			modules: make(map[ModuleKey]struct{}),
+		},
 	}
 
 	s.saveChan = make(chan VersionProto, constants.WorkerHolderSize)
@@ -36,10 +68,11 @@ func (s *PersistManager) Persister() Persistent {
 	return s.persister
 }
 
-func (s *PersistManager) Change(ctx context.Context, imme bool) {
-	s.changed.Store(true)
+func (s *PersistManager) Change(ctx context.Context, modules []ModuleKey, immediately bool) {
+	s.changedModules.Add(modules)
 	s.persister.Refresh(ctx)
-	if imme {
+
+	if immediately {
 		s.immediatelyChan <- struct{}{}
 	}
 }
@@ -86,10 +119,13 @@ func (s *PersistManager) prepareToPersist(ctx context.Context) VersionProto {
 	if IsAdminID(s.ID()) {
 		return nil
 	}
-	if !s.changed.CompareAndSwap(true, false) {
+
+	modules := s.changedModules.Take()
+	if len(modules) == 0 {
 		return nil
 	}
-	return s.persister.PrepareToPersist(ctx)
+
+	return s.persister.PrepareToPersist(ctx, modules)
 }
 
 func (s *PersistManager) Persist(c context.Context, proto VersionProto) error {
@@ -118,16 +154,10 @@ func (s *PersistManager) IncVersion(ctx context.Context) error {
 		return nil
 	}
 
-	proto := s.persister.PrepareToPersist(ctx)
-	if proto == nil {
-		s.log.Infof("prepare to persist failed when incr db version. oid=%d", s.ID())
-		return nil
-	}
-
 	ctx, cancel := context.WithTimeout(ctx, constants.AsyncMongoTimeout)
 	defer cancel()
 
-	ver := proto.GetVersion()
+	ver := s.persister.Version()
 	if err := s.persister.IncVersion(ctx, s.ID(), ver); err != nil {
 		if errors.Is(err, xerrors.ErrDBRecordNotAffected) {
 			return errors.Wrapf(err, "version error, reload. oid=%d version=%d", s.ID(), ver)

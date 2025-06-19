@@ -25,7 +25,7 @@ func (uc *SystemUseCase) Heartbeat(ctx core.Context, cs *climsg.CSHeartbeat) (sc
 	u := ctx.User()
 	t := ctx.User().Now().Unix()
 
-	if u.System.FirstHeartBeatCompleted() {
+	if u.System().FirstHeartBeatCompleted() {
 		if cs.ClientTime+MaxOffsetSec < t || cs.ClientTime-MaxOffsetSec > t {
 			sc.Code = climsg.SCHeartbeat_ErrTime
 			sc.ServerTime = t
@@ -33,7 +33,7 @@ func (uc *SystemUseCase) Heartbeat(ctx core.Context, cs *climsg.CSHeartbeat) (sc
 		}
 	}
 
-	u.System.SetFirstHeartBeatCompleted()
+	u.System().SetFirstHeartBeatCompleted()
 	sc.ServerTime = t
 	sc.Code = climsg.SCHeartbeat_Succeeded
 	return

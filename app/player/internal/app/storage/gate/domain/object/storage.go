@@ -1,16 +1,24 @@
 package object
 
 import (
-	"context"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	"github.com/go-pantheon/roma/gamedata"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/go-pantheon/roma/pkg/errs"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
+
+const (
+	ModuleKey = "storage"
+)
+
+var _ life.Module = (*Storage)(nil)
 
 type Storage struct {
 	Items         map[int64]*ItemInfo
@@ -23,19 +31,19 @@ func NewStorage() *Storage {
 		Items: make(map[int64]*ItemInfo, 128),
 		Packs: make(map[int64]*PackInfo, 128),
 	}
+	o.Register()
+
 	return o
 }
 
-func NewStorageProto() *dbv1.UserStorageProto {
-	p := &dbv1.UserStorageProto{
-		Items:         make(map[int64]uint64, 128),
-		Packs:         make(map[int64]uint64, 128),
-		RecoveryInfos: make(map[int64]*dbv1.ItemRecoveryInfoProto, 128),
-	}
-	return p
+func (o *Storage) Register() {
+	userregister.Register(ModuleKey, o)
 }
 
-func (o *Storage) EncodeServer(p *dbv1.UserStorageProto) {
+func (o *Storage) Marshal() ([]byte, error) {
+	p := dbv1.UserStorageProtoPool.Get()
+	defer dbv1.UserStorageProtoPool.Put(p)
+
 	p.Items = make(map[int64]uint64, len(o.Items))
 	p.Packs = make(map[int64]uint64, len(o.Items))
 	p.RecoveryInfos = make(map[int64]*dbv1.ItemRecoveryInfoProto, len(o.Items))
@@ -49,14 +57,19 @@ func (o *Storage) EncodeServer(p *dbv1.UserStorageProto) {
 	}
 
 	for _, info := range o.RecoveryInfos {
-		p.RecoveryInfos[info.Id] = NewRecoveryInfoProto()
-		info.EncodeServer(p.RecoveryInfos[info.Id])
+		pr := dbv1.ItemRecoveryInfoProtoPool.Get()
+		p.RecoveryInfos[info.Id] = info.encodeServer(pr)
 	}
+
+	return proto.Marshal(p)
 }
 
-func (o *Storage) DecodeServer(ctx context.Context, p *dbv1.UserStorageProto) {
-	if p == nil {
-		return
+func (o *Storage) Unmarshal(data []byte) error {
+	p := dbv1.UserStorageProtoPool.Get()
+	defer dbv1.UserStorageProtoPool.Put(p)
+
+	if err := proto.Unmarshal(data, p); err != nil {
+		return err
 	}
 
 	for id, count := range p.Items {
@@ -76,12 +89,14 @@ func (o *Storage) DecodeServer(ctx context.Context, p *dbv1.UserStorageProto) {
 	}
 
 	for _, pr := range p.RecoveryInfos {
-		if info, err := DecodeRecoveryInfo(pr, o.Items); err != nil {
+		if info, err := decodeRecoveryInfo(pr, o.Items); err != nil {
 			log.Errorf("decode recoverable item error: %+v", err)
 		} else {
 			o.RecoveryInfos[info.Id] = info
 		}
 	}
+
+	return nil
 }
 
 func (o *Storage) EncodeClient() *climsg.UserStorageProto {

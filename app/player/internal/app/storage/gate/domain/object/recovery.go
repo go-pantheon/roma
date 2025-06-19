@@ -30,12 +30,7 @@ func newRecoveryInfo(d *gamedata.ResourceItemData, ctime time.Time) *RecoveryInf
 	return item
 }
 
-func NewRecoveryInfoProto() *dbv1.ItemRecoveryInfoProto {
-	p := &dbv1.ItemRecoveryInfoProto{}
-	return p
-}
-
-func DecodeRecoveryInfo(p *dbv1.ItemRecoveryInfoProto, items map[int64]*ItemInfo) (*RecoveryInfo, error) {
+func decodeRecoveryInfo(p *dbv1.ItemRecoveryInfoProto, items map[int64]*ItemInfo) (*RecoveryInfo, error) {
 	if p == nil {
 		return nil, errors.Wrapf(xerrors.ErrDBProtoDecode, "ItemRecoveryInfoProto is nil")
 	}
@@ -67,9 +62,10 @@ func (o *RecoveryInfo) Recover(ctime time.Time) (toAdd uint64) {
 	return
 }
 
-func (o *RecoveryInfo) EncodeServer(p *dbv1.ItemRecoveryInfoProto) {
+func (o *RecoveryInfo) encodeServer(p *dbv1.ItemRecoveryInfoProto) *dbv1.ItemRecoveryInfoProto {
 	p.DataId = o.Id
 	p.UpdatedAt = o.updatedAt.Unix()
+	return p
 }
 
 func (o *RecoveryInfo) EncodeClient(storage *climsg.UserStorageProto) {

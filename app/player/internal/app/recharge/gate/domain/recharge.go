@@ -128,7 +128,7 @@ func (do *RechargeDomain) AddUserRecharge(ctx core.Context, productId int64) err
 		return errors.Wrapf(rechargeerrs.ErrProductId, "productId=%d", productId)
 	}
 
-	if err := ctx.User().Basic.Recharge.AddRecharge(int64(d.Price)); err != nil {
+	if err := ctx.User().Recharge().AddRecharge(int64(d.Price)); err != nil {
 		return errors.WithMessagef(err, "productId=%d price=%d", productId, d.Price)
 	}
 

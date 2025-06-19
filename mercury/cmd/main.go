@@ -49,7 +49,7 @@ func main() {
 
 	c := config.New(
 		config.WithSource(
-			env.NewSource(profile.ORG_PREFIX),
+			env.NewSource(profile.OrgPrefix),
 			file.NewSource(flagConf),
 		),
 	)
@@ -108,7 +108,7 @@ func run(logger log.Logger, bc *conf.Bootstrap) error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-c:
-				ws.Stop()
+				ws.Stop(ctx)
 			}
 		}
 	})

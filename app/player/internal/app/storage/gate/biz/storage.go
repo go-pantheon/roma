@@ -31,17 +31,21 @@ func NewStorageUseCase(mgr *core.Manager, logger log.Logger, storageDo *domain.S
 	return uc
 }
 
-func (uc *StorageUseCase) onCreated(ctx core.Context) {
+func (uc *StorageUseCase) onCreated(ctx core.Context) error {
 	prizes := gamedata.GetResourceConstantData().OnCreatedItemsItemPrizes
 	if prizes != nil {
 		if err := uc.do.Add(ctx, domain.WithItems(prizes.Items()...), domain.WithSilent(true)); err != nil {
 			uc.log.WithContext(ctx).Errorf("add on created items failed. uid=%d %+v", ctx.UID(), err)
 		}
 	}
+
+	return nil
 }
 
-func (uc *StorageUseCase) onSecondTick(ctx core.Context) {
+func (uc *StorageUseCase) onSecondTick(ctx core.Context) error {
 	uc.do.Recover(ctx)
+
+	return nil
 }
 
 func (uc *StorageUseCase) UsePack(ctx core.Context, cs *climsg.CSUsePack) (sc *climsg.SCUsePack, err error) {

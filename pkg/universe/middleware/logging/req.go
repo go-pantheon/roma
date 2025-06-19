@@ -5,13 +5,13 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
-	"github.com/go-pantheon/fabrica-kit/tunnel"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
+	"github.com/go-pantheon/fabrica-net/xnet"
 	"github.com/go-pantheon/roma/gen/app/codec"
 	jsoniter "github.com/json-iterator/go"
 )
 
-func Req(ctx context.Context, log *log.Helper, p tunnel.ForwardMessage, filter func(mod, seq int32) bool) {
+func Req(ctx context.Context, log *log.Helper, p xnet.TunnelMessage, filter func(mod, seq int32) bool) {
 	if !profile.IsDev() {
 		return
 	}

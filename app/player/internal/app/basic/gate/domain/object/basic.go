@@ -1,8 +1,16 @@
 package object
 
 import (
-	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	"time"
+
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
+	"google.golang.org/protobuf/proto"
+)
+
+const (
+	ModuleKey = "basic"
 )
 
 const (
@@ -11,40 +19,46 @@ const (
 	GenderFemale = 2
 )
 
+var _ life.Module = (*Basic)(nil)
+
 type Basic struct {
-	Gender   int32
-	Recharge *Recharge
+	Name      string
+	Gender    int32
+	CreatedAt time.Time
 }
 
 func NewBasic() *Basic {
-	return &Basic{
-		Recharge: NewRecharge(),
-	}
+	o := &Basic{}
+	o.Register()
+	return o
 }
 
-func NewBasicProto() *dbv1.UserBasicProto {
-	p := &dbv1.UserBasicProto{}
-	p.Recharge = NewRechargeProto()
-	return p
+func (o *Basic) Register() {
+	userregister.Register(ModuleKey, o)
 }
 
-func (o *Basic) EncodeServer(p *dbv1.UserBasicProto) {
+func (o *Basic) Marshal() ([]byte, error) {
+	p := dbv1.UserBasicProtoPool.Get()
+	defer dbv1.UserBasicProtoPool.Put(p)
+
+	p.Name = o.Name
 	p.Gender = o.Gender
-	p.Recharge = o.Recharge.EncodeServer()
+	p.CreatedAt = o.CreatedAt.Unix()
+
+	return proto.Marshal(p)
 }
 
-func (o *Basic) DecodeServer(p *dbv1.UserBasicProto) (err error) {
-	if p == nil {
-		return
+func (o *Basic) Unmarshal(bytes []byte) (err error) {
+	p := dbv1.UserBasicProtoPool.Get()
+	defer dbv1.UserBasicProtoPool.Put(p)
+
+	if err = proto.Unmarshal(bytes, p); err != nil {
+		return err
 	}
+
+	o.Name = p.Name
 	o.Gender = p.Gender
-	o.Recharge.DecodeServer(p.Recharge)
-	return
-}
+	o.CreatedAt = time.Unix(p.CreatedAt, 0)
 
-func (o *Basic) EncodeClient() *climsg.UserBasicProto {
-	p := &climsg.UserBasicProto{}
-	p.Gender = o.Gender
-	p.RechargeAmounts = o.Recharge.EncodeClient()
-	return p
+	return
 }

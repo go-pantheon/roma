@@ -36,7 +36,7 @@ type HeroUseCase struct {
 	storageDo *storagedo.StorageDomain
 }
 
-func (uc *HeroUseCase) onCreated(ctx core.Context) {
+func (uc *HeroUseCase) onCreated(ctx core.Context) error {
 	for _, d := range gamedata.GetHeroConstantData().HeroDataList {
 		if _, err := uc.heroDo.UnlockHero(ctx, d); err != nil {
 			uc.log.WithContext(ctx).Errorf("unlock hero on created failed. %+v", err)
@@ -44,6 +44,8 @@ func (uc *HeroUseCase) onCreated(ctx core.Context) {
 		}
 		ctx.Changed()
 	}
+
+	return nil
 }
 
 func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, itemIds ...int64) error {
@@ -62,7 +64,7 @@ func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, itemIds ...int64) erro
 
 	newHeroes := make([]*object.Hero, 0, len(gamedata.GetHeroBaseDataList()))
 
-	heroes := ctx.User().HeroList.Heroes
+	heroes := ctx.User().HeroList().Heroes
 	for _, heroData := range gamedata.GetHeroBaseDataList() {
 		if _, ok := heroes[heroData.ID]; ok {
 			continue
@@ -87,7 +89,7 @@ func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, itemIds ...int64) erro
 }
 
 func (uc *HeroUseCase) unlockHero(ctx core.Context, d *gamedata.HeroBaseData, cost *gamedata.Costs) (r *object.Hero, err error) {
-	if ctx.User().HeroList.Heroes[d.ID] != nil {
+	if ctx.User().HeroList().Heroes[d.ID] != nil {
 		err = errors.Errorf("hero already unlocked. heroId=%d", d.ID)
 		return
 	}
@@ -106,7 +108,7 @@ func (uc *HeroUseCase) unlockHero(ctx core.Context, d *gamedata.HeroBaseData, co
 func (uc *HeroUseCase) HeroLevelUpgrade(ctx core.Context, cs *climsg.CSHeroLevelUpgrade) (sc *climsg.SCHeroLevelUpgrade, err error) {
 	sc = &climsg.SCHeroLevelUpgrade{}
 	var hero *object.Hero
-	if hero = ctx.User().HeroList.Heroes[cs.HeroId]; hero == nil {
+	if hero = ctx.User().HeroList().Heroes[cs.HeroId]; hero == nil {
 		sc.Code = climsg.SCHeroLevelUpgrade_ErrHeroNotExist
 		return
 	}

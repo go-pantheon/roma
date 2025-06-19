@@ -18,11 +18,11 @@ import (
 	"context"
 	"{{.Project}}/roma/gen/api/client/module"
 	"{{.Project}}/roma/gen/app/{{.LowerCamelGroup}}/service"
-	"{{.Project}}/fabrica-kit/tunnel"
+	"{{.Project}}/fabrica-net/xnet"
 	"github.com/pkg/errors"
 )
 
-func {{.UpperCamelGroup}}Handle(ctx context.Context, s *service.{{.UpperCamelGroup}}Services, in tunnel.ForwardMessage) ([]byte, error) {
+func {{.UpperCamelGroup}}Handle(ctx context.Context, s *service.{{.UpperCamelGroup}}Services, in xnet.TunnelMessage) ([]byte, error) {
 	var (
 		out []byte
 		err error

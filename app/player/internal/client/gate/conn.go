@@ -19,7 +19,7 @@ type Conn struct {
 }
 
 func NewConn(logger log.Logger, rt *RouteTable, r registry.Discovery) (*Conn, error) {
-	conn, err := conn.NewConn(serviceName, balancer.BalancerTypeViewer, logger, rt, r)
+	conn, err := conn.NewConn(serviceName, balancer.TypeReader, logger, rt, r)
 	if err != nil {
 		return nil, err
 	}
@@ -41,6 +41,6 @@ type RouteTable struct {
 
 func NewRouteTable(d *data.Data) *RouteTable {
 	return &RouteTable{
-		RouteTable: routetable.NewRouteTable(serviceName, redis.NewRedisRouteTable(d.Rdb)),
+		RouteTable: routetable.NewRouteTable(serviceName, redis.New(d.Rdb)),
 	}
 }

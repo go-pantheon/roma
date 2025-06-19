@@ -79,9 +79,6 @@ func buildGetUserListCond(req *adminv1.UserListRequest) (cond *dbv1.UserProto, s
 		return
 	}
 
-	if len(req.Cond.Name) > 0 {
-		cond.Name = req.Cond.Name
-	}
 	return
 }
 
@@ -97,14 +94,9 @@ func toUserProto(p *dbv1.UserProto) (*adminv1.UserProto, error) {
 	}
 
 	u := &adminv1.UserProto{
-		Id:           p.Id,
-		IdStr:        idStr,
-		Name:         p.Name,
-		CreatedAt:    p.CreatedAt,
-		LoginAt:      p.LoginAt,
-		LastOnlineAt: p.LastOnlineAt,
-		LastOnlineIp: p.LastOnlineIp,
-		Detail:       string(bytes),
+		Id:     p.Id,
+		IdStr:  idStr,
+		Detail: string(bytes),
 	}
 	return u, nil
 }

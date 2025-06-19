@@ -9,14 +9,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func DontLog(err error) bool {
-	return errors.Is(err, xsync.ErrGroupStopping) || IsConnectionError(err) || IsContextError(err) || xerrors.IsLogoutError(err)
+func IsUnloggableErr(err error) bool {
+	return errors.Is(err, xsync.ErrStopByTrigger) || IsEOFError(err) || IsCancelError(err) || xerrors.IsLogoutError(err)
 }
 
-func IsConnectionError(err error) bool {
+func IsEOFError(err error) bool {
 	return errors.Is(err, io.EOF)
 }
 
-func IsContextError(err error) bool {
+func IsCancelError(err error) bool {
 	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 }

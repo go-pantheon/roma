@@ -17,7 +17,7 @@ func (do *StorageDomain) Cost(ctx core.Context, toCosts *gamedata.Costs) (err er
 		return
 	}
 
-	storage := ctx.User().Storage
+	storage := ctx.User().Storage()
 	updateInfo := object.NewUpdateInfo(ctx.Now(), object.UpdateTypeSub)
 
 	toCosts.Walk(func(itemCost *gamedata.ItemCost) bool {
@@ -40,7 +40,7 @@ func (do *StorageDomain) Cost(ctx core.Context, toCosts *gamedata.Costs) (err er
 }
 
 func (do *StorageDomain) CanCost(ctx core.Context, toCosts *gamedata.Costs) (err error) {
-	storage := ctx.User().Storage
+	storage := ctx.User().Storage()
 
 	toCosts.Walk(func(itemCost *gamedata.ItemCost) bool {
 		item, ok := storage.Items[itemCost.Data().Id()]

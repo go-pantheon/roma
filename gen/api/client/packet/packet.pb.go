@@ -23,7 +23,7 @@ const (
 
 // TCP packet structure definition
 // For public network access
-// The complete message format: 4(len, bigEndian) + encrypt(byte[](Marshal(Packet))). The client and server send messages in this format.
+// The complete message format: 4(4 + len(data), bigEndian) + data(encrypt(byte[](Marshal(Packet)))). The client and server send messages in this format.
 // After the handshake protocol, all protocols use AES encryption and decryption
 // The message index number is incremented by 1 each time, and the message index number is unique within the same module
 // mod + seq + obj forms the unique ID of data

@@ -23,9 +23,9 @@ type Context interface {
 	UnsafeObject() interface{}
 	ShowProto() proto.Message
 
-	IsChanged() (changed bool, immediately bool)
-	Changed()
-	ChangedImmediately()
+	ChangedModules() (modules []ModuleKey, immediately bool)
+	Changed(modules ...ModuleKey)
+	ChangedImmediately(modules ...ModuleKey)
 }
 
 var _ Context = (*workerContext)(nil)
@@ -41,9 +41,11 @@ type workerContext struct {
 	clientIP  string
 	uid       int64
 
-	changed            bool
+	changedModules     []ModuleKey
 	changedImmediately bool
 }
+
+const defaultChangedModulesSize = 16
 
 func NewContext(ctx context.Context, w *Worker) Context {
 	c := &workerContext{
@@ -52,6 +54,7 @@ func NewContext(ctx context.Context, w *Worker) Context {
 		Replier:         w.Replier,
 		persister:       w.persistManager.Persister(),
 		clientIP:        w.ClientIP(),
+		changedModules:  make([]ModuleKey, 0, defaultChangedModulesSize),
 	}
 	if uid, err := xcontext.UID(ctx); err == nil {
 		c.SetUID(uid)
@@ -90,15 +93,27 @@ func (w *workerContext) UnsafeObject() interface{} {
 	return w.persister.UnsafeObject()
 }
 
-func (w *workerContext) IsChanged() (changed bool, immediately bool) {
-	return w.changed, w.changedImmediately
+var emptyModules = []ModuleKey{}
+
+func (w *workerContext) ChangedModules() (modules []ModuleKey, immediately bool) {
+	if len(w.changedModules) == 0 {
+		return emptyModules, false
+	}
+
+	modules = w.changedModules
+	w.changedModules = make([]ModuleKey, 0, len(modules))
+
+	immediately = w.changedImmediately
+	w.changedImmediately = false
+
+	return
 }
 
-func (w *workerContext) Changed() {
-	w.changed = true
+func (w *workerContext) Changed(modules ...ModuleKey) {
+	w.changedModules = append(w.changedModules, modules...)
 }
 
-func (w *workerContext) ChangedImmediately() {
-	w.changed = true
+func (w *workerContext) ChangedImmediately(modules ...ModuleKey) {
 	w.changedImmediately = true
+	w.changedModules = append(w.changedModules, modules...)
 }

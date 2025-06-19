@@ -27,18 +27,19 @@ type UserPersister struct {
 	do *domain.UserDomain
 }
 
-func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
-	p := do.LoadCachedProto(ctx, uid, time.Now())
-
-	if p == nil {
-		p, putFunc := do.GetProto()
-		defer putFunc()
+func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, sid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
+	p := do.Get(ctx, uid, time.Now())
+	if p != nil {
+		do.Remove(ctx, uid)
+	} else {
+		p = dbv1.UserProtoPool.Get()
+		defer dbv1.UserProtoPool.Put(p)
 
 		p.Id = uid
 		if err = do.Load(ctx, uid, p); err != nil {
 			if errors.Is(err, xerrors.ErrDBRecordNotFound) {
 				if allowCreate {
-					err = do.Create(ctx, uid, time.Now(), p)
+					err = do.Create(ctx, uid, sid, time.Now(), p)
 					newborn = true
 				}
 			}
@@ -48,8 +49,8 @@ func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, all
 		}
 	}
 
-	user := userobj.NewUser(p.Id, p.Name)
-	if err = user.DecodeServer(ctx, p); err != nil {
+	user := userobj.NewUser(p.Id, sid, p.ServerVersion)
+	if err = user.Unmarshal(p); err != nil {
 		return
 	}
 	user.SetNewborn(newborn)
@@ -69,15 +70,16 @@ func (s *UserPersister) Refresh(ctx context.Context) (err error) {
 	return
 }
 
-func (s *UserPersister) PrepareToPersist(ctx context.Context) (ret life.VersionProto) {
+func (s *UserPersister) PrepareToPersist(ctx context.Context, modules []life.ModuleKey) (ret life.VersionProto) {
 	_ = s.Lock(func() error {
 		s.user.Version += 1 // update version first
 
-		p, putFunc := s.do.GetProto()
-		defer putFunc()
+		p := dbv1.UserProtoPool.Get()
+		defer dbv1.UserProtoPool.Put(p)
 
-		s.user.EncodeServer(p)
+		s.user.EncodeServer(p, modules, false)
 		ret = p
+
 		return nil
 	})
 	return
@@ -88,7 +90,6 @@ func (s *UserPersister) refreshProto() {
 }
 
 func (s *UserPersister) Persist(ctx context.Context, uid int64, proto life.VersionProto) (err error) {
-	defer s.do.PutBackProto(proto.(*dbv1.UserProto))
 	return s.do.Persist(ctx, uid, proto)
 }
 
@@ -97,15 +98,16 @@ func (s *UserPersister) IncVersion(ctx context.Context, uid int64, newVersion in
 }
 
 func (s *UserPersister) OnStop(ctx context.Context, id int64, p life.VersionProto) (err error) {
-	cache, _ := s.do.GetProto() // cache will be reset on remove from UserProtoPool.cache
-	proto.Merge(cache, p)
-
-	s.do.CacheProto(ctx, s.uid, cache, time.Now())
+	s.do.Cache(ctx, s.uid, p.(*dbv1.UserProto), time.Now())
 	return nil
 }
 
 func (s *UserPersister) ID() int64 {
 	return s.uid
+}
+
+func (s *UserPersister) Version() int64 {
+	return s.user.Version
 }
 
 func (s *UserPersister) UnsafeObject() interface{} {

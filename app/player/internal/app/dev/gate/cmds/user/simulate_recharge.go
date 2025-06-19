@@ -44,7 +44,7 @@ func (c *SimulateRechargeCommander) Func(ctx core.Context, args map[string]strin
 		sc.Message = err.Error()
 		return
 	}
-	if err = user.Basic.Recharge.AddRecharge(cents); err != nil {
+	if err = user.Recharge().AddRecharge(cents); err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
 		sc.Message = err.Error()
 		return

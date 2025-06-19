@@ -1,0 +1,33 @@
+package dbv1
+
+import (
+	"sync"
+)
+
+var (
+	UserStatusProtoPool = newUserStatusProtoPool()
+)
+
+type userStatusProtoPool struct {
+	sync.Pool
+}
+
+func newUserStatusProtoPool() *userStatusProtoPool {
+	return &userStatusProtoPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserStatusProto{}
+			},
+		},
+	}
+}
+
+func (pool *userStatusProtoPool) Get() *UserStatusProto {
+	return pool.Pool.Get().(*UserStatusProto)
+}
+
+func (pool *userStatusProtoPool) Put(p *UserStatusProto) {
+
+	p.Reset()
+	pool.Pool.Put(p)
+}

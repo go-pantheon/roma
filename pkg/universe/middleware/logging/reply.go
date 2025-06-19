@@ -6,7 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
-	"github.com/go-pantheon/fabrica-kit/tunnel"
+	"github.com/go-pantheon/fabrica-net/xnet"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
@@ -29,7 +29,7 @@ func DefaultFilter(mod, seq int32) bool {
 	return true
 }
 
-func Reply(ctx context.Context, log *log.Helper, reply tunnel.ForwardMessage, filter func(mod, seq int32) bool) {
+func Reply(ctx context.Context, log *log.Helper, reply xnet.TunnelMessage, filter func(mod, seq int32) bool) {
 	if !profile.IsDev() {
 		return
 	}

@@ -4,17 +4,35 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/go-pantheon/fabrica-util/errors"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
+	"google.golang.org/protobuf/proto"
 )
 
-const RechargePrecision = int64(2)
+const (
+	ModuleKey = "recharge"
+)
+
+const (
+	RechargePrecision = int64(2)
+)
+
+var _ life.Module = (*Recharge)(nil)
 
 type Recharge struct {
 	amount big.Rat
 }
 
 func NewRecharge() *Recharge {
-	return buildRecharge(0)
+	o := buildRecharge(0)
+	o.Register()
+	return o
+}
+
+func (o *Recharge) Register() {
+	userregister.Register(ModuleKey, o)
 }
 
 func NewRechargeFromCents(cents int64) *Recharge {
@@ -34,19 +52,30 @@ func NewRechargeProto() *dbv1.RechargeProto {
 	return p
 }
 
-func (o *Recharge) EncodeServer() *dbv1.RechargeProto {
-	p := &dbv1.RechargeProto{
-		Amount: o.amount.String(),
-	}
-	return p
+func (o *Recharge) Marshal() ([]byte, error) {
+	p := dbv1.RechargeProtoPool.Get()
+	defer dbv1.RechargeProtoPool.Put(p)
+
+	p.Amount = o.amount.String()
+	return proto.Marshal(p)
 }
 
-func (o *Recharge) DecodeServer(p *dbv1.RechargeProto) (err error) {
-	if p == nil {
-		return
+func (o *Recharge) Unmarshal(data []byte) error {
+	p := dbv1.RechargeProtoPool.Get()
+	defer dbv1.RechargeProtoPool.Put(p)
+
+	if err := proto.Unmarshal(data, p); err != nil {
+		return errors.Wrap(err, "failed to unmarshal recharge")
 	}
-	o.amount, err = amountFromString(p.Amount)
-	return
+
+	amount, err := amountFromString(p.Amount)
+	if err != nil {
+		return errors.Wrap(err, "failed to unmarshal recharge")
+	}
+
+	o.amount = amount
+
+	return nil
 }
 
 func (o *Recharge) EncodeClient() float32 {
