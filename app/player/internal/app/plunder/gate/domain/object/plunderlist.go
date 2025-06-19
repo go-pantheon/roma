@@ -12,23 +12,22 @@ const (
 	ModuleKey = "plunder"
 )
 
+func init() {
+	userregister.Register(ModuleKey, NewPlunderList)
+}
+
 var _ life.Module = (*PlunderList)(nil)
 
 type PlunderList struct {
 	Plunders map[int64]*Plunder
 }
 
-func NewPlunderList() *PlunderList {
+func NewPlunderList() life.Module {
 	o := &PlunderList{
 		Plunders: make(map[int64]*Plunder),
 	}
-	o.Register()
 
 	return o
-}
-
-func (o *PlunderList) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func (o *PlunderList) Marshal() ([]byte, error) {

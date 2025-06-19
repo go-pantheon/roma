@@ -12,6 +12,10 @@ const (
 	ModuleKey = "room"
 )
 
+func init() {
+	userregister.Register(ModuleKey, NewRoom)
+}
+
 var _ life.Module = (*Room)(nil)
 
 type Room struct {
@@ -19,14 +23,9 @@ type Room struct {
 	IsCreator bool
 }
 
-func NewRoom() *Room {
+func NewRoom() life.Module {
 	o := &Room{}
-	o.Register()
 	return o
-}
-
-func (o *Room) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func NewRoomProto() *dbv1.UserRoomProto {

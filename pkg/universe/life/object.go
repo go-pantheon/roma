@@ -2,8 +2,9 @@ package life
 
 type ModuleKey string
 
+type NewModuleFunc func() Module
+
 type Module interface {
-	Register()
 	Marshal() ([]byte, error)
 	Unmarshal([]byte) error
 }

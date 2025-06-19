@@ -13,6 +13,10 @@ const (
 	ModuleKey = "status"
 )
 
+func init() {
+	userregister.Register(ModuleKey, NewStatus)
+}
+
 var _ life.Module = (*Status)(nil)
 
 type Status struct {
@@ -26,14 +30,9 @@ type Status struct {
 	TotalOnlineDuration time.Duration
 }
 
-func NewStatus() *Status {
+func NewStatus() life.Module {
 	o := &Status{}
-	o.Register()
 	return o
-}
-
-func (o *Status) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func (o *Status) Marshal() ([]byte, error) {

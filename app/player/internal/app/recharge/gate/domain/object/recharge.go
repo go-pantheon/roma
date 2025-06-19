@@ -19,20 +19,19 @@ const (
 	RechargePrecision = int64(2)
 )
 
+func init() {
+	userregister.Register(ModuleKey, NewRecharge)
+}
+
 var _ life.Module = (*Recharge)(nil)
 
 type Recharge struct {
 	amount big.Rat
 }
 
-func NewRecharge() *Recharge {
+func NewRecharge() life.Module {
 	o := buildRecharge(0)
-	o.Register()
 	return o
-}
-
-func (o *Recharge) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func NewRechargeFromCents(cents int64) *Recharge {

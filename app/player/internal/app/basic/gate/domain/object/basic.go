@@ -19,6 +19,10 @@ const (
 	GenderFemale = 2
 )
 
+func init() {
+	userregister.Register(ModuleKey, NewBasic)
+}
+
 var _ life.Module = (*Basic)(nil)
 
 type Basic struct {
@@ -27,14 +31,9 @@ type Basic struct {
 	CreatedAt time.Time
 }
 
-func NewBasic() *Basic {
+func NewBasic() life.Module {
 	o := &Basic{}
-	o.Register()
 	return o
-}
-
-func (o *Basic) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func (o *Basic) Marshal() ([]byte, error) {

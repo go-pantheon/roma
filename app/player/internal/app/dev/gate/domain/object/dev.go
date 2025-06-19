@@ -1,4 +1,4 @@
-package userobj
+package object
 
 import (
 	"time"
@@ -16,18 +16,17 @@ const (
 
 var _ life.Module = (*Dev)(nil)
 
+func init() {
+	userregister.Register(ModuleKey, NewDev)
+}
+
 type Dev struct {
 	devTimeOffset time.Duration
 }
 
-func NewDev() *Dev {
+func NewDev() life.Module {
 	o := &Dev{}
-	o.Register()
 	return o
-}
-
-func (o *Dev) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func NewDevProto() *dbv1.DevProto {

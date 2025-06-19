@@ -22,7 +22,7 @@ type User struct {
 	Version       int64
 	ServerVersion string
 
-	Modules map[life.ModuleKey]life.Module
+	modules map[life.ModuleKey]life.Module
 }
 
 func NewUser(id int64, sid int64, serverVersion string) *User {
@@ -30,11 +30,11 @@ func NewUser(id int64, sid int64, serverVersion string) *User {
 		ID:            id,
 		SID:           sid,
 		ServerVersion: serverVersion,
-		Modules:       make(map[life.ModuleKey]life.Module, 16),
+		modules:       make(map[life.ModuleKey]life.Module, 16),
 	}
 
-	userregister.ForEach(func(key life.ModuleKey, module life.Module) {
-		u.Modules[key] = module
+	userregister.ForEach(func(key life.ModuleKey, newFunc life.NewModuleFunc) {
+		u.modules[key] = newFunc()
 	})
 
 	return u
@@ -50,7 +50,7 @@ func (o *User) Unmarshal(p *dbv1.UserProto) error {
 	o.ServerVersion = userVersion
 
 	for key, data := range p.Modules {
-		if mod := o.Modules[life.ModuleKey(key)]; mod != nil {
+		if mod := o.modules[life.ModuleKey(key)]; mod != nil {
 			if err := mod.Unmarshal(data); err != nil {
 				return errors.WithMessagef(err, "module unmarshal failed. uid=%d, mod=%s", o.ID, key)
 			}
@@ -67,7 +67,7 @@ func (o *User) EncodeServer(p *dbv1.UserProto, modules []life.ModuleKey, all boo
 	p.Modules = make(map[string][]byte, 16)
 
 	if all {
-		for key, mod := range o.Modules {
+		for key, mod := range o.modules {
 			data, err := mod.Marshal()
 			if err != nil {
 				return err
@@ -77,7 +77,7 @@ func (o *User) EncodeServer(p *dbv1.UserProto, modules []life.ModuleKey, all boo
 		}
 	} else {
 		for _, key := range modules {
-			if mod := o.Modules[key]; mod != nil {
+			if mod := o.modules[key]; mod != nil {
 				data, err := mod.Marshal()
 				if err != nil {
 					return err

@@ -12,22 +12,21 @@ const (
 	ModuleKey = "hero"
 )
 
+func init() {
+	userregister.Register(ModuleKey, NewHeroList)
+}
+
 var _ life.Module = (*HeroList)(nil)
 
 type HeroList struct {
 	Heroes map[int64]*Hero
 }
 
-func NewHeroList() *HeroList {
+func NewHeroList() life.Module {
 	o := &HeroList{
 		Heroes: make(map[int64]*Hero, 8),
 	}
-	o.Register()
 	return o
-}
-
-func (o *HeroList) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func (o *HeroList) Marshal() ([]byte, error) {

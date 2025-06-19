@@ -14,6 +14,10 @@ const (
 	ModuleKey = "system"
 )
 
+func init() {
+	userregister.Register(ModuleKey, NewSystem)
+}
+
 var _ life.Module = (*System)(nil)
 
 type System struct {
@@ -21,15 +25,10 @@ type System struct {
 	// TODO: add more fields
 }
 
-func NewSystem() *System {
+func NewSystem() life.Module {
 	o := &System{}
-	o.Register()
 
 	return o
-}
-
-func (o *System) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func (o *System) Marshal() ([]byte, error) {

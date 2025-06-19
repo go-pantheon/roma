@@ -18,6 +18,10 @@ const (
 	ModuleKey = "storage"
 )
 
+func init() {
+	userregister.Register(ModuleKey, NewStorage)
+}
+
 var _ life.Module = (*Storage)(nil)
 
 type Storage struct {
@@ -26,18 +30,13 @@ type Storage struct {
 	RecoveryInfos map[int64]*RecoveryInfo
 }
 
-func NewStorage() *Storage {
+func NewStorage() life.Module {
 	o := &Storage{
 		Items: make(map[int64]*ItemInfo, 128),
 		Packs: make(map[int64]*PackInfo, 128),
 	}
-	o.Register()
 
 	return o
-}
-
-func (o *Storage) Register() {
-	userregister.Register(ModuleKey, o)
 }
 
 func (o *Storage) Marshal() ([]byte, error) {
