@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on DevProto with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on UserDevProto with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *DevProto) Validate() error {
+func (m *UserDevProto) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on DevProto with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in DevProtoMultiError, or nil
-// if none found.
-func (m *DevProto) ValidateAll() error {
+// ValidateAll checks the field values on UserDevProto with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in UserDevProtoMultiError, or
+// nil if none found.
+func (m *UserDevProto) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *DevProto) validate(all bool) error {
+func (m *UserDevProto) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -60,18 +60,18 @@ func (m *DevProto) validate(all bool) error {
 	// no validation rules for TimeOffset
 
 	if len(errors) > 0 {
-		return DevProtoMultiError(errors)
+		return UserDevProtoMultiError(errors)
 	}
 
 	return nil
 }
 
-// DevProtoMultiError is an error wrapping multiple validation errors returned
-// by DevProto.ValidateAll() if the designated constraints aren't met.
-type DevProtoMultiError []error
+// UserDevProtoMultiError is an error wrapping multiple validation errors
+// returned by UserDevProto.ValidateAll() if the designated constraints aren't met.
+type UserDevProtoMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m DevProtoMultiError) Error() string {
+func (m UserDevProtoMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -80,11 +80,11 @@ func (m DevProtoMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m DevProtoMultiError) AllErrors() []error { return m }
+func (m UserDevProtoMultiError) AllErrors() []error { return m }
 
-// DevProtoValidationError is the validation error returned by
-// DevProto.Validate if the designated constraints aren't met.
-type DevProtoValidationError struct {
+// UserDevProtoValidationError is the validation error returned by
+// UserDevProto.Validate if the designated constraints aren't met.
+type UserDevProtoValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -92,22 +92,22 @@ type DevProtoValidationError struct {
 }
 
 // Field function returns field value.
-func (e DevProtoValidationError) Field() string { return e.field }
+func (e UserDevProtoValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e DevProtoValidationError) Reason() string { return e.reason }
+func (e UserDevProtoValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e DevProtoValidationError) Cause() error { return e.cause }
+func (e UserDevProtoValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e DevProtoValidationError) Key() bool { return e.key }
+func (e UserDevProtoValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e DevProtoValidationError) ErrorName() string { return "DevProtoValidationError" }
+func (e UserDevProtoValidationError) ErrorName() string { return "UserDevProtoValidationError" }
 
 // Error satisfies the builtin error interface
-func (e DevProtoValidationError) Error() string {
+func (e UserDevProtoValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -119,14 +119,14 @@ func (e DevProtoValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sDevProto.%s: %s%s",
+		"invalid %sUserDevProto.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = DevProtoValidationError{}
+var _ error = UserDevProtoValidationError{}
 
 var _ interface {
 	Field() string
@@ -134,4 +134,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = DevProtoValidationError{}
+} = UserDevProtoValidationError{}

@@ -26,24 +26,23 @@ type System struct {
 }
 
 func NewSystem() life.Module {
-	o := &System{}
-
-	return o
+	return &System{}
 }
 
-func (o *System) Marshal() ([]byte, error) {
-	p := dbv1.SystemProtoPool.Get()
-	defer dbv1.SystemProtoPool.Put(p)
+func (o *System) EncodeServer() proto.Message {
+	p := dbv1.UserSystemProtoPool.Get()
 
-	return proto.Marshal(p)
+	return p
 }
 
-func (o *System) Unmarshal(bytes []byte) error {
-	p := dbv1.SystemProtoPool.Get()
-	defer dbv1.SystemProtoPool.Put(p)
+func (o *System) DecodeServer(p proto.Message) error {
+	if p == nil {
+		return errors.New("system decode server nil")
+	}
 
-	if err := proto.Unmarshal(bytes, p); err != nil {
-		return errors.Wrap(err, "failed to unmarshal system")
+	_, ok := p.(*dbv1.UserSystemProto)
+	if !ok {
+		return errors.Errorf("system decode server invalid type: %T", p)
 	}
 
 	return nil

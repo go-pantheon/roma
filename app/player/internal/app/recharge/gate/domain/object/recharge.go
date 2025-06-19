@@ -46,30 +46,31 @@ func buildRecharge(cents int64) *Recharge {
 	return r
 }
 
-func NewRechargeProto() *dbv1.RechargeProto {
-	p := &dbv1.RechargeProto{}
+func NewRechargeProto() *dbv1.UserRechargeProto {
+	p := &dbv1.UserRechargeProto{}
 	return p
 }
 
-func (o *Recharge) Marshal() ([]byte, error) {
-	p := dbv1.RechargeProtoPool.Get()
-	defer dbv1.RechargeProtoPool.Put(p)
-
+func (o *Recharge) EncodeServer() proto.Message {
+	p := dbv1.UserRechargeProtoPool.Get()
 	p.Amount = o.amount.String()
-	return proto.Marshal(p)
+
+	return p
 }
 
-func (o *Recharge) Unmarshal(data []byte) error {
-	p := dbv1.RechargeProtoPool.Get()
-	defer dbv1.RechargeProtoPool.Put(p)
-
-	if err := proto.Unmarshal(data, p); err != nil {
-		return errors.Wrap(err, "failed to unmarshal recharge")
+func (o *Recharge) DecodeServer(p proto.Message) error {
+	if p == nil {
+		return errors.New("recharge decode server nil")
 	}
 
-	amount, err := amountFromString(p.Amount)
+	op, ok := p.(*dbv1.UserRechargeProto)
+	if !ok {
+		return errors.Errorf("recharge decode server invalid type: %T", p)
+	}
+
+	amount, err := amountFromString(op.Amount)
 	if err != nil {
-		return errors.Wrap(err, "failed to unmarshal recharge")
+		return errors.Wrap(err, "failed to parse recharge amount")
 	}
 
 	o.amount = amount

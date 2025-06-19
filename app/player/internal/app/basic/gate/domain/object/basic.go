@@ -3,6 +3,8 @@ package object
 import (
 	"time"
 
+	"github.com/go-pantheon/fabrica-util/errors"
+	"github.com/go-pantheon/fabrica-util/xtime"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/go-pantheon/roma/pkg/universe/life"
@@ -32,32 +34,33 @@ type Basic struct {
 }
 
 func NewBasic() life.Module {
-	o := &Basic{}
-	return o
+	return &Basic{}
 }
 
-func (o *Basic) Marshal() ([]byte, error) {
+func (o *Basic) EncodeServer() proto.Message {
 	p := dbv1.UserBasicProtoPool.Get()
-	defer dbv1.UserBasicProtoPool.Put(p)
 
 	p.Name = o.Name
 	p.Gender = o.Gender
 	p.CreatedAt = o.CreatedAt.Unix()
 
-	return proto.Marshal(p)
+	return p
 }
 
-func (o *Basic) Unmarshal(bytes []byte) (err error) {
-	p := dbv1.UserBasicProtoPool.Get()
-	defer dbv1.UserBasicProtoPool.Put(p)
-
-	if err = proto.Unmarshal(bytes, p); err != nil {
-		return err
+func (o *Basic) DecodeServer(p proto.Message) error {
+	if p == nil {
+		return errors.New("basic decode server nil")
 	}
 
-	o.Name = p.Name
-	o.Gender = p.Gender
-	o.CreatedAt = time.Unix(p.CreatedAt, 0)
+	op, ok := p.(*dbv1.UserBasicProto)
+	if !ok {
+		return errors.Errorf("basic decode server invalid type: %T", p)
+	}
 
-	return
+	o.Name = op.Name
+	o.Gender = op.Gender
+	o.CreatedAt = xtime.Time(op.CreatedAt)
+
+	return nil
 }
+

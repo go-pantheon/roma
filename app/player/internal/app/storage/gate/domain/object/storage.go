@@ -39,9 +39,8 @@ func NewStorage() life.Module {
 	return o
 }
 
-func (o *Storage) Marshal() ([]byte, error) {
+func (o *Storage) EncodeServer() proto.Message {
 	p := dbv1.UserStorageProtoPool.Get()
-	defer dbv1.UserStorageProtoPool.Put(p)
 
 	p.Items = make(map[int64]uint64, len(o.Items))
 	p.Packs = make(map[int64]uint64, len(o.Items))
@@ -60,18 +59,20 @@ func (o *Storage) Marshal() ([]byte, error) {
 		p.RecoveryInfos[info.Id] = info.encodeServer(pr)
 	}
 
-	return proto.Marshal(p)
+	return p
 }
 
-func (o *Storage) Unmarshal(data []byte) error {
-	p := dbv1.UserStorageProtoPool.Get()
-	defer dbv1.UserStorageProtoPool.Put(p)
-
-	if err := proto.Unmarshal(data, p); err != nil {
-		return err
+func (o *Storage) DecodeServer(p proto.Message) error {
+	if p == nil {
+		return errors.New("storage decode server nil")
 	}
 
-	for id, count := range p.Items {
+	op, ok := p.(*dbv1.UserStorageProto)
+	if !ok {
+		return errors.Errorf("storage decode server invalid type: %T", p)
+	}
+
+	for id, count := range op.Items {
 		if prize, err := gamedata.TryNewItemPrize(id, count); err != nil {
 			log.Errorf("decode item info error: %+v", err)
 		} else {
@@ -79,7 +80,7 @@ func (o *Storage) Unmarshal(data []byte) error {
 		}
 	}
 
-	for id, count := range p.Packs {
+	for id, count := range op.Packs {
 		if info, err := gamedata.TryNewPackPrize(id, count); err != nil {
 			log.Errorf("decode pack info error: %+v", err)
 		} else {
@@ -87,7 +88,7 @@ func (o *Storage) Unmarshal(data []byte) error {
 		}
 	}
 
-	for _, pr := range p.RecoveryInfos {
+	for _, pr := range op.RecoveryInfos {
 		if info, err := decodeRecoveryInfo(pr, o.Items); err != nil {
 			log.Errorf("decode recoverable item error: %+v", err)
 		} else {
@@ -116,6 +117,7 @@ func (o *Storage) EncodeClient() *climsg.UserStorageProto {
 	for _, info := range o.RecoveryInfos {
 		info.EncodeClient(p)
 	}
+
 	return p
 }
 
@@ -138,7 +140,8 @@ func (o *Storage) AddItem(d *gamedata.ResourceItemData, amount uint64) (err erro
 			o.RecoveryInfos[d.Id()] = newRecoveryInfo(d, time.Now())
 		}
 	}
-	return
+
+	return nil
 }
 
 func (o *Storage) SubItem(d *gamedata.ResourceItemData, amount uint64) (err error) {

@@ -35,8 +35,19 @@ func main() {
 	log.Printf("dir: %s", destDir)
 
 	service := tmpl.NewService()
+
+	poolTemplate, err := tmpl.NewPoolTemplate()
+	if err != nil {
+		panic(err)
+	}
+
+	codecTemplate, err := tmpl.NewCodecTemplate()
+	if err != nil {
+		panic(err)
+	}
+
 	for _, file := range data.Files {
-		formatted, err := service.Execute(file)
+		formatted, err := service.Execute(file, poolTemplate)
 		if err != nil {
 			panic(err)
 		}
@@ -47,5 +58,17 @@ func main() {
 			panic(err)
 		}
 
+		if file.HasOneof {
+			formatted, err = service.Execute(file, codecTemplate)
+			if err != nil {
+				panic(err)
+			}
+
+			destFilePath = filepath.Join(destDir, file.Dir, file.FileName+"_codec.go")
+
+			if err := os.WriteFile(destFilePath, formatted, 0644); err != nil {
+				panic(err)
+			}
+		}
 	}
 }

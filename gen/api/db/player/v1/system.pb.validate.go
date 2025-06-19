@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on SystemProto with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *SystemProto) Validate() error {
+// Validate checks the field values on UserSystemProto with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UserSystemProto) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on SystemProto with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in SystemProtoMultiError, or
-// nil if none found.
-func (m *SystemProto) ValidateAll() error {
+// ValidateAll checks the field values on UserSystemProto with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserSystemProtoMultiError, or nil if none found.
+func (m *UserSystemProto) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *SystemProto) validate(all bool) error {
+func (m *UserSystemProto) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -66,7 +66,7 @@ func (m *SystemProto) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, SystemProtoValidationError{
+					errors = append(errors, UserSystemProtoValidationError{
 						field:  fmt.Sprintf("Events[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -74,7 +74,7 @@ func (m *SystemProto) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, SystemProtoValidationError{
+					errors = append(errors, UserSystemProtoValidationError{
 						field:  fmt.Sprintf("Events[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -83,7 +83,7 @@ func (m *SystemProto) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return SystemProtoValidationError{
+				return UserSystemProtoValidationError{
 					field:  fmt.Sprintf("Events[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -94,18 +94,19 @@ func (m *SystemProto) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return SystemProtoMultiError(errors)
+		return UserSystemProtoMultiError(errors)
 	}
 
 	return nil
 }
 
-// SystemProtoMultiError is an error wrapping multiple validation errors
-// returned by SystemProto.ValidateAll() if the designated constraints aren't met.
-type SystemProtoMultiError []error
+// UserSystemProtoMultiError is an error wrapping multiple validation errors
+// returned by UserSystemProto.ValidateAll() if the designated constraints
+// aren't met.
+type UserSystemProtoMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m SystemProtoMultiError) Error() string {
+func (m UserSystemProtoMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -114,11 +115,11 @@ func (m SystemProtoMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m SystemProtoMultiError) AllErrors() []error { return m }
+func (m UserSystemProtoMultiError) AllErrors() []error { return m }
 
-// SystemProtoValidationError is the validation error returned by
-// SystemProto.Validate if the designated constraints aren't met.
-type SystemProtoValidationError struct {
+// UserSystemProtoValidationError is the validation error returned by
+// UserSystemProto.Validate if the designated constraints aren't met.
+type UserSystemProtoValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -126,22 +127,22 @@ type SystemProtoValidationError struct {
 }
 
 // Field function returns field value.
-func (e SystemProtoValidationError) Field() string { return e.field }
+func (e UserSystemProtoValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e SystemProtoValidationError) Reason() string { return e.reason }
+func (e UserSystemProtoValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e SystemProtoValidationError) Cause() error { return e.cause }
+func (e UserSystemProtoValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e SystemProtoValidationError) Key() bool { return e.key }
+func (e UserSystemProtoValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e SystemProtoValidationError) ErrorName() string { return "SystemProtoValidationError" }
+func (e UserSystemProtoValidationError) ErrorName() string { return "UserSystemProtoValidationError" }
 
 // Error satisfies the builtin error interface
-func (e SystemProtoValidationError) Error() string {
+func (e UserSystemProtoValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -153,14 +154,14 @@ func (e SystemProtoValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sSystemProto.%s: %s%s",
+		"invalid %sUserSystemProto.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = SystemProtoValidationError{}
+var _ error = UserSystemProtoValidationError{}
 
 var _ interface {
 	Field() string
@@ -168,7 +169,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = SystemProtoValidationError{}
+} = UserSystemProtoValidationError{}
 
 // Validate checks the field values on WorkerEvent with the rules defined in
 // the proto definition for this message. If any rules are violated, the first

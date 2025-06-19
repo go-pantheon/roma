@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on PlunderListProto with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *PlunderListProto) Validate() error {
+// Validate checks the field values on UserPlunderListProto with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UserPlunderListProto) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on PlunderListProto with the rules
+// ValidateAll checks the field values on UserPlunderListProto with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// PlunderListProtoMultiError, or nil if none found.
-func (m *PlunderListProto) ValidateAll() error {
+// UserPlunderListProtoMultiError, or nil if none found.
+func (m *UserPlunderListProto) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *PlunderListProto) validate(all bool) error {
+func (m *UserPlunderListProto) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -75,7 +75,7 @@ func (m *PlunderListProto) validate(all bool) error {
 				switch v := interface{}(val).(type) {
 				case interface{ ValidateAll() error }:
 					if err := v.ValidateAll(); err != nil {
-						errors = append(errors, PlunderListProtoValidationError{
+						errors = append(errors, UserPlunderListProtoValidationError{
 							field:  fmt.Sprintf("Plunders[%v]", key),
 							reason: "embedded message failed validation",
 							cause:  err,
@@ -83,7 +83,7 @@ func (m *PlunderListProto) validate(all bool) error {
 					}
 				case interface{ Validate() error }:
 					if err := v.Validate(); err != nil {
-						errors = append(errors, PlunderListProtoValidationError{
+						errors = append(errors, UserPlunderListProtoValidationError{
 							field:  fmt.Sprintf("Plunders[%v]", key),
 							reason: "embedded message failed validation",
 							cause:  err,
@@ -92,7 +92,7 @@ func (m *PlunderListProto) validate(all bool) error {
 				}
 			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
 				if err := v.Validate(); err != nil {
-					return PlunderListProtoValidationError{
+					return UserPlunderListProtoValidationError{
 						field:  fmt.Sprintf("Plunders[%v]", key),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -104,19 +104,19 @@ func (m *PlunderListProto) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return PlunderListProtoMultiError(errors)
+		return UserPlunderListProtoMultiError(errors)
 	}
 
 	return nil
 }
 
-// PlunderListProtoMultiError is an error wrapping multiple validation errors
-// returned by PlunderListProto.ValidateAll() if the designated constraints
-// aren't met.
-type PlunderListProtoMultiError []error
+// UserPlunderListProtoMultiError is an error wrapping multiple validation
+// errors returned by UserPlunderListProto.ValidateAll() if the designated
+// constraints aren't met.
+type UserPlunderListProtoMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m PlunderListProtoMultiError) Error() string {
+func (m UserPlunderListProtoMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -125,11 +125,11 @@ func (m PlunderListProtoMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m PlunderListProtoMultiError) AllErrors() []error { return m }
+func (m UserPlunderListProtoMultiError) AllErrors() []error { return m }
 
-// PlunderListProtoValidationError is the validation error returned by
-// PlunderListProto.Validate if the designated constraints aren't met.
-type PlunderListProtoValidationError struct {
+// UserPlunderListProtoValidationError is the validation error returned by
+// UserPlunderListProto.Validate if the designated constraints aren't met.
+type UserPlunderListProtoValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -137,22 +137,24 @@ type PlunderListProtoValidationError struct {
 }
 
 // Field function returns field value.
-func (e PlunderListProtoValidationError) Field() string { return e.field }
+func (e UserPlunderListProtoValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e PlunderListProtoValidationError) Reason() string { return e.reason }
+func (e UserPlunderListProtoValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e PlunderListProtoValidationError) Cause() error { return e.cause }
+func (e UserPlunderListProtoValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e PlunderListProtoValidationError) Key() bool { return e.key }
+func (e UserPlunderListProtoValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e PlunderListProtoValidationError) ErrorName() string { return "PlunderListProtoValidationError" }
+func (e UserPlunderListProtoValidationError) ErrorName() string {
+	return "UserPlunderListProtoValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e PlunderListProtoValidationError) Error() string {
+func (e UserPlunderListProtoValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -164,14 +166,14 @@ func (e PlunderListProtoValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sPlunderListProto.%s: %s%s",
+		"invalid %sUserPlunderListProto.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = PlunderListProtoValidationError{}
+var _ error = UserPlunderListProtoValidationError{}
 
 var _ interface {
 	Field() string
@@ -179,24 +181,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = PlunderListProtoValidationError{}
+} = UserPlunderListProtoValidationError{}
 
-// Validate checks the field values on PlunderProto with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *PlunderProto) Validate() error {
+// Validate checks the field values on UserPlunderProto with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UserPlunderProto) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on PlunderProto with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in PlunderProtoMultiError, or
-// nil if none found.
-func (m *PlunderProto) ValidateAll() error {
+// ValidateAll checks the field values on UserPlunderProto with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserPlunderProtoMultiError, or nil if none found.
+func (m *UserPlunderProto) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *PlunderProto) validate(all bool) error {
+func (m *UserPlunderProto) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -206,18 +208,19 @@ func (m *PlunderProto) validate(all bool) error {
 	// no validation rules for Weights
 
 	if len(errors) > 0 {
-		return PlunderProtoMultiError(errors)
+		return UserPlunderProtoMultiError(errors)
 	}
 
 	return nil
 }
 
-// PlunderProtoMultiError is an error wrapping multiple validation errors
-// returned by PlunderProto.ValidateAll() if the designated constraints aren't met.
-type PlunderProtoMultiError []error
+// UserPlunderProtoMultiError is an error wrapping multiple validation errors
+// returned by UserPlunderProto.ValidateAll() if the designated constraints
+// aren't met.
+type UserPlunderProtoMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m PlunderProtoMultiError) Error() string {
+func (m UserPlunderProtoMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -226,11 +229,11 @@ func (m PlunderProtoMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m PlunderProtoMultiError) AllErrors() []error { return m }
+func (m UserPlunderProtoMultiError) AllErrors() []error { return m }
 
-// PlunderProtoValidationError is the validation error returned by
-// PlunderProto.Validate if the designated constraints aren't met.
-type PlunderProtoValidationError struct {
+// UserPlunderProtoValidationError is the validation error returned by
+// UserPlunderProto.Validate if the designated constraints aren't met.
+type UserPlunderProtoValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -238,22 +241,22 @@ type PlunderProtoValidationError struct {
 }
 
 // Field function returns field value.
-func (e PlunderProtoValidationError) Field() string { return e.field }
+func (e UserPlunderProtoValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e PlunderProtoValidationError) Reason() string { return e.reason }
+func (e UserPlunderProtoValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e PlunderProtoValidationError) Cause() error { return e.cause }
+func (e UserPlunderProtoValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e PlunderProtoValidationError) Key() bool { return e.key }
+func (e UserPlunderProtoValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e PlunderProtoValidationError) ErrorName() string { return "PlunderProtoValidationError" }
+func (e UserPlunderProtoValidationError) ErrorName() string { return "UserPlunderProtoValidationError" }
 
 // Error satisfies the builtin error interface
-func (e PlunderProtoValidationError) Error() string {
+func (e UserPlunderProtoValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -265,14 +268,14 @@ func (e PlunderProtoValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sPlunderProto.%s: %s%s",
+		"invalid %sUserPlunderProto.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = PlunderProtoValidationError{}
+var _ error = UserPlunderProtoValidationError{}
 
 var _ interface {
 	Field() string
@@ -280,4 +283,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = PlunderProtoValidationError{}
+} = UserPlunderProtoValidationError{}

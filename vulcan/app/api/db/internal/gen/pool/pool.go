@@ -124,6 +124,10 @@ func genFile(path string, goModuleBase string, allMessages map[string]struct{}) 
 				switch field := element.(type) {
 				case *proto.MapField:
 					fieldData = parseMapField(field, allMessages)
+				case *proto.Oneof:
+					fieldData = parseOneof(field, allMessages)
+					msg.HasOneof = true
+					ret.HasOneof = true
 				case *proto.NormalField:
 					if field.Repeated {
 						fieldData = parseRepeatedField(field, allMessages)
@@ -146,14 +150,14 @@ func genFile(path string, goModuleBase string, allMessages map[string]struct{}) 
 
 func parseMapField(protoField *proto.MapField, allDefinedMessageTypes map[string]struct{}) *tmpl.Field {
 	ret := &tmpl.Field{
-		Name:      camelcase.ToUnderScore(protoField.Name),
-		IsMap:     true,
-		KeyType:   protoField.KeyType,
-		ValueType: protoField.Type,
+		Name:         camelcase.ToUnderScore(protoField.Name),
+		IsMap:        true,
+		MapKeyType:   protoField.KeyType,
+		MapValueType: protoField.Type,
 	}
 
 	if _, isMsg := allDefinedMessageTypes[protoField.Type]; isMsg {
-		ret.ValueIsMessage = true
+		ret.MapValueIsMessage = true
 	}
 
 	return ret
@@ -161,13 +165,33 @@ func parseMapField(protoField *proto.MapField, allDefinedMessageTypes map[string
 
 func parseRepeatedField(protoField *proto.NormalField, allDefinedMessageTypes map[string]struct{}) *tmpl.Field {
 	ret := &tmpl.Field{
-		Name:       camelcase.ToUnderScore(protoField.Name),
-		IsRepeated: true,
-		ValueType:  protoField.Type,
+		Name:              camelcase.ToUnderScore(protoField.Name),
+		IsRepeated:        true,
+		RepeatedValueType: protoField.Type,
 	}
 
 	if _, isMsg := allDefinedMessageTypes[protoField.Type]; isMsg {
-		ret.ValueIsMessage = true
+		ret.RepeatedValueIsMessage = true
+	}
+
+	return ret
+}
+
+func parseOneof(oneof *proto.Oneof, allDefinedMessageTypes map[string]struct{}) *tmpl.Field {
+	ret := &tmpl.Field{
+		Name:    camelcase.ToUnderScore(oneof.Name),
+		IsOneof: true,
+	}
+
+	for _, element := range oneof.Elements {
+		if field, ok := element.(*proto.OneOfField); ok {
+			if _, isMsg := allDefinedMessageTypes[field.Type]; isMsg {
+				ret.OneofElements = append(ret.OneofElements, &tmpl.OneofElement{
+					Name: field.Name,
+					Type: field.Type,
+				})
+			}
+		}
 	}
 
 	return ret

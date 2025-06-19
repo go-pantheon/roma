@@ -1,6 +1,7 @@
 package object
 
 import (
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
@@ -33,26 +34,27 @@ func NewRoomProto() *dbv1.UserRoomProto {
 	return p
 }
 
-func (o *Room) Marshal() ([]byte, error) {
+func (o *Room) EncodeServer() proto.Message {
 	p := dbv1.UserRoomProtoPool.Get()
-	defer dbv1.UserRoomProtoPool.Put(p)
 
 	p.Id = o.Id
 	p.IsCreator = o.IsCreator
 
-	return proto.Marshal(p)
+	return p
 }
 
-func (o *Room) Unmarshal(data []byte) error {
-	p := dbv1.UserRoomProtoPool.Get()
-	defer dbv1.UserRoomProtoPool.Put(p)
-
-	if err := proto.Unmarshal(data, p); err != nil {
-		return err
+func (o *Room) DecodeServer(p proto.Message) error {
+	if p == nil {
+		return errors.New("room decode server nil")
 	}
 
-	o.Id = p.Id
-	o.IsCreator = p.IsCreator
+	op, ok := p.(*dbv1.UserRoomProto)
+	if !ok {
+		return errors.Errorf("room decode server invalid type: %T", p)
+	}
+
+	o.Id = op.Id
+	o.IsCreator = op.IsCreator
 
 	return nil
 }
@@ -60,5 +62,6 @@ func (o *Room) Unmarshal(data []byte) error {
 func (o *Room) EncodeClient() *climsg.UserRoomProto {
 	p := &climsg.UserRoomProto{}
 	p.RoomId = o.Id
+
 	return p
 }

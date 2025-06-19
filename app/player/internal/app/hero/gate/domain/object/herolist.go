@@ -1,6 +1,7 @@
 package object
 
 import (
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
@@ -29,27 +30,30 @@ func NewHeroList() life.Module {
 	return o
 }
 
-func (o *HeroList) Marshal() ([]byte, error) {
+func (o *HeroList) EncodeServer() proto.Message {
 	p := dbv1.UserHeroListProtoPool.Get()
-	defer dbv1.UserHeroListProtoPool.Put(p)
-
 	p.Heroes = make(map[int64]*dbv1.UserHeroProto, len(o.Heroes))
+
 	for _, oh := range o.Heroes {
-		ph := dbv1.UserHeroProtoPool.Get()
-		oh.encodeServer(ph)
-		p.Heroes[oh.Id] = ph
+		p.Heroes[oh.Id] = oh.encodeServer()
 	}
 
-	return proto.Marshal(p)
+	return p
 }
 
-func (o *HeroList) Unmarshal(data []byte) error {
-	p := dbv1.UserHeroListProtoPool.Get()
-	defer dbv1.UserHeroListProtoPool.Put(p)
+func (o *HeroList) DecodeServer(p proto.Message) error {
+	if p == nil {
+		return errors.New("hero list decode server nil")
+	}
 
-	o.Heroes = make(map[int64]*Hero, len(p.Heroes))
+	op, ok := p.(*dbv1.UserHeroListProto)
+	if !ok {
+		return errors.Errorf("hero list decode server invalid type: %T", p)
+	}
 
-	for _, ph := range p.Heroes {
+	o.Heroes = make(map[int64]*Hero, len(op.Heroes))
+
+	for _, ph := range op.Heroes {
 		h, err := NewHero(ph.Id)
 		if err != nil {
 			return err
@@ -60,6 +64,7 @@ func (o *HeroList) Unmarshal(data []byte) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -71,5 +76,6 @@ func (o *HeroList) EncodeClient() *climsg.UserHeroListProto {
 	for _, oh := range o.Heroes {
 		p.Heroes[oh.Id] = oh.EncodeClient()
 	}
+
 	return p
 }

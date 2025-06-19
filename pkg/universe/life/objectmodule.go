@@ -1,0 +1,22 @@
+package life
+
+import "google.golang.org/protobuf/proto"
+
+type ModuleKey string
+
+type NewModuleFunc func() Module
+
+type Module interface {
+	ModuleCodec
+	// ModuleMarshaler
+}
+
+type ModuleCodec interface {
+	EncodeServer() proto.Message
+	DecodeServer(proto.Message) error
+}
+
+type ModuleMarshaler interface {
+	Marshal() ([]byte, error)
+	Unmarshal([]byte) error
+}

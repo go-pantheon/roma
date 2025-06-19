@@ -19,17 +19,12 @@ func NewPlunder() *Plunder {
 	return p
 }
 
-func NewPlunderProto() *dbv1.PlunderProto {
-	p := &dbv1.PlunderProto{}
-	return p
-}
-
-func (o *Plunder) encodeServer(p *dbv1.PlunderProto) {
+func (o *Plunder) encodeServer(p *dbv1.UserPlunderProto) {
 	p.Weights = make(map[int64]int64, len(o.Weights))
 	maps.Copy(p.Weights, o.Weights)
 }
 
-func (o *Plunder) decodeServer(p *dbv1.PlunderProto) {
+func (o *Plunder) decodeServer(p *dbv1.UserPlunderProto) {
 	if p == nil || p.Weights == nil {
 		return
 	}

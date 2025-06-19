@@ -1,8 +1,6 @@
 package template
 
 import (
-	"bytes"
-	"go/format"
 	"text/template"
 
 	"github.com/go-pantheon/fabrica-util/camelcase"
@@ -14,6 +12,10 @@ package {{ .Package }}
 
 import (
 	"sync"
+
+	{{ if .HasOneof }}
+		"github.com/go-kratos/kratos/v2/log"
+	{{ end }}
 )
 
 var (
@@ -23,6 +25,8 @@ var (
 )
 
 {{- range .Messages }}
+
+{{- $msgName := .Name | ToUpperCamel }}
 
 type {{ .Name | ToLowerCamel }}Pool struct {
 	sync.Pool
@@ -44,39 +48,43 @@ func (pool *{{ .Name | ToLowerCamel }}Pool) Get() *{{ .Name }} {
 
 func (pool *{{ .Name | ToLowerCamel }}Pool) Put(p *{{ .Name }}) {
 	{{- range .Fields }}
-		{{- if .IsMap }}
-			{{- if .ValueIsMessage }}
+		{{- if .IsOneof }}
+			if p.{{ .Name | ToUpperCamel }} != nil {
+			  switch p.{{ .Name | ToUpperCamel }}.(type) {
+		    {{- range .OneofElements }}
+				case *{{ $msgName }}_{{ .Name | ToUpperCamel }}:
+				  {{ .Type }}Pool.Put(p.Get{{ .Name | ToUpperCamel }}())
+				{{- end }}
+				default:
+					log.Errorf("{{ $msgName }} put invalid type: %T", p.{{ .Name | ToUpperCamel }})
+			  }
+			}
+		{{- else if .IsMap }}
+			{{- if .MapValueIsMessage }}
 				for _, v := range p.{{ .Name | ToUpperCamel }} {
-					{{ .ValueType }}Pool.Put(v)
+					{{ .MapValueType }}Pool.Put(v)
 				}
-			{{- end }}
+			{{ end }}
 		{{- else if .IsRepeated }}
-			{{- if .ValueIsMessage }}
+			{{- if .RepeatedValueIsMessage }}
 				for _, v := range p.{{ .Name | ToUpperCamel }} {
-					{{ .ValueType }}Pool.Put(v)
+					{{ .RepeatedValueType }}Pool.Put(v)
 				}
-			{{- end }}
+			{{ end }}
 		{{- else if .IsMessage }}
 			{{- if .IsMessage }}
 				{{ .Type }}Pool.Put(p.{{ .Name | ToUpperCamel }})
 			{{- end }}
-		{{- end }}
-	{{- end }}
-
+		{{ end }}
+	{{ end }}
 	p.Reset()
 	pool.Pool.Put(p)
 }
+
 {{- end }}
 `
 
-type Service struct {
-}
-
-func NewService() *Service {
-	return &Service{}
-}
-
-func (s *Service) Execute(data *File) ([]byte, error) {
+func NewPoolTemplate() (*template.Template, error) {
 	tmpl, err := template.New("protoPool").Funcs(template.FuncMap{
 		"ToLowerCamel": camelcase.ToLowerCamel,
 		"ToUpperCamel": camelcase.ToUpperCamel,
@@ -85,15 +93,5 @@ func (s *Service) Execute(data *File) ([]byte, error) {
 		return nil, errors.Wrapf(err, "failed to parse template")
 	}
 
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return nil, errors.Wrapf(err, "failed to execute template")
-	}
-
-	formatted, err := format.Source(buf.Bytes())
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to format generated code:\n%s", buf.String())
-	}
-
-	return formatted, nil
+	return tmpl, nil
 }

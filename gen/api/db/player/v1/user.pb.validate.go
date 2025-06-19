@@ -61,7 +61,51 @@ func (m *UserProto) validate(all bool) error {
 
 	// no validation rules for Sid
 
-	// no validation rules for Modules
+	{
+		sorted_keys := make([]string, len(m.GetModules()))
+		i := 0
+		for key := range m.GetModules() {
+			sorted_keys[i] = key
+			i++
+		}
+		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
+		for _, key := range sorted_keys {
+			val := m.GetModules()[key]
+			_ = val
+
+			// no validation rules for Modules[key]
+
+			if all {
+				switch v := interface{}(val).(type) {
+				case interface{ ValidateAll() error }:
+					if err := v.ValidateAll(); err != nil {
+						errors = append(errors, UserProtoValidationError{
+							field:  fmt.Sprintf("Modules[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				case interface{ Validate() error }:
+					if err := v.Validate(); err != nil {
+						errors = append(errors, UserProtoValidationError{
+							field:  fmt.Sprintf("Modules[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				}
+			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+				if err := v.Validate(); err != nil {
+					return UserProtoValidationError{
+						field:  fmt.Sprintf("Modules[%v]", key),
+						reason: "embedded message failed validation",
+						cause:  err,
+					}
+				}
+			}
+
+		}
+	}
 
 	// no validation rules for Version
 
@@ -143,3 +187,477 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UserProtoValidationError{}
+
+// Validate checks the field values on UserModuleProto with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UserModuleProto) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UserModuleProto with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserModuleProtoMultiError, or nil if none found.
+func (m *UserModuleProto) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UserModuleProto) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	switch v := m.Module.(type) {
+	case *UserModuleProto_Basic:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetBasic()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Basic",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Basic",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetBasic()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "Basic",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *UserModuleProto_Dev:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetDev()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Dev",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Dev",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetDev()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "Dev",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *UserModuleProto_Status:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetStatus()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Status",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Status",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetStatus()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "Status",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *UserModuleProto_System:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetSystem()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "System",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "System",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetSystem()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "System",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *UserModuleProto_PlunderList:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetPlunderList()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "PlunderList",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "PlunderList",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetPlunderList()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "PlunderList",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *UserModuleProto_HeroList:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetHeroList()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "HeroList",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "HeroList",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetHeroList()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "HeroList",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *UserModuleProto_Storage:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetStorage()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Storage",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Storage",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetStorage()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "Storage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *UserModuleProto_Recharge:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetRecharge()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Recharge",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Recharge",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetRecharge()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "Recharge",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *UserModuleProto_Room:
+		if v == nil {
+			err := UserModuleProtoValidationError{
+				field:  "Module",
+				reason: "oneof value cannot be a typed-nil",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+		if all {
+			switch v := interface{}(m.GetRoom()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Room",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UserModuleProtoValidationError{
+						field:  "Room",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetRoom()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UserModuleProtoValidationError{
+					field:  "Room",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	default:
+		_ = v // ensures v is used
+	}
+
+	if len(errors) > 0 {
+		return UserModuleProtoMultiError(errors)
+	}
+
+	return nil
+}
+
+// UserModuleProtoMultiError is an error wrapping multiple validation errors
+// returned by UserModuleProto.ValidateAll() if the designated constraints
+// aren't met.
+type UserModuleProtoMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UserModuleProtoMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UserModuleProtoMultiError) AllErrors() []error { return m }
+
+// UserModuleProtoValidationError is the validation error returned by
+// UserModuleProto.Validate if the designated constraints aren't met.
+type UserModuleProtoValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UserModuleProtoValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UserModuleProtoValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UserModuleProtoValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UserModuleProtoValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UserModuleProtoValidationError) ErrorName() string { return "UserModuleProtoValidationError" }
+
+// Error satisfies the builtin error interface
+func (e UserModuleProtoValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUserModuleProto.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UserModuleProtoValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UserModuleProtoValidationError{}

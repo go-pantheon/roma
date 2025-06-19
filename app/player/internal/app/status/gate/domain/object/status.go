@@ -3,6 +3,7 @@ package object
 import (
 	"time"
 
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/go-pantheon/roma/pkg/universe/life"
@@ -31,13 +32,11 @@ type Status struct {
 }
 
 func NewStatus() life.Module {
-	o := &Status{}
-	return o
+	return &Status{}
 }
 
-func (o *Status) Marshal() ([]byte, error) {
+func (o *Status) EncodeServer() proto.Message {
 	p := dbv1.UserStatusProtoPool.Get()
-	defer dbv1.UserStatusProtoPool.Put(p)
 
 	p.OnlineIp = o.ClientIP
 	p.LoginAt = o.LoginAt.Unix()
@@ -48,24 +47,26 @@ func (o *Status) Marshal() ([]byte, error) {
 	p.DailyOnlineSeconds = int64(o.DailyOnlineDuration.Seconds())
 	p.TotalOnlineSeconds = int64(o.TotalOnlineDuration.Seconds())
 
-	return proto.Marshal(p)
+	return p
 }
 
-func (o *Status) Unmarshal(bytes []byte) (err error) {
-	p := dbv1.UserStatusProtoPool.Get()
-	defer dbv1.UserStatusProtoPool.Put(p)
-
-	if err = proto.Unmarshal(bytes, p); err != nil {
-		return err
+func (o *Status) DecodeServer(p proto.Message) error {
+	if p == nil {
+		return errors.New("status decode server nil")
 	}
 
-	o.ClientIP = p.OnlineIp
-	o.LoginAt = time.Unix(p.LoginAt, 0)
-	o.LogoutAt = time.Unix(p.LogoutAt, 0)
-	o.LatestOnlineAt = time.Unix(p.LatestOnlineAt, 0)
-	o.NextDailyResetAt = time.Unix(p.NextDailyResetAt, 0)
-	o.DailyOnlineDuration = time.Duration(p.DailyOnlineSeconds) * time.Second
-	o.TotalOnlineDuration = time.Duration(p.TotalOnlineSeconds) * time.Second
+	op, ok := p.(*dbv1.UserStatusProto)
+	if !ok {
+		return errors.Errorf("status decode server invalid type: %T", p)
+	}
 
-	return
+	o.ClientIP = op.OnlineIp
+	o.LoginAt = time.Unix(op.LoginAt, 0)
+	o.LogoutAt = time.Unix(op.LogoutAt, 0)
+	o.LatestOnlineAt = time.Unix(op.LatestOnlineAt, 0)
+	o.NextDailyResetAt = time.Unix(op.NextDailyResetAt, 0)
+	o.DailyOnlineDuration = time.Duration(op.DailyOnlineSeconds) * time.Second
+	o.TotalOnlineDuration = time.Duration(op.TotalOnlineSeconds) * time.Second
+
+	return nil
 }

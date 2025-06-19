@@ -5,29 +5,30 @@ import (
 )
 
 var (
-	SystemProtoPool = newSystemProtoPool()
-	WorkerEventPool = newWorkerEventPool()
+	UserSystemProtoPool = newUserSystemProtoPool()
+	WorkerEventPool     = newWorkerEventPool()
 )
 
-type systemProtoPool struct {
+type userSystemProtoPool struct {
 	sync.Pool
 }
 
-func newSystemProtoPool() *systemProtoPool {
-	return &systemProtoPool{
+func newUserSystemProtoPool() *userSystemProtoPool {
+	return &userSystemProtoPool{
 		Pool: sync.Pool{
 			New: func() any {
-				return &SystemProto{}
+				return &UserSystemProto{}
 			},
 		},
 	}
 }
 
-func (pool *systemProtoPool) Get() *SystemProto {
-	return pool.Pool.Get().(*SystemProto)
+func (pool *userSystemProtoPool) Get() *UserSystemProto {
+	return pool.Pool.Get().(*UserSystemProto)
 }
 
-func (pool *systemProtoPool) Put(p *SystemProto) {
+func (pool *userSystemProtoPool) Put(p *UserSystemProto) {
+
 	for _, v := range p.Events {
 		WorkerEventPool.Put(v)
 	}

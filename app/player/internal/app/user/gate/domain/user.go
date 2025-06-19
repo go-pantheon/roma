@@ -6,12 +6,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
-	"github.com/go-pantheon/fabrica-kit/xerrors"
 	userobj "github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/object"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
-	"github.com/go-pantheon/roma/pkg/universe/life"
-
-	"github.com/pkg/errors"
 )
 
 type UserRepo interface {
@@ -70,12 +66,9 @@ func (do *UserDomain) Login(ctx context.Context, uid int64, ctime, logoutTime ti
 	return do.repo.UpdateLoginTime(ctx, uid, ctime, logoutTime)
 }
 
-func (do *UserDomain) Persist(ctx context.Context, uid int64, proto life.VersionProto) (err error) {
-	p, ok := proto.(*dbv1.UserProto)
-	if !ok {
-		err = errors.Wrapf(xerrors.ErrDBRecordType, "uid=%d proto=%T", uid, proto)
-		return
-	}
+func (do *UserDomain) Persist(ctx context.Context, uid int64, p *dbv1.UserProto) (err error) {
+	defer dbv1.UserProtoPool.Put(p)
+
 	return do.repo.UpdateByID(ctx, uid, p)
 }
 

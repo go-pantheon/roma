@@ -47,13 +47,17 @@ func (o *Hero) decodeServer(p *dbv1.UserHeroProto) (*Hero, error) {
 	return o, nil
 }
 
-func (o *Hero) encodeServer(p *dbv1.UserHeroProto) {
+func (o *Hero) encodeServer() *dbv1.UserHeroProto {
+	p := dbv1.UserHeroProtoPool.Get()
+
 	p.Id = o.Id
 	p.Level = o.Level
 	p.Equips = slices.Clone(o.Equips)
 
 	p.Skills = make(map[int64]int64, len(o.Skills))
 	maps.Copy(p.Skills, o.Skills)
+
+	return p
 }
 
 func (o *Hero) EncodeClient() *climsg.HeroProto {

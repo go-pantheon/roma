@@ -154,6 +154,8 @@ func (w *Worker) run(ctx context.Context) error {
 		return xsync.Run(func() error {
 			for {
 				select {
+				case <-ctx.Done():
+					return ctx.Err()
 				case proto := <-w.persistManager.SaveChan():
 					if err := w.persistManager.Persist(ctx, proto); err != nil {
 						if errors.Is(err, xerrors.ErrDBRecordNotAffected) {
@@ -162,8 +164,6 @@ func (w *Worker) run(ctx context.Context) error {
 							w.log.WithContext(ctx).Errorf("worker persist failed. id=%d %+v", w.ID(), err)
 						}
 					}
-				case <-ctx.Done():
-					return ctx.Err()
 				}
 			}
 		})

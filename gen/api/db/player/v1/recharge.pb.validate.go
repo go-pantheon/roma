@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on RechargeProto with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *RechargeProto) Validate() error {
+// Validate checks the field values on UserRechargeProto with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UserRechargeProto) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on RechargeProto with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in RechargeProtoMultiError, or
-// nil if none found.
-func (m *RechargeProto) ValidateAll() error {
+// ValidateAll checks the field values on UserRechargeProto with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserRechargeProtoMultiError, or nil if none found.
+func (m *UserRechargeProto) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *RechargeProto) validate(all bool) error {
+func (m *UserRechargeProto) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -60,19 +60,19 @@ func (m *RechargeProto) validate(all bool) error {
 	// no validation rules for Amount
 
 	if len(errors) > 0 {
-		return RechargeProtoMultiError(errors)
+		return UserRechargeProtoMultiError(errors)
 	}
 
 	return nil
 }
 
-// RechargeProtoMultiError is an error wrapping multiple validation errors
-// returned by RechargeProto.ValidateAll() if the designated constraints
+// UserRechargeProtoMultiError is an error wrapping multiple validation errors
+// returned by UserRechargeProto.ValidateAll() if the designated constraints
 // aren't met.
-type RechargeProtoMultiError []error
+type UserRechargeProtoMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m RechargeProtoMultiError) Error() string {
+func (m UserRechargeProtoMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -81,11 +81,11 @@ func (m RechargeProtoMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m RechargeProtoMultiError) AllErrors() []error { return m }
+func (m UserRechargeProtoMultiError) AllErrors() []error { return m }
 
-// RechargeProtoValidationError is the validation error returned by
-// RechargeProto.Validate if the designated constraints aren't met.
-type RechargeProtoValidationError struct {
+// UserRechargeProtoValidationError is the validation error returned by
+// UserRechargeProto.Validate if the designated constraints aren't met.
+type UserRechargeProtoValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -93,22 +93,24 @@ type RechargeProtoValidationError struct {
 }
 
 // Field function returns field value.
-func (e RechargeProtoValidationError) Field() string { return e.field }
+func (e UserRechargeProtoValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e RechargeProtoValidationError) Reason() string { return e.reason }
+func (e UserRechargeProtoValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e RechargeProtoValidationError) Cause() error { return e.cause }
+func (e UserRechargeProtoValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e RechargeProtoValidationError) Key() bool { return e.key }
+func (e UserRechargeProtoValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e RechargeProtoValidationError) ErrorName() string { return "RechargeProtoValidationError" }
+func (e UserRechargeProtoValidationError) ErrorName() string {
+	return "UserRechargeProtoValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e RechargeProtoValidationError) Error() string {
+func (e UserRechargeProtoValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -120,14 +122,14 @@ func (e RechargeProtoValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sRechargeProto.%s: %s%s",
+		"invalid %sUserRechargeProto.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = RechargeProtoValidationError{}
+var _ error = UserRechargeProtoValidationError{}
 
 var _ interface {
 	Field() string
@@ -135,4 +137,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = RechargeProtoValidationError{}
+} = UserRechargeProtoValidationError{}

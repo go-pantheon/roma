@@ -50,9 +50,10 @@ func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, sid
 	}
 
 	user := userobj.NewUser(p.Id, sid, p.ServerVersion)
-	if err = user.Unmarshal(p); err != nil {
+	if err = user.DecodeServer(p); err != nil {
 		return
 	}
+
 	user.SetNewborn(newborn)
 
 	ret = &UserPersister{
@@ -75,7 +76,6 @@ func (s *UserPersister) PrepareToPersist(ctx context.Context, modules []life.Mod
 		s.user.Version += 1 // update version first
 
 		p := dbv1.UserProtoPool.Get()
-		defer dbv1.UserProtoPool.Put(p)
 
 		s.user.EncodeServer(p, modules, false)
 		ret = p
@@ -90,7 +90,13 @@ func (s *UserPersister) refreshProto() {
 }
 
 func (s *UserPersister) Persist(ctx context.Context, uid int64, proto life.VersionProto) (err error) {
-	return s.do.Persist(ctx, uid, proto)
+	p, ok := proto.(*dbv1.UserProto)
+	if !ok {
+		err = errors.Wrapf(xerrors.ErrDBRecordType, "uid=%d proto=%T", uid, proto)
+		return
+	}
+
+	return s.do.Persist(ctx, uid, p)
 }
 
 func (s *UserPersister) IncVersion(ctx context.Context, uid int64, newVersion int64) (err error) {

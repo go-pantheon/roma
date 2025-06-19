@@ -5,56 +5,56 @@ import (
 )
 
 var (
-	PlunderListProtoPool = newPlunderListProtoPool()
-	PlunderProtoPool     = newPlunderProtoPool()
+	UserPlunderListProtoPool = newUserPlunderListProtoPool()
+	UserPlunderProtoPool     = newUserPlunderProtoPool()
 )
 
-type plunderListProtoPool struct {
+type userPlunderListProtoPool struct {
 	sync.Pool
 }
 
-func newPlunderListProtoPool() *plunderListProtoPool {
-	return &plunderListProtoPool{
+func newUserPlunderListProtoPool() *userPlunderListProtoPool {
+	return &userPlunderListProtoPool{
 		Pool: sync.Pool{
 			New: func() any {
-				return &PlunderListProto{}
+				return &UserPlunderListProto{}
 			},
 		},
 	}
 }
 
-func (pool *plunderListProtoPool) Get() *PlunderListProto {
-	return pool.Pool.Get().(*PlunderListProto)
+func (pool *userPlunderListProtoPool) Get() *UserPlunderListProto {
+	return pool.Pool.Get().(*UserPlunderListProto)
 }
 
-func (pool *plunderListProtoPool) Put(p *PlunderListProto) {
+func (pool *userPlunderListProtoPool) Put(p *UserPlunderListProto) {
 	for _, v := range p.Plunders {
-		PlunderProtoPool.Put(v)
+		UserPlunderProtoPool.Put(v)
 	}
 
 	p.Reset()
 	pool.Pool.Put(p)
 }
 
-type plunderProtoPool struct {
+type userPlunderProtoPool struct {
 	sync.Pool
 }
 
-func newPlunderProtoPool() *plunderProtoPool {
-	return &plunderProtoPool{
+func newUserPlunderProtoPool() *userPlunderProtoPool {
+	return &userPlunderProtoPool{
 		Pool: sync.Pool{
 			New: func() any {
-				return &PlunderProto{}
+				return &UserPlunderProto{}
 			},
 		},
 	}
 }
 
-func (pool *plunderProtoPool) Get() *PlunderProto {
-	return pool.Pool.Get().(*PlunderProto)
+func (pool *userPlunderProtoPool) Get() *UserPlunderProto {
+	return pool.Pool.Get().(*UserPlunderProto)
 }
 
-func (pool *plunderProtoPool) Put(p *PlunderProto) {
+func (pool *userPlunderProtoPool) Put(p *UserPlunderProto) {
 
 	p.Reset()
 	pool.Pool.Put(p)

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/go-pantheon/fabrica-kit/profile"
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/go-pantheon/roma/pkg/universe/life"
@@ -25,40 +26,30 @@ type Dev struct {
 }
 
 func NewDev() life.Module {
-	o := &Dev{}
-	return o
+	return &Dev{}
 }
 
-func NewDevProto() *dbv1.DevProto {
-	p := &dbv1.DevProto{}
+func (o *Dev) EncodeServer() proto.Message {
+	p := dbv1.UserDevProtoPool.Get()
+
+	p.TimeOffset = int64(o.devTimeOffset)
+
 	return p
 }
 
-func (o *Dev) EncodeServer(p *dbv1.DevProto) {
-	p.TimeOffset = int64(o.devTimeOffset)
-}
-
-func (o *Dev) Marshal() ([]byte, error) {
-	p := dbv1.DevProtoPool.Get()
-	defer dbv1.DevProtoPool.Put(p)
-
-	p.TimeOffset = int64(o.devTimeOffset)
-	return proto.Marshal(p)
-}
-
-func (o *Dev) DecodeServer(p *dbv1.DevProto) {
+func (o *Dev) DecodeServer(p proto.Message) error {
 	if p == nil {
-		return
+		return errors.New("dev decode server nil")
 	}
 
-	o.devTimeOffset = time.Duration(p.TimeOffset)
-}
+	op, ok := p.(*dbv1.UserDevProto)
+	if !ok {
+		return errors.Errorf("dev decode server invalid type: %T", p)
+	}
 
-func (o *Dev) Unmarshal(bytes []byte) error {
-	p := dbv1.DevProtoPool.Get()
-	defer dbv1.DevProtoPool.Put(p)
+	o.devTimeOffset = time.Duration(op.TimeOffset)
 
-	return proto.Unmarshal(bytes, p)
+	return nil
 }
 
 func (o *Dev) SetTimeOffset(dur time.Duration) bool {

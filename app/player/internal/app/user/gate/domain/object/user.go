@@ -40,7 +40,7 @@ func NewUser(id int64, sid int64, serverVersion string) *User {
 	return u
 }
 
-func (o *User) Unmarshal(p *dbv1.UserProto) error {
+func (o *User) DecodeServer(p *dbv1.UserProto) error {
 	userVersion, err := checkServerVersion(o.ServerVersion, p.ServerVersion)
 	if err != nil {
 		return err
@@ -49,10 +49,10 @@ func (o *User) Unmarshal(p *dbv1.UserProto) error {
 	o.Version = p.Version
 	o.ServerVersion = userVersion
 
-	for key, data := range p.Modules {
+	for key, mp := range p.Modules {
 		if mod := o.modules[life.ModuleKey(key)]; mod != nil {
-			if err := mod.Unmarshal(data); err != nil {
-				return errors.WithMessagef(err, "module unmarshal failed. uid=%d, mod=%s", o.ID, key)
+			if err = dbv1.DecodeUserModuleProto(mp, mod); err != nil {
+				return err
 			}
 		}
 	}
@@ -64,26 +64,26 @@ func (o *User) EncodeServer(p *dbv1.UserProto, modules []life.ModuleKey, all boo
 	p.Version = o.Version
 	p.ServerVersion = o.ServerVersion
 
-	p.Modules = make(map[string][]byte, 16)
+	p.Modules = make(map[string]*dbv1.UserModuleProto, 16)
 
 	if all {
 		for key, mod := range o.modules {
-			data, err := mod.Marshal()
+			mp, err := dbv1.EncodeUserModuleProto(mod)
 			if err != nil {
 				return err
 			}
 
-			p.Modules[string(key)] = data
+			p.Modules[string(key)] = mp
 		}
 	} else {
 		for _, key := range modules {
 			if mod := o.modules[key]; mod != nil {
-				data, err := mod.Marshal()
+				mp, err := dbv1.EncodeUserModuleProto(mod)
 				if err != nil {
 					return err
 				}
 
-				p.Modules[string(key)] = data
+				p.Modules[string(key)] = mp
 			}
 		}
 	}

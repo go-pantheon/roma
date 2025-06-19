@@ -30,31 +30,37 @@ func NewPlunderList() life.Module {
 	return o
 }
 
-func (o *PlunderList) Marshal() ([]byte, error) {
-	p := dbv1.PlunderListProtoPool.Get()
-	defer dbv1.PlunderListProtoPool.Put(p)
+func (os *PlunderList) EncodeServer() proto.Message {
+	p := dbv1.UserPlunderListProtoPool.Get()
+	p.Plunders = make(map[int64]*dbv1.UserPlunderProto, len(os.Plunders))
 
-	p.Plunders = make(map[int64]*dbv1.PlunderProto, len(o.Plunders))
+	for k, op := range os.Plunders {
+		pp := dbv1.UserPlunderProtoPool.Get()
 
-	for k, op := range o.Plunders {
-		p.Plunders[k] = NewPlunderProto()
-		op.encodeServer(p.Plunders[k])
+		op.encodeServer(pp)
+		p.Plunders[k] = pp
 	}
 
-	return proto.Marshal(p)
+	return p
 }
 
-func (o *PlunderList) Unmarshal(data []byte) error {
-	p := dbv1.PlunderListProtoPool.Get()
-	defer dbv1.PlunderListProtoPool.Put(p)
-
-	if err := proto.Unmarshal(data, p); err != nil {
-		return errors.Wrap(err, "failed to unmarshal plunder list")
+func (os *PlunderList) DecodeServer(p proto.Message) error {
+	if p == nil {
+		return errors.New("plunder list decode server nil")
 	}
 
-	for k, p := range p.Plunders {
-		o.Plunders[k] = NewPlunder()
-		o.Plunders[k].decodeServer(p)
+	sp, ok := p.(*dbv1.UserPlunderListProto)
+	if !ok {
+		return errors.Errorf("plunder list decode server invalid type: %T", p)
+	}
+
+	os.Plunders = make(map[int64]*Plunder, len(sp.Plunders))
+
+	for id, op := range sp.Plunders {
+		o := NewPlunder()
+
+		o.decodeServer(op)
+		os.Plunders[id] = o
 	}
 
 	return nil

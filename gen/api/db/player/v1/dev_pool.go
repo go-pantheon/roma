@@ -5,28 +5,28 @@ import (
 )
 
 var (
-	DevProtoPool = newDevProtoPool()
+	UserDevProtoPool = newUserDevProtoPool()
 )
 
-type devProtoPool struct {
+type userDevProtoPool struct {
 	sync.Pool
 }
 
-func newDevProtoPool() *devProtoPool {
-	return &devProtoPool{
+func newUserDevProtoPool() *userDevProtoPool {
+	return &userDevProtoPool{
 		Pool: sync.Pool{
 			New: func() any {
-				return &DevProto{}
+				return &UserDevProto{}
 			},
 		},
 	}
 }
 
-func (pool *devProtoPool) Get() *DevProto {
-	return pool.Pool.Get().(*DevProto)
+func (pool *userDevProtoPool) Get() *UserDevProto {
+	return pool.Pool.Get().(*UserDevProto)
 }
 
-func (pool *devProtoPool) Put(p *DevProto) {
+func (pool *userDevProtoPool) Put(p *UserDevProto) {
 
 	p.Reset()
 	pool.Pool.Put(p)
