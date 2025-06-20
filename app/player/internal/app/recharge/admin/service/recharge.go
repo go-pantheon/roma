@@ -139,7 +139,7 @@ func (s *RechargeAdmin) UpdateOrderAckStateById(ctx context.Context, req *adminv
 }
 
 func toOrderProto(p *dbv1.OrderProto) (*adminv1.OrderProto, error) {
-	p.Token = ""
+	p.Info.Token = ""
 
 	bytes, err := json.Marshal(p)
 	if err != nil {
@@ -151,8 +151,8 @@ func toOrderProto(p *dbv1.OrderProto) (*adminv1.OrderProto, error) {
 		TransId:     p.TransId,
 		Uid:         p.Uid,
 		Ack:         p.Ack,
-		ProductId:   p.ProductId,
-		PurchasedAt: p.PurchasedAt,
+		ProductId:   p.Info.ProductId,
+		PurchasedAt: p.Info.PurchasedAt,
 		AckAt:       p.AckAt,
 		Detail:      string(bytes),
 	}

@@ -144,13 +144,14 @@ func (do *googleCli) createOrderProto(uid int64, receipt *googleReceiptJson, res
 	p := &dbv1.OrderProto{
 		Store: string(do.store),
 		Uid:   uid,
+		Info:  &dbv1.OrderInfoProto{},
 	}
 
-	p.Token = receipt.PurchaseToken
-	p.ProductId = receipt.ProductId
+	p.Info.Token = receipt.PurchaseToken
+	p.Info.ProductId = receipt.ProductId
 
 	p.TransId = result.OrderId
-	p.PurchasedAt = result.PurchaseTimeMillis / microToMilli // microseconds to milliseconds
+	p.Info.PurchasedAt = result.PurchaseTimeMillis / microToMilli // microseconds to milliseconds
 
 	p.Ack = int32(dbv1.OrderAckState_ORDER_ACK_STATE_SUCCEEDED)
 	p.AckAt = ctime.Unix()

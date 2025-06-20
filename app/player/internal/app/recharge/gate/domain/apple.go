@@ -140,17 +140,18 @@ func (do *appleCli) createOrderProto(_ context.Context, uid int64, token string,
 	p := &dbv1.OrderProto{
 		Store: string(do.store),
 		Uid:   uid,
+		Info:  &dbv1.OrderInfoProto{},
 	}
 
-	p.Token = token
-	p.ProductId = inApp.ProductID
+	p.Info.Token = token
+	p.Info.ProductId = inApp.ProductID
 	p.TransId = inApp.TransactionID
 
 	purchaseTime, err := strconv.ParseInt(inApp.PurchaseDateMS, 10, 64)
 	if err != nil {
-		p.PurchasedAt = ctime.Unix()
+		p.Info.PurchasedAt = ctime.Unix()
 	} else {
-		p.PurchasedAt = purchaseTime / microToMilli // microseconds to milliseconds
+		p.Info.PurchasedAt = purchaseTime / microToMilli // microseconds to milliseconds
 	}
 
 	p.Ack = int32(dbv1.OrderAckState_ORDER_ACK_STATE_SUCCEEDED)
