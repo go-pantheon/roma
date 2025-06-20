@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/xsync"
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/fabrica-util/errors"
 )
 
 func IsUnloggableErr(err error) bool {

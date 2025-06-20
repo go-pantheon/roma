@@ -66,16 +66,20 @@ func (s *RoomPersister) Refresh(ctx context.Context) (err error) {
 	return
 }
 
-func (s *RoomPersister) PrepareToPersist(ctx context.Context, keys []life.ModuleKey) life.VersionProto {
-	_ = s.Lock(func() error {
-		s.room.Version += 1          // update version first
-		p := s.do.GetProtoFromPool() // p is get from sync.Pool, and will be reset by Persist() soon
-		s.room.EncodeServer(p)
+func (s *RoomPersister) PrepareToPersist(ctx context.Context, keys []life.ModuleKey) (proto life.VersionProto, err error) {
+	err = s.Lock(func() error {
+		// update version first
+		s.room.Version += 1
+
+		// p is get from sync.Pool, and will be reset by Persist() soon
+		p := s.do.GetProtoFromPool()
+		s.room.EncodeServer(p, keys)
+		proto = p
+
 		return nil
 	})
 
-	// TODO: implement
-	return nil
+	return proto, err
 }
 
 func (s *RoomPersister) refreshProto() {
@@ -122,4 +126,8 @@ func (s *RoomPersister) Lock(f func() error) error {
 
 func (s *RoomPersister) Version() int64 {
 	return s.room.Version
+}
+
+func (s *RoomPersister) ModuleKeys() []life.ModuleKey {
+	return []life.ModuleKey{}
 }

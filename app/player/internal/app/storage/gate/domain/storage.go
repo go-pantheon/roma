@@ -60,7 +60,8 @@ func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.Update
 
 	_ = ctx.ProductPreparedEvent(core.WorkerEventTypeStorageItemUpdated, itemIds...)
 	_ = ctx.ProductPreparedEvent(core.WorkerEventTypeStoragePackUpdated, packIds...)
-	ctx.Changed()
+
+	ctx.Changed(object.ModuleKey)
 
 	if !silent {
 		_ = ctx.Reply(climod.ModuleID_Storage, int32(cliseq.StorageSeq_PushItemUpdated), ctx.UID(), amountMsg)

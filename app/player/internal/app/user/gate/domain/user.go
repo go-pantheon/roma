@@ -7,6 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
 	userobj "github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/object"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 )
 
@@ -41,7 +42,8 @@ func NewUserDomain(pr UserRepo, logger log.Logger, cache UserProtoCache) *UserDo
 
 func (do *UserDomain) Create(ctx context.Context, uid int64, sid int64, ctime time.Time, p *dbv1.UserProto) (err error) {
 	defaultUser := do.initDefaultUser(uid, sid)
-	defaultUser.EncodeServer(p, nil, true)
+	defaultUser.EncodeServer(p, userregister.AllModuleKeys())
+	
 	err = do.repo.Create(ctx, uid, p, ctime)
 	if err != nil {
 		return err

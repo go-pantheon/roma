@@ -1,7 +1,7 @@
 package errs
 
 import (
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/fabrica-util/errors"
 )
 
 var (

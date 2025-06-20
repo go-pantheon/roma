@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	register = newUserRegister()
+	register      = newUserRegister()
+	allModuleKeys = make([]life.ModuleKey, 0, 32)
 )
 
 type UserRegister struct {
@@ -22,6 +23,11 @@ func newUserRegister() *UserRegister {
 
 func Register(key life.ModuleKey, newFunc life.NewModuleFunc) {
 	register.newFuncs.Store(key, newFunc)
+	allModuleKeys = append(allModuleKeys, key)
+}
+
+func AllModuleKeys() []life.ModuleKey {
+	return allModuleKeys
 }
 
 func ForEach(fn func(key life.ModuleKey, newFunc life.NewModuleFunc)) {

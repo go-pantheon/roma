@@ -13,15 +13,12 @@ type Persistent interface {
 	ShowProto() proto.Message
 	Lock(f func() error) error
 	Refresh(ctx context.Context) (err error)
-	PrepareToPersist(ctx context.Context, modules []ModuleKey) VersionProto
+	PrepareToPersist(ctx context.Context, modules []ModuleKey) (VersionProto, error)
 	Persist(ctx context.Context, id int64, proto VersionProto) (err error)
 	IncVersion(ctx context.Context, id int64, newVersion int64) (err error)
 	OnStop(ctx context.Context, id int64, proto VersionProto) (err error)
-
-	// PrepareToPersistV2(ctx context.Context) PersistData
-	// PersistV2(ctx context.Context, data PersistData) (err error)
+	ModuleKeys() []ModuleKey
 }
-
 
 type PersistData struct {
 	ID      int64

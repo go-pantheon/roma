@@ -41,7 +41,7 @@ type workerContext struct {
 	clientIP  string
 	uid       int64
 
-	changedModules     []ModuleKey
+	changedModules     map[ModuleKey]struct{}
 	changedImmediately bool
 }
 
@@ -54,11 +54,14 @@ func NewContext(ctx context.Context, w *Worker) Context {
 		Replier:         w.Replier,
 		persister:       w.persistManager.Persister(),
 		clientIP:        w.ClientIP(),
-		changedModules:  make([]ModuleKey, 0, defaultChangedModulesSize),
 	}
+
+	c.changedModules = make(map[ModuleKey]struct{}, len(c.persister.ModuleKeys()))
+
 	if uid, err := xcontext.UID(ctx); err == nil {
 		c.SetUID(uid)
 	}
+
 	return c
 }
 
@@ -66,6 +69,7 @@ func (w *workerContext) Now() time.Time {
 	w.Once.Do(func() {
 		w.ctime = time.Now()
 	})
+
 	return w.ctime
 }
 
@@ -93,27 +97,38 @@ func (w *workerContext) UnsafeObject() interface{} {
 	return w.persister.UnsafeObject()
 }
 
-var emptyModules = []ModuleKey{}
-
 func (w *workerContext) ChangedModules() (modules []ModuleKey, immediately bool) {
-	if len(w.changedModules) == 0 {
-		return emptyModules, false
+	defer func() {
+		w.changedModules = make(map[ModuleKey]struct{}, len(w.persister.ModuleKeys()))
+		w.changedImmediately = false
+	}()
+
+	modules = make([]ModuleKey, 0, len(w.changedModules))
+	for mod := range w.changedModules {
+		modules = append(modules, mod)
 	}
 
-	modules = w.changedModules
-	w.changedModules = make([]ModuleKey, 0, len(modules))
-
-	immediately = w.changedImmediately
-	w.changedImmediately = false
-
-	return
+	return modules, w.changedImmediately
 }
 
 func (w *workerContext) Changed(modules ...ModuleKey) {
-	w.changedModules = append(w.changedModules, modules...)
+	if len(modules) == 0 {
+		for _, mod := range w.persister.ModuleKeys() {
+			w.changedModules[mod] = struct{}{}
+		}
+
+		return
+	}
+
+	for _, mod := range modules {
+		w.changedModules[mod] = struct{}{}
+	}
 }
 
 func (w *workerContext) ChangedImmediately(modules ...ModuleKey) {
 	w.changedImmediately = true
-	w.changedModules = append(w.changedModules, modules...)
+
+	for _, mod := range modules {
+		w.changedModules[mod] = struct{}{}
+	}
 }

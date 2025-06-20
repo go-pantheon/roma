@@ -42,7 +42,7 @@ func (uc *HeroUseCase) onCreated(ctx core.Context) error {
 			uc.log.WithContext(ctx).Errorf("unlock hero on created failed. %+v", err)
 			continue
 		}
-		ctx.Changed()
+		ctx.Changed(object.ModuleKey)
 	}
 
 	return nil
@@ -93,15 +93,17 @@ func (uc *HeroUseCase) unlockHero(ctx core.Context, d *gamedata.HeroBaseData, co
 		err = errors.Errorf("hero already unlocked. heroId=%d", d.ID)
 		return
 	}
+
 	if err = uc.storageDo.Cost(ctx, cost); err != nil {
 		return
 	}
+
 	r, err = uc.heroDo.UnlockHero(ctx, d)
 	if err != nil {
 		return
 	}
 
-	ctx.Changed()
+	ctx.Changed(object.ModuleKey)
 	return
 }
 
@@ -129,7 +131,8 @@ func (uc *HeroUseCase) HeroLevelUpgrade(ctx core.Context, cs *climsg.CSHeroLevel
 		}
 	}
 	hero.Level = levelData.Level
-	ctx.Changed()
+	
+	ctx.Changed(object.ModuleKey)
 
 	sc.Code = climsg.SCHeroLevelUpgrade_Succeeded
 	sc.Hero = hero.EncodeClient()

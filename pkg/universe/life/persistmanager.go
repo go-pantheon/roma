@@ -7,8 +7,9 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/fabrica-util/errors"
+	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
-	"github.com/pkg/errors"
 )
 
 type PersistManager struct {
@@ -22,45 +23,47 @@ type PersistManager struct {
 }
 
 type ChangedModules struct {
-	sync.Mutex
+	mu sync.Mutex
 
-	modules map[ModuleKey]struct{}
+	modules []ModuleKey
+}
+
+func NewChangedModules(cap int) *ChangedModules {
+	return &ChangedModules{
+		modules: make([]ModuleKey, 0, cap),
+	}
 }
 
 func (c *ChangedModules) Add(modules []ModuleKey) {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	for _, module := range modules {
-		c.modules[module] = struct{}{}
+	for _, mod := range modules {
+		c.modules = append(c.modules, mod)
 	}
 }
 
-func (c *ChangedModules) Take() []ModuleKey {
-	c.Lock()
-	defer c.Unlock()
+func (c *ChangedModules) Move() []ModuleKey {
+	c.mu.Lock()
 
-	ret := make([]ModuleKey, 0, len(c.modules))
-	for module := range c.modules {
-		ret = append(ret, module)
-	}
+	defer func() {
+		c.modules = make([]ModuleKey, 0, len(c.modules))
+		c.mu.Unlock()
+	}()
 
-	c.modules = make(map[ModuleKey]struct{}, len(ret))
-
-	return ret
+	return c.modules
 }
 
 func newPersistManager(log *log.Helper, persister Persistent) (s *PersistManager) {
 	s = &PersistManager{
-		log:       log,
-		persister: persister,
-		changedModules: &ChangedModules{
-			modules: make(map[ModuleKey]struct{}),
-		},
+		log:            log,
+		persister:      persister,
+		changedModules: NewChangedModules(len(persister.ModuleKeys())),
 	}
 
 	s.saveChan = make(chan VersionProto, constants.WorkerHolderSize)
 	s.immediatelyChan = make(chan struct{}, constants.WorkerHolderSize)
+
 	return
 }
 
@@ -81,48 +84,55 @@ func (s *PersistManager) SaveChan() chan VersionProto {
 	return s.saveChan
 }
 
-func (s *PersistManager) Stop(ctx context.Context) {
+func (s *PersistManager) Stop(ctx context.Context) (err error) {
 	close(s.immediatelyChan)
 	close(s.saveChan)
 
 	// Persist the object before stopping
-	proto := s.prepareToPersist(ctx)
+	proto, err := s.prepareToPersist(ctx)
+	if err != nil {
+		return err
+	}
+
 	if proto == nil {
-		s.log.Infof("prepare to persist failed. oid=%d", s.ID())
-		return
+		return nil
 	}
 
-	_ = s.persister.OnStop(ctx, s.ID(), proto)
-
-	// proto will be reset by persister, so we should use it before persist, such as OnStop
-	if err := s.Persist(ctx, proto); err != nil {
-		s.log.WithContext(ctx).Errorf("%+v", err)
-		return
+	if onStopErr := s.persister.OnStop(ctx, s.ID(), proto); onStopErr != nil {
+		s.log.WithContext(ctx).Errorf("persister on stop failed. oid=%d %+v", s.ID(), onStopErr)
 	}
-	s.log.WithContext(ctx).Debugf("persist stopped. oid=%d", s.ID())
+
+	// proto will be reset by persister, other functions should use it Before Persist
+	return s.Persist(ctx, proto)
 }
 
 func (s *PersistManager) Immediately() chan struct{} {
 	return s.immediatelyChan
 }
 
-func (s *PersistManager) PrepareToPersist(ctx context.Context) {
-	proto := s.prepareToPersist(ctx)
-	if proto == nil {
-		s.log.Infof("prepare to persist failed. oid=%d", s.ID())
-		return
+func (s *PersistManager) PrepareToPersist(ctx context.Context) error {
+	proto, err := s.prepareToPersist(ctx)
+	if err != nil {
+		return err
 	}
+
+	if proto == nil {
+		return errs.ErrPersistNilProto
+	}
+
 	s.saveChan <- proto
+
+	return nil
 }
 
-func (s *PersistManager) prepareToPersist(ctx context.Context) VersionProto {
+func (s *PersistManager) prepareToPersist(ctx context.Context) (VersionProto, error) {
 	if IsAdminID(s.ID()) {
-		return nil
+		return nil, nil
 	}
 
-	modules := s.changedModules.Take()
+	modules := s.changedModules.Move()
 	if len(modules) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	return s.persister.PrepareToPersist(ctx, modules)

@@ -34,8 +34,10 @@ func (do *StorageDomain) Cost(ctx core.Context, toCosts *gamedata.Costs) (err er
 		return err
 	}
 
-	ctx.Changed()
+	ctx.Changed(object.ModuleKey)
+
 	do.AfterUpdate(ctx, updateInfo, 0, false)
+
 	return
 }
 

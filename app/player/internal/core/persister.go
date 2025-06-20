@@ -9,6 +9,7 @@ import (
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
 	userobj "github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/object"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
@@ -71,17 +72,16 @@ func (s *UserPersister) Refresh(ctx context.Context) (err error) {
 	return
 }
 
-func (s *UserPersister) PrepareToPersist(ctx context.Context, modules []life.ModuleKey) (ret life.VersionProto) {
-	_ = s.Lock(func() error {
+func (s *UserPersister) PrepareToPersist(ctx context.Context, modules []life.ModuleKey) (ret life.VersionProto, err error) {
+	err = s.Lock(func() error {
 		s.user.Version += 1 // update version first
 
-		p := dbv1.UserProtoPool.Get()
-
-		s.user.EncodeServer(p, modules, false)
-		ret = p
+		ret = life.VersionProto(dbv1.UserProtoPool.Get())
+		s.user.EncodeServer(ret.(*dbv1.UserProto), modules)
 
 		return nil
 	})
+
 	return
 }
 
@@ -129,4 +129,8 @@ func (s *UserPersister) Lock(f func() error) error {
 	defer s.mu.Unlock()
 
 	return f()
+}
+
+func (s *UserPersister) ModuleKeys() []life.ModuleKey {
+	return userregister.AllModuleKeys()
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-util/xtime"
 	"github.com/go-pantheon/roma/app/player/internal/app/basic/gate/domain/object"
+	statusobj "github.com/go-pantheon/roma/app/player/internal/app/status/gate/domain/object"
 	storagedo "github.com/go-pantheon/roma/app/player/internal/app/storage/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/core"
@@ -49,7 +50,7 @@ func (uc *UserUseCase) onCreated(ctx core.Context) error {
 	ctx.User().Status().LoginAt = ctime
 	ctx.User().Status().LatestOnlineAt = ctime
 
-	ctx.Changed()
+	ctx.Changed(object.ModuleKey, statusobj.ModuleKey)
 
 	return nil
 }
@@ -87,8 +88,9 @@ func (uc *UserUseCase) secondTick(ctx core.Context) error {
 		user.Status().LoginAt = ctime
 		user.Status().LogoutAt = user.Status().LatestOnlineAt
 		user.Status().LatestOnlineAt = ctime
-		ctx.Changed()
 	}
+
+	ctx.Changed(statusobj.ModuleKey)
 
 	return nil
 }
@@ -130,7 +132,9 @@ func (uc *UserUseCase) UpdateName(ctx core.Context, cs *climsg.CSUpdateName) (sc
 	}
 
 	basic.Name = name
-	ctx.Changed()
+
+	ctx.Changed(object.ModuleKey)
+	
 
 	sc.Code = climsg.SCUpdateName_Succeeded
 	return
@@ -151,7 +155,7 @@ func (uc *UserUseCase) SetGender(ctx core.Context, cs *climsg.CSSetGender) (sc *
 	}
 
 	o.Gender = cs.Gender
-	ctx.Changed()
+	ctx.Changed(object.ModuleKey)
 
 	sc.Code = climsg.SCSetGender_Succeeded
 	return

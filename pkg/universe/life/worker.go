@@ -3,6 +3,8 @@ package life
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"sync/atomic"
@@ -85,7 +87,8 @@ func newWorker(
 	w.status = OnlineStatus(xcontext.Status(ctx))
 	w.referer = xcontext.GateReferer(ctx)
 	w.clientIP = xcontext.ClientIP(ctx)
-	w.log.WithContext(ctx).Debugf("create worker. id=%d status=%d client_ip=%s referer=%s", w.ID(), w.status, w.clientIP, w.referer)
+
+	w.log.WithContext(ctx).Debugf("create worker. %s", w.LogInfo())
 
 	return
 }
@@ -126,12 +129,16 @@ func (w *Worker) run(ctx context.Context) error {
 					}
 				case e := <-w.ConsumeEvent():
 					if err := w.ExecuteEvent(w.newContextFunc(ctx, w), e); err != nil {
-						w.log.WithContext(ctx).Errorf("worker execute event failed. %+v", err)
+						w.log.WithContext(ctx).Errorf("worker execute event failed. %s %+v", w.LogInfo(), err)
 					}
 				case <-w.persistManager.Immediately():
-					w.persistManager.PrepareToPersist(ctx)
+					if err := w.persistManager.PrepareToPersist(ctx); err != nil {
+						w.log.WithContext(ctx).Errorf("worker immediately prepare to persist failed. %s %+v", w.LogInfo(), err)
+					}
 				case <-w.persistTicker.C:
-					w.persistManager.PrepareToPersist(ctx)
+					if err := w.persistManager.PrepareToPersist(ctx); err != nil {
+						w.log.WithContext(ctx).Errorf("worker ticker prepare to persist failed. %s %+v", w.LogInfo(), err)
+					}
 				}
 			}
 		})
@@ -238,7 +245,7 @@ func (w *Worker) stop(ctx context.Context) {
 		}
 
 		w.persistManager.Stop(ctx)
-		w.log.Debugf("worker stopped. id=%d", w.ID())
+		w.log.Debugf("worker stopped. %s", w.LogInfo())
 		return err
 	})
 }
@@ -335,4 +342,19 @@ func (w *Worker) Referer() string {
 
 func (w *Worker) ClientIP() string {
 	return w.clientIP
+}
+
+func (w *Worker) LogInfo() string {
+	buf := strings.Builder{}
+
+	buf.WriteString("id=")
+	buf.WriteString(strconv.FormatInt(w.ID(), 10))
+	buf.WriteString(" status=")
+	buf.WriteString(w.Status().String())
+	buf.WriteString(" referer=")
+	buf.WriteString(w.Referer())
+	buf.WriteString(" client_ip=")
+	buf.WriteString(w.ClientIP())
+
+	return buf.String()
 }

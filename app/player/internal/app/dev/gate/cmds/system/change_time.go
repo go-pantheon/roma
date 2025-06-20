@@ -7,6 +7,7 @@ import (
 	"github.com/go-pantheon/fabrica-util/xtime"
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/biz"
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds"
+	devobj "github.com/go-pantheon/roma/app/player/internal/app/dev/gate/domain/object"
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	"github.com/go-pantheon/roma/pkg/util/maths/i64"
@@ -62,7 +63,7 @@ func (c *ChangeTimeCommander) Func(ctx core.Context, args map[string]string) (sc
 		user.Dev().SetTimeOffset(dur)
 	}
 
-	ctx.Changed()
+	ctx.Changed(devobj.ModuleKey)
 	sc.Code = climsg.SCDevExecute_Succeeded
 	sc.Message = fmt.Sprintf("New time is changed to %s. Offset to %.2fm", xtime.Format(ctx.Now()), user.Dev().TimeOffset().Minutes())
 	return

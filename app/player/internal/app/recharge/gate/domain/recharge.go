@@ -6,6 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
+	"github.com/go-pantheon/roma/app/player/internal/app/recharge/gate/domain/object"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/gate/rechargeerrs"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/pkg"
 	"github.com/go-pantheon/roma/app/player/internal/conf"
@@ -132,6 +133,6 @@ func (do *RechargeDomain) AddUserRecharge(ctx core.Context, productId int64) err
 		return errors.WithMessagef(err, "productId=%d price=%d", productId, d.Price)
 	}
 
-	ctx.Changed()
+	ctx.Changed(object.ModuleKey)
 	return nil
 }

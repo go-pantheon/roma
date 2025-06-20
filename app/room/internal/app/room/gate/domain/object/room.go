@@ -6,6 +6,7 @@ import (
 	"github.com/go-pantheon/fabrica-util/xtime"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/room/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 type Room struct {
@@ -28,7 +29,7 @@ func NewRoomProto() *dbv1.RoomProto {
 	return &dbv1.RoomProto{}
 }
 
-func (o *Room) EncodeServer(p *dbv1.RoomProto) {
+func (o *Room) EncodeServer(p *dbv1.RoomProto, keys []life.ModuleKey) {
 	p.Id = o.Id
 	p.Sid = o.Sid
 	p.RoomType = o.RoomType

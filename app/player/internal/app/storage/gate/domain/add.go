@@ -103,7 +103,9 @@ func (do *StorageDomain) Add(ctx core.Context, opts ...AddOpt) error {
 			_ = updateInfo.Merge(up)
 		}
 	}
-	ctx.Changed()
+
+	ctx.Changed(object.ModuleKey)
+
 	do.AfterUpdate(ctx, updateInfo, option.itemSource, option.silent)
 	return nil
 }
@@ -123,7 +125,7 @@ func (do *StorageDomain) addItems(ctx core.Context, prizes ...*gamedata.ItemPriz
 		}
 		updateInfo.AddItem(data, prize.Amount())
 	}
-	ctx.Changed()
+	ctx.Changed(object.ModuleKey)
 	return updateInfo, nil
 }
 
@@ -157,7 +159,7 @@ func (do *StorageDomain) addPacks(ctx core.Context, packs ...*gamedata.PackPrize
 		}
 		updateInfo.AddPack(item.Data(), item.Amount())
 	}
-	ctx.Changed()
+	ctx.Changed(object.ModuleKey)
 	return updateInfo, nil
 }
 
@@ -195,7 +197,7 @@ func (do *StorageDomain) addPrizes(ctx core.Context, prizes ...*gamedata.Prizes)
 			_ = updateInfo.Merge(up)
 		}
 	}
-	ctx.Changed()
+	ctx.Changed(object.ModuleKey)
 	return updateInfo, nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/app/hero"
 	"github.com/go-pantheon/roma/app/player/internal/app/plunder"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge"
+	"github.com/go-pantheon/roma/app/player/internal/app/status"
 	"github.com/go-pantheon/roma/app/player/internal/app/storage"
 	"github.com/go-pantheon/roma/app/player/internal/app/system"
 	"github.com/go-pantheon/roma/app/player/internal/app/user"
@@ -15,9 +16,10 @@ import (
 var ProviderSet = wire.NewSet(
 	gamedata.ProviderSet,
 	user.ProviderSet,
-	recharge.ProviderSet,
 	dev.ProviderSet,
 	system.ProviderSet,
+	status.ProviderSet,
+	recharge.ProviderSet,
 	plunder.ProviderSet,
 	storage.ProviderSet,
 	hero.ProviderSet,

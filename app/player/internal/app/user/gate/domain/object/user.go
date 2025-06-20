@@ -60,31 +60,22 @@ func (o *User) DecodeServer(p *dbv1.UserProto) error {
 	return nil
 }
 
-func (o *User) EncodeServer(p *dbv1.UserProto, modules []life.ModuleKey, all bool) (err error) {
+func (o *User) EncodeServer(p *dbv1.UserProto, modules []life.ModuleKey) (err error) {
+	p.Id = o.ID
+	p.Sid = o.SID
 	p.Version = o.Version
 	p.ServerVersion = o.ServerVersion
 
 	p.Modules = make(map[string]*dbv1.UserModuleProto, 16)
 
-	if all {
-		for key, mod := range o.modules {
+	for _, key := range modules {
+		if mod := o.modules[key]; mod != nil {
 			mp, err := dbv1.EncodeUserModuleProto(mod)
 			if err != nil {
 				return err
 			}
 
 			p.Modules[string(key)] = mp
-		}
-	} else {
-		for _, key := range modules {
-			if mod := o.modules[key]; mod != nil {
-				mp, err := dbv1.EncodeUserModuleProto(mod)
-				if err != nil {
-					return err
-				}
-
-				p.Modules[string(key)] = mp
-			}
 		}
 	}
 
