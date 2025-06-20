@@ -25,15 +25,15 @@ import (
 		{{- if .IsOneof }}
 			func Encode{{ $msgName }}(module life.Module) (*{{ $msgName }}, error) {		
 				p := module.EncodeServer()
+				mp := UserModuleProtoPool.Get()
 
 				switch p.(type) {
 				{{- range .OneofElements }}
 				case *{{ .Type }}:
-					return &{{ $msgName }}{
-						{{ $filedName }}: &{{ $msgName }}_{{ .Name | ToUpperCamel }}{
-							{{ .Name | ToUpperCamel }}: p.(*{{ .Type }}),
-						},
-					}, nil
+					mp.Module = &{{ $msgName }}_{{ .Name | ToUpperCamel }}{
+						{{ .Name | ToUpperCamel }}: p.(*{{ .Type }}),
+					}
+					return mp, nil
 				{{- end }}
 				default:
 					return nil, errors.Errorf("{{ $msgName }} encode invalid type: %T", module)

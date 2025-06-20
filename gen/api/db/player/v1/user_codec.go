@@ -7,62 +7,54 @@ import (
 
 func EncodeUserModuleProto(module life.Module) (*UserModuleProto, error) {
 	p := module.EncodeServer()
+	mp := UserModuleProtoPool.Get()
 
 	switch p.(type) {
 	case *UserBasicProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_Basic{
-				Basic: p.(*UserBasicProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_Basic{
+			Basic: p.(*UserBasicProto),
+		}
+		return mp, nil
 	case *UserDevProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_Dev{
-				Dev: p.(*UserDevProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_Dev{
+			Dev: p.(*UserDevProto),
+		}
+		return mp, nil
 	case *UserStatusProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_Status{
-				Status: p.(*UserStatusProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_Status{
+			Status: p.(*UserStatusProto),
+		}
+		return mp, nil
 	case *UserSystemProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_System{
-				System: p.(*UserSystemProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_System{
+			System: p.(*UserSystemProto),
+		}
+		return mp, nil
 	case *UserPlunderListProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_PlunderList{
-				PlunderList: p.(*UserPlunderListProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_PlunderList{
+			PlunderList: p.(*UserPlunderListProto),
+		}
+		return mp, nil
 	case *UserHeroListProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_HeroList{
-				HeroList: p.(*UserHeroListProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_HeroList{
+			HeroList: p.(*UserHeroListProto),
+		}
+		return mp, nil
 	case *UserStorageProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_Storage{
-				Storage: p.(*UserStorageProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_Storage{
+			Storage: p.(*UserStorageProto),
+		}
+		return mp, nil
 	case *UserRechargeProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_Recharge{
-				Recharge: p.(*UserRechargeProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_Recharge{
+			Recharge: p.(*UserRechargeProto),
+		}
+		return mp, nil
 	case *UserRoomProto:
-		return &UserModuleProto{
-			Module: &UserModuleProto_Room{
-				Room: p.(*UserRoomProto),
-			},
-		}, nil
+		mp.Module = &UserModuleProto_Room{
+			Room: p.(*UserRoomProto),
+		}
+		return mp, nil
 	default:
 		return nil, errors.Errorf("UserModuleProto encode invalid type: %T", module)
 	}
