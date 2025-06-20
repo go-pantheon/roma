@@ -9,18 +9,18 @@ import (
 	userobj "github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/object"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 type UserRepo interface {
 	Create(ctx context.Context, uid int64, defaultUser *dbv1.UserProto, ctime time.Time) error
-	QueryByID(ctx context.Context, uid int64, p *dbv1.UserProto) error
+	QueryByID(ctx context.Context, uid int64, p *dbv1.UserProto, mods []life.ModuleKey) error
 	UpdateByID(ctx context.Context, uid int64, user *dbv1.UserProto) error
-	UpdateLoginTime(ctx context.Context, uid int64, loginAt, logoutAt time.Time) error
-	Exist(ctx context.Context, uid int64) (bool, error)
+	IsExist(ctx context.Context, uid int64) (bool, error)
 	IncVersion(ctx context.Context, uid int64, newVersion int64) error
 }
 
-type UserProtoCache interface {
+type UserCache interface {
 	Put(ctx context.Context, uid int64, user *dbv1.UserProto, ctime time.Time)
 	Get(ctx context.Context, uid int64, ctime time.Time) (ret *dbv1.UserProto)
 	Remove(ctx context.Context, uid int64)
@@ -29,10 +29,10 @@ type UserProtoCache interface {
 type UserDomain struct {
 	log        *log.Helper
 	repo       UserRepo
-	protoCache UserProtoCache
+	protoCache UserCache
 }
 
-func NewUserDomain(pr UserRepo, logger log.Logger, cache UserProtoCache) *UserDomain {
+func NewUserDomain(pr UserRepo, logger log.Logger, cache UserCache) *UserDomain {
 	return &UserDomain{
 		repo:       pr,
 		protoCache: cache,
@@ -43,7 +43,7 @@ func NewUserDomain(pr UserRepo, logger log.Logger, cache UserProtoCache) *UserDo
 func (do *UserDomain) Create(ctx context.Context, uid int64, sid int64, ctime time.Time, p *dbv1.UserProto) (err error) {
 	defaultUser := do.initDefaultUser(uid, sid)
 	defaultUser.EncodeServer(p, userregister.AllModuleKeys())
-	
+
 	err = do.repo.Create(ctx, uid, p, ctime)
 	if err != nil {
 		return err
@@ -57,15 +57,11 @@ func (do *UserDomain) initDefaultUser(id int64, sid int64) *userobj.User {
 }
 
 func (do *UserDomain) Exist(ctx context.Context, uid int64) (bool, error) {
-	return do.repo.Exist(ctx, uid)
+	return do.repo.IsExist(ctx, uid)
 }
 
 func (do *UserDomain) Load(ctx context.Context, uid int64, p *dbv1.UserProto) (err error) {
-	return do.repo.QueryByID(ctx, uid, p)
-}
-
-func (do *UserDomain) Login(ctx context.Context, uid int64, ctime, logoutTime time.Time) (err error) {
-	return do.repo.UpdateLoginTime(ctx, uid, ctime, logoutTime)
+	return do.repo.QueryByID(ctx, uid, p, userregister.AllModuleKeys())
 }
 
 func (do *UserDomain) Persist(ctx context.Context, uid int64, p *dbv1.UserProto) (err error) {

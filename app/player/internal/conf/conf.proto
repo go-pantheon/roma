@@ -51,7 +51,10 @@ message Server {
 }
 
 message Data {
-	message Mongo {
+	Redis redis = 1;
+	Postgresql postgresql = 2;
+
+	message Postgresql {
 		string source = 1;
 		string database = 2;
 		google.protobuf.Duration dial_timeout = 3;
@@ -64,8 +67,6 @@ message Data {
 		google.protobuf.Duration read_timeout = 5;
 		google.protobuf.Duration write_timeout = 6;
 	}
-	Redis redis = 1;
-	Mongo mongo = 2;
 }
 
 message Registry {

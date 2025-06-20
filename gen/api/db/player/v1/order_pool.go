@@ -5,7 +5,8 @@ import (
 )
 
 var (
-	OrderProtoPool = newOrderProtoPool()
+	OrderProtoPool     = newOrderProtoPool()
+	OrderInfoProtoPool = newOrderInfoProtoPool()
 )
 
 type orderProtoPool struct {
@@ -27,6 +28,31 @@ func (pool *orderProtoPool) Get() *OrderProto {
 }
 
 func (pool *orderProtoPool) Put(p *OrderProto) {
+	OrderInfoProtoPool.Put(p.Info)
+
+	p.Reset()
+	pool.Pool.Put(p)
+}
+
+type orderInfoProtoPool struct {
+	sync.Pool
+}
+
+func newOrderInfoProtoPool() *orderInfoProtoPool {
+	return &orderInfoProtoPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &OrderInfoProto{}
+			},
+		},
+	}
+}
+
+func (pool *orderInfoProtoPool) Get() *OrderInfoProto {
+	return pool.Pool.Get().(*OrderInfoProto)
+}
+
+func (pool *orderInfoProtoPool) Put(p *OrderInfoProto) {
 
 	p.Reset()
 	pool.Pool.Put(p)

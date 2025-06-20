@@ -72,13 +72,13 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	if err != nil {
 		return nil, nil, err
 	}
-	userRepo, err := data2.NewUserMongoRepo(dataData, logger)
+	userRepo, err := data2.NewUserPostgresRepo(dataData, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	userProtoCache := data2.NewUserProtoCache()
-	userDomain := domain.NewUserDomain(userRepo, logger, userProtoCache)
+	userCache := data2.NewUserProtoCache()
+	userDomain := domain.NewUserDomain(userRepo, logger, userCache)
 	routeTable := gate.NewRouteTable(dataData)
 	discovery, err := client.NewDiscovery(confRegistry)
 	if err != nil {
@@ -133,7 +133,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	storageRegistrar := registry6.NewStorageRegistrar(storageServiceServer)
 	heroRegistrar := registry7.NewHeroRegistrar(heroServiceServer)
 	gateRegistrars := registry.NewGateRegistrars(systemRegistrar, userRegistrar, devRegistrar, storageRegistrar, heroRegistrar)
-	domainUserRepo, err := data4.NewUserMongoRepo(dataData, logger)
+	domainUserRepo, err := data4.NewUserPostgresRepo(dataData, logger)
 	if err != nil {
 		cleanup2()
 		cleanup()
@@ -149,7 +149,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	bizStorageUseCase := biz8.NewStorageUseCase(logger, storageDomain)
 	storageAdminServer := service10.NewStorageAdmin(logger, manager, bizStorageUseCase)
 	registryStorageRegistrar := registry10.NewStorageRegistrar(storageAdminServer)
-	orderRepo, err := data5.NewOrderMongoRepo(dataData, logger)
+	orderRepo, err := data5.NewOrderPostgresRepo(dataData, logger)
 	if err != nil {
 		cleanup2()
 		cleanup()

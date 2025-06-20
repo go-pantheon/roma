@@ -1,6 +1,6 @@
 module github.com/go-pantheon/roma
 
-go 1.24.0
+go 1.24.4
 
 require (
 	github.com/awa/go-iap v1.43.1
@@ -8,11 +8,13 @@ require (
 	github.com/emicklei/proto v1.14.1
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20250527152916-d6f5f00cf562
 	github.com/go-kratos/kratos/v2 v2.8.4
-	github.com/go-pantheon/fabrica-kit v0.0.10
-	github.com/go-pantheon/fabrica-net v0.0.16
-	github.com/go-pantheon/fabrica-util v0.0.21
+	github.com/go-pantheon/fabrica-kit v0.0.11
+	github.com/go-pantheon/fabrica-net v0.0.17
+	github.com/go-pantheon/fabrica-util v0.0.23
 	github.com/google/wire v0.6.0
+	github.com/jackc/pgx/v5 v5.7.5
 	github.com/json-iterator/go v1.1.12
+	github.com/pashagolub/pgxmock/v3 v3.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.10.0
 	github.com/stretchr/testify v1.10.0
@@ -39,6 +41,7 @@ require (
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/exaring/otelpgx v0.9.3 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
@@ -60,6 +63,9 @@ require (
 	github.com/googleapis/gax-go/v2 v2.14.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect

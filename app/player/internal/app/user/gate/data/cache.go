@@ -11,13 +11,13 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var _ domain.UserProtoCache = (*UserProtoCache)(nil)
+var _ domain.UserCache = (*UserProtoCache)(nil)
 
 type UserProtoCache struct {
 	cache *lru.LRU
 }
 
-func NewUserProtoCache() domain.UserProtoCache {
+func NewUserProtoCache() domain.UserCache {
 	c := &UserProtoCache{
 		cache: lru.NewLRU(
 			lru.WithCapacity(constants.WorkerSize),

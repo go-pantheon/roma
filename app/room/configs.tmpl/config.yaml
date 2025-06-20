@@ -17,14 +17,14 @@ server:
   grpc:
     addr: 0.0.0.0:9102
     timeout: 5s
-data: 
-  mongo:
-    source: admin:${MONGO_PASSWORD}@localhost:27017/roma?maxPoolSize=5000&socketTimeoutMS=1000
-    database: roma
-    dial_timeout: 1s
+data:
+  postgresql:
+    source: ${POSTGRES_SOURCE}
+    database: ${POSTGRES_DATABASE}
+    dial_timeout: ${POSTGRES_DIAL_TIMEOUT}
   redis:
-    addr: localhost:6379
+    addr: ${REDIS_ADDR}
     password: ${REDIS_PASSWORD}
-    dial_timeout: 1s
-    read_timeout: 0.4s
-    write_timeout: 0.6s
+    dial_timeout: ${REDIS_DIAL_TIMEOUT}
+    read_timeout: ${REDIS_READ_TIMEOUT}
+    write_timeout: ${REDIS_WRITE_TIMEOUT}

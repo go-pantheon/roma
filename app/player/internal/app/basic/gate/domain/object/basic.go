@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	ModuleKey = "basic"
+	ModuleKey    = "basic"
+	ModuleDBType = "JSONB"
 )
 
 const (
@@ -63,4 +64,3 @@ func (o *Basic) DecodeServer(p proto.Message) error {
 
 	return nil
 }
-

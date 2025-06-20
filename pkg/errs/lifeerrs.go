@@ -11,3 +11,8 @@ var (
 	ErrPersistNilProto     = errors.New("persist nil proto")
 	ErrPersistEmptyModules = errors.New("persist empty modules")
 )
+
+var (
+	ErrUnmarshalEmptyModule = errors.New("decode empty module")
+	ErrMarshalNilModule     = errors.New("marshal nil module")
+)

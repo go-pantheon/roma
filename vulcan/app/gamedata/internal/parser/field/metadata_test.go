@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/go-pantheon/fabrica-util/camelcase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,12 +19,12 @@ func TestStringToMetadataType(t *testing.T) {
 		{
 			name: "Id",
 			in:   string(IdType),
-			want: &NameInfo{Type: IdType, FieldName: string(IdType)},
+			want: &NameInfo{Type: IdType, FieldName: camelcase.ToUpperCamel(string(IdType))},
 		},
 		{
 			name: "SharedId",
 			in:   fmt.Sprintf("%s_%s", SharedIdType, "Id"),
-			want: &NameInfo{Type: SharedIdType, FieldName: "Id"},
+			want: &NameInfo{Type: SharedIdType, FieldName: "ID"},
 		},
 		{
 			name: "SharedSubId",
@@ -83,8 +84,8 @@ func TestStringToMetadataType(t *testing.T) {
 		{
 			name:   "string with invalid formula prefix",
 			in:     fmt.Sprintf("%s#%s_%s", FormulaType, "", "Formula"),
-			want:   &NameInfo{},
-			hasErr: true,
+			want:   &NameInfo{Type: NormalType, FormulaValue: "Formula", FieldName: "Formula"},
+			hasErr: false,
 		},
 		{
 			name:   "string with empty joined name",
