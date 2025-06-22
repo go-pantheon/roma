@@ -8,9 +8,11 @@ import (
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/xid"
+	basicobj "github.com/go-pantheon/roma/app/player/internal/app/basic/gate/domain/object"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/admin/biz"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	adminv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/user/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 type UserAdmin struct {
@@ -44,12 +46,12 @@ func (s *UserAdmin) GetById(ctx context.Context, req *adminv1.GetByIdRequest) (*
 }
 
 func (s *UserAdmin) UserList(ctx context.Context, req *adminv1.UserListRequest) (*adminv1.UserListResponse, error) {
-	cond, start, limit, err := buildGetUserListCond(req)
+	conds, start, limit, err := buildGetUserListCond(req)
 	if err != nil {
 		return nil, err
 	}
 
-	protos, count, err := s.uc.GetList(ctx, start, limit, cond)
+	protos, count, err := s.uc.GetList(ctx, start, limit, conds)
 	if err != nil {
 		return nil, err
 	}
@@ -70,13 +72,23 @@ func (s *UserAdmin) UserList(ctx context.Context, req *adminv1.UserListRequest) 
 	return reply, nil
 }
 
-func buildGetUserListCond(req *adminv1.UserListRequest) (cond *dbv1.UserProto, start, limit int64, err error) {
+func buildGetUserListCond(req *adminv1.UserListRequest) (conds map[life.ModuleKey]*dbv1.UserModuleProto, start, limit int64, err error) {
 	start, limit = profile.PageStartLimit(req.Page, req.PageSize)
 
-	cond = &dbv1.UserProto{}
+	conds = make(map[life.ModuleKey]*dbv1.UserModuleProto)
+
 	if req.Cond == nil {
-		err = xerrors.APIParamInvalid("cond is nil")
-		return
+		return conds, start, limit, nil
+	}
+
+	if req.Cond.Name != "" {
+		conds[basicobj.ModuleKey] = &dbv1.UserModuleProto{
+			Module: &dbv1.UserModuleProto_Basic{
+				Basic: &dbv1.UserBasicProto{
+					Name: req.Cond.Name,
+				},
+			},
+		}
 	}
 
 	return

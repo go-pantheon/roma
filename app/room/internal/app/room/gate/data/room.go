@@ -12,15 +12,15 @@ import (
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/room/v1"
 )
 
-var _ domain.RoomRepo = (*roomPostgresRepo)(nil)
+var _ domain.RoomRepo = (*roomPgRepo)(nil)
 
-type roomPostgresRepo struct {
+type roomPgRepo struct {
 	log  *log.Helper
 	data *data.Data
 }
 
-func NewRoomPostgresRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, error) {
-	r := &roomPostgresRepo{
+func NewRoomPgRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, error) {
+	r := &roomPgRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "room/room/gate/data")),
 	}
@@ -28,22 +28,22 @@ func NewRoomPostgresRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, e
 	return r, nil
 }
 
-func (r *roomPostgresRepo) Create(ctx context.Context, p *dbv1.RoomProto, ctime time.Time) (err error) {
+func (r *roomPgRepo) Create(ctx context.Context, p *dbv1.RoomProto, ctime time.Time) (err error) {
 	return errors.New("not implemented")
 }
 
-func (r *roomPostgresRepo) QueryByID(ctx context.Context, id int64, p *dbv1.RoomProto) error {
+func (r *roomPgRepo) QueryByID(ctx context.Context, id int64, p *dbv1.RoomProto) error {
 	return errors.New("not implemented")
 }
 
-func (r *roomPostgresRepo) UpdateByID(ctx context.Context, id int64, user *dbv1.RoomProto) error {
+func (r *roomPgRepo) UpdateByID(ctx context.Context, id int64, user *dbv1.RoomProto) error {
 	return errors.New("not implemented")
 }
 
-func (r *roomPostgresRepo) Exist(ctx context.Context, id int64) (bool, error) {
+func (r *roomPgRepo) Exist(ctx context.Context, id int64) (bool, error) {
 	return false, errors.New("not implemented")
 }
 
-func (r *roomPostgresRepo) IncVersion(ctx context.Context, id int64, newVersion int64) error {
+func (r *roomPgRepo) IncVersion(ctx context.Context, id int64, newVersion int64) error {
 	return errors.New("not implemented")
 }

@@ -49,14 +49,14 @@ func newTestRepoWithMock(t *testing.T) (domain.UserRepo, pgxmock.PgxPoolIface) {
 	alterSQLTest := `ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "testmodule" BYTEA;`
 	mock.ExpectExec(regexp.QuoteMeta(alterSQLTest)).WillReturnResult(pgxmock.NewResult("ALTER", 1))
 
-	repo, err := data.TestNewUserPostgresRepo(d, logger, testModuleKeys)
+	repo, err := data.TestNewUserPgRepo(d, logger, testModuleKeys)
 	require.NoError(t, err)
 	require.NotNil(t, repo)
 
 	return repo, mock
 }
 
-func TestUserPostgresRepo_Create(t *testing.T) {
+func TestUserPgRepo_Create(t *testing.T) {
 	repo, mock := newTestRepoWithMock(t)
 	uid := int64(1001)
 	user := &dbv1.UserProto{
@@ -86,7 +86,7 @@ func TestUserPostgresRepo_Create(t *testing.T) {
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestUserPostgresRepo_QueryByID(t *testing.T) {
+func TestUserPgRepo_QueryByID(t *testing.T) {
 	repo, mock := newTestRepoWithMock(t)
 	uid := int64(1002)
 
@@ -125,7 +125,7 @@ func TestUserPostgresRepo_QueryByID(t *testing.T) {
 	assert.Equal(t, "queried_user", queriedBasic.Name)
 }
 
-func TestUserPostgresRepo_UpdateByID(t *testing.T) {
+func TestUserPgRepo_UpdateByID(t *testing.T) {
 	repo, mock := newTestRepoWithMock(t)
 	uid := int64(1003)
 	user := &dbv1.UserProto{
@@ -156,7 +156,7 @@ func TestUserPostgresRepo_UpdateByID(t *testing.T) {
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestUserPostgresRepo_IsExist(t *testing.T) {
+func TestUserPgRepo_IsExist(t *testing.T) {
 	uid := int64(1004)
 	querySQL := `SELECT EXISTS(SELECT 1 FROM "user" WHERE id = $1);`
 
@@ -181,7 +181,7 @@ func TestUserPostgresRepo_IsExist(t *testing.T) {
 	})
 }
 
-func TestUserPostgresRepo_IncVersion(t *testing.T) {
+func TestUserPgRepo_IncVersion(t *testing.T) {
 	repo, mock := newTestRepoWithMock(t)
 	uid := int64(1005)
 	newVersion := int64(5)

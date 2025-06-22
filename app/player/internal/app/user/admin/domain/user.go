@@ -5,12 +5,12 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 type UserRepo interface {
-	GetByID(ctx context.Context, uid int64) (*dbv1.UserProto, error)
-	GetList(ctx context.Context, start, limit int64, cond *dbv1.UserProto) ([]*dbv1.UserProto, int64, error)
-	UpdateByID(ctx context.Context, uid int64, user *dbv1.UserProto) error
+	GetByID(ctx context.Context, user *dbv1.UserProto, mods []life.ModuleKey) error
+	GetList(ctx context.Context, start, limit int64, conds map[life.ModuleKey]*dbv1.UserModuleProto, mods []life.ModuleKey) ([]*dbv1.UserProto, int64, error)
 }
 
 type UserDomain struct {
@@ -25,14 +25,10 @@ func NewUserDomain(pr UserRepo, logger log.Logger) *UserDomain {
 	}
 }
 
-func (do *UserDomain) GetByID(ctx context.Context, uid int64) (u *dbv1.UserProto, err error) {
-	return do.repo.GetByID(ctx, uid)
+func (do *UserDomain) GetByID(ctx context.Context, user *dbv1.UserProto, mods []life.ModuleKey) (err error) {
+	return do.repo.GetByID(ctx, user, mods)
 }
 
-func (do *UserDomain) GetList(ctx context.Context, start, limit int64, cond *dbv1.UserProto) ([]*dbv1.UserProto, int64, error) {
-	return do.repo.GetList(ctx, start, limit, cond)
-}
-
-func (do *UserDomain) UpdateByID(ctx context.Context, uid int64, proto *dbv1.UserProto) (err error) {
-	return do.repo.UpdateByID(ctx, uid, proto)
+func (do *UserDomain) GetList(ctx context.Context, start, limit int64, conds map[life.ModuleKey]*dbv1.UserModuleProto, mods []life.ModuleKey) ([]*dbv1.UserProto, int64, error) {
+	return do.repo.GetList(ctx, start, limit, conds, mods)
 }

@@ -31,7 +31,7 @@ func AllModuleKeys() []life.ModuleKey {
 }
 
 func ForEach(fn func(key life.ModuleKey, newFunc life.NewModuleFunc)) {
-	register.newFuncs.Range(func(key, value interface{}) bool {
+	register.newFuncs.Range(func(key, value any) bool {
 		fn(key.(life.ModuleKey), value.(life.NewModuleFunc))
 		return true
 	})

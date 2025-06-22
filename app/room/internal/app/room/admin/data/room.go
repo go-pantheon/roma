@@ -10,15 +10,15 @@ import (
 	adminv1 "github.com/go-pantheon/roma/gen/api/server/room/admin/room/v1"
 )
 
-var _ domain.RoomRepo = (*roomPostgresRepo)(nil)
+var _ domain.RoomRepo = (*roomPgRepo)(nil)
 
-type roomPostgresRepo struct {
+type roomPgRepo struct {
 	log  *log.Helper
 	data *data.Data
 }
 
-func NewRoomPostgresRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, error) {
-	r := &roomPostgresRepo{
+func NewRoomPgRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, error) {
+	r := &roomPgRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "player/recharge/admin/data/order")),
 	}
@@ -26,6 +26,6 @@ func NewRoomPostgresRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, e
 	return r, nil
 }
 
-func (r *roomPostgresRepo) GetByID(ctx context.Context, id int64) (*adminv1.RoomProto, error) {
+func (r *roomPgRepo) GetByID(ctx context.Context, id int64) (*adminv1.RoomProto, error) {
 	return nil, errors.New("not implemented")
 }

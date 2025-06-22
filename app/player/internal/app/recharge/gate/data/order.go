@@ -16,15 +16,15 @@ const (
 	_tableName = "order"
 )
 
-var _ domain.OrderRepo = (*orderPostgresRepo)(nil)
+var _ domain.OrderRepo = (*orderPgRepo)(nil)
 
-type orderPostgresRepo struct {
+type orderPgRepo struct {
 	log  *log.Helper
 	data *data.Data
 }
 
-func NewOrderPostgresRepo(data *data.Data, logger log.Logger) (domain.OrderRepo, error) {
-	r := &orderPostgresRepo{
+func NewOrderPgRepo(data *data.Data, logger log.Logger) (domain.OrderRepo, error) {
+	r := &orderPgRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "player/recharge/gate/data")),
 	}
@@ -39,7 +39,7 @@ func NewOrderPostgresRepo(data *data.Data, logger log.Logger) (domain.OrderRepo,
 	return r, nil
 }
 
-func (r *orderPostgresRepo) initDB(ctx context.Context) error {
+func (r *orderPgRepo) initDB(ctx context.Context) error {
 	if err := r.createTable(ctx); err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (r *orderPostgresRepo) initDB(ctx context.Context) error {
 	return nil
 }
 
-func (r *orderPostgresRepo) createTable(ctx context.Context) error {
+func (r *orderPgRepo) createTable(ctx context.Context) error {
 	const createTableSQL = `
 	CREATE TABLE IF NOT EXISTS "order" (
 		"id" BIGINT PRIMARY KEY,
@@ -73,18 +73,18 @@ func (r *orderPostgresRepo) createTable(ctx context.Context) error {
 	return nil
 }
 
-func (r *orderPostgresRepo) updateTable(ctx context.Context) error {
+func (r *orderPgRepo) updateTable(ctx context.Context) error {
 	return errors.New("not implemented")
 }
 
-func (r *orderPostgresRepo) Create(ctx context.Context, order *dbv1.OrderProto) error {
+func (r *orderPgRepo) Create(ctx context.Context, order *dbv1.OrderProto) error {
 	return errors.New("not implemented")
 }
 
-func (r *orderPostgresRepo) GetByTransId(ctx context.Context, store pkg.Store, transId string) (*dbv1.OrderProto, error) {
+func (r *orderPgRepo) GetByTransId(ctx context.Context, store pkg.Store, transId string) (*dbv1.OrderProto, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (r *orderPostgresRepo) UpdateAckState(ctx context.Context, store pkg.Store, transId string, ackState dbv1.OrderAckState) error {
+func (r *orderPgRepo) UpdateAckState(ctx context.Context, store pkg.Store, transId string, ackState dbv1.OrderAckState) error {
 	return errors.New("not implemented")
 }
