@@ -57,6 +57,8 @@ func (m *OrderProto) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Id
+
 	if all {
 		switch v := interface{}(m.GetInfo()).(type) {
 		case interface{ ValidateAll() error }:

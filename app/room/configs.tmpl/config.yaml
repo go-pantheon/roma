@@ -18,10 +18,10 @@ server:
     addr: 0.0.0.0:9102
     timeout: 5s
 data:
-  postgresql:
-    source: ${POSTGRES_SOURCE}
-    database: ${POSTGRES_DATABASE}
-    dial_timeout: ${POSTGRES_DIAL_TIMEOUT}
+  mongo:
+    source: ${MONGO_SOURCE}
+    database: ${MONGO_DATABASE}
+    dial_timeout: ${MONGO_DIAL_TIMEOUT}
   redis:
     addr: ${REDIS_ADDR}
     password: ${REDIS_PASSWORD}

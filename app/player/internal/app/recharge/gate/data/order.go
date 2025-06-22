@@ -2,18 +2,22 @@ package data
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-util/data/db/postgresql/migrate"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/pkg"
 	"github.com/go-pantheon/roma/app/player/internal/data"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/jackc/pgx/v5"
 )
 
 const (
-	_tableName = "order"
+	_tableName = "orders"
 )
 
 var _ domain.OrderRepo = (*orderPgRepo)(nil)
@@ -32,59 +36,100 @@ func NewOrderPgRepo(data *data.Data, logger log.Logger) (domain.OrderRepo, error
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := r.initDB(ctx); err != nil {
+	if err := migrate.Migrate(ctx, r.data.Pdb, &dbv1.OrderProto{}, nil); err != nil {
+		return nil, err
+	}
+
+	if err := r.updateDB(ctx); err != nil {
 		return nil, err
 	}
 
 	return r, nil
 }
 
-func (r *orderPgRepo) initDB(ctx context.Context) error {
-	if err := r.createTable(ctx); err != nil {
-		return err
+func (r *orderPgRepo) updateDB(ctx context.Context) error {
+	{
+		idxTransIdStoreSQL := `CREATE INDEX IF NOT EXISTS idx_orders_trans_id_store ON orders (trans_id, store);`
+		_, err := r.data.Pdb.Exec(ctx, idxTransIdStoreSQL)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create index idx_orders_trans_id_store")
+		}
 	}
 
-	if err := r.updateTable(ctx); err != nil {
-		return err
+	{
+		idxUIDSQL := `CREATE INDEX IF NOT EXISTS idx_uid ON orders (uid);`
+		_, err := r.data.Pdb.Exec(ctx, idxUIDSQL)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create index idx_uid")
+		}
+	}
+
+	{
+		idxInfoProductIdSQL := `CREATE INDEX IF NOT EXISTS idx_orders_info_product_id ON orders ((info->>'product_id'));`
+		_, err := r.data.Pdb.Exec(ctx, idxInfoProductIdSQL)
+		if err != nil {
+			return errors.Wrapf(err, "failed to create index idx_orders_info_product_id")
+		}
 	}
 
 	return nil
-}
-
-func (r *orderPgRepo) createTable(ctx context.Context) error {
-	const createTableSQL = `
-	CREATE TABLE IF NOT EXISTS "order" (
-		"id" BIGINT PRIMARY KEY,
-		"uid" BIGINT NOT NULL,
-		"store" VARCHAR(255) NOT NULL,
-		"trans_id" VARCHAR(255) NOT NULL,
-		"ack" INT NOT NULL,
-		"ack_at" BIGINT NOT NULL,
-		"info" JSONB NOT NULL
-	);
-	`
-	_, err := r.data.Pdb.Exec(ctx, createTableSQL)
-	if err != nil {
-		return errors.Wrap(err, "failed to create user table")
-	}
-
-	r.log.Infof("[PostgreSQL] created user table")
-
-	return nil
-}
-
-func (r *orderPgRepo) updateTable(ctx context.Context) error {
-	return errors.New("not implemented")
 }
 
 func (r *orderPgRepo) Create(ctx context.Context, order *dbv1.OrderProto) error {
-	return errors.New("not implemented")
+	infoJson, err := json.Marshal(order.Info)
+	if err != nil {
+		return errors.Wrapf(err, "failed to marshal order info: %+v", order.Info)
+	}
+
+	query := fmt.Sprintf(`INSERT INTO "%s" (info, uid, store, trans_id, ack, ack_at)
+		VALUES ($1, $2, $3, $4, $5, $6)`, _tableName)
+
+	_, err = r.data.Pdb.Exec(ctx, query, infoJson, order.Uid, order.Store, order.TransId, order.Ack, order.AckAt)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create order, order: %+v", order)
+	}
+
+	return nil
 }
 
 func (r *orderPgRepo) GetByTransId(ctx context.Context, store pkg.Store, transId string) (*dbv1.OrderProto, error) {
-	return nil, errors.New("not implemented")
+	query := fmt.Sprintf(`SELECT info, uid, store, trans_id, ack, ack_at 
+		FROM "%s" WHERE trans_id = $1 AND store = $2 LIMIT 1`, _tableName)
+
+	row := r.data.Pdb.QueryRow(ctx, query, transId, store)
+
+	var (
+		o        dbv1.OrderProto
+		infoJson []byte
+	)
+
+	err := row.Scan(&infoJson, &o.Uid, &o.Store, &o.TransId, &o.Ack, &o.AckAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.Errorf("order not found, store: %s, transId: %s", store, transId)
+		}
+		return nil, errors.Wrapf(err, "failed to get order by transId, store: %s, transId: %s", store, transId)
+	}
+
+	err = json.Unmarshal(infoJson, &o.Info)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to unmarshal order info: %s", string(infoJson))
+	}
+
+	return &o, nil
 }
 
 func (r *orderPgRepo) UpdateAckState(ctx context.Context, store pkg.Store, transId string, ackState dbv1.OrderAckState) error {
-	return errors.New("not implemented")
+	query := `UPDATE orders SET ack = $1, ack_at = $2 WHERE trans_id = $3 AND store = $4`
+
+	tag, err := r.data.Pdb.Exec(ctx, query, int32(ackState), time.Now().Unix(), transId, store)
+	if err != nil {
+		return errors.Wrapf(err, "failed to update ack state, store: %s, transId: %s, ackState: %s", store, transId, ackState.String())
+	}
+
+	if tag.RowsAffected() == 0 {
+		return errors.Errorf("order not found, store: %s, transId: %s", store, transId)
+	}
+
+	return nil
 }

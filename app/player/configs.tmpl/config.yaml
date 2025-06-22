@@ -18,6 +18,10 @@ server:
     addr: 0.0.0.0:9102
     timeout: 5s
 data:
+  mongo:
+    source: ${MONGO_SOURCE}
+    database: ${MONGO_DATABASE}
+    dial_timeout: ${MONGO_DIAL_TIMEOUT}
   postgresql:
     source: ${POSTGRES_SOURCE}
     database: ${POSTGRES_DATABASE}

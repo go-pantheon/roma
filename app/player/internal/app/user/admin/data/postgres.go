@@ -9,6 +9,7 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/admin/domain"
 	"github.com/go-pantheon/roma/app/player/internal/data"
+	"github.com/go-pantheon/roma/app/player/internal/data/pguser"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 )
@@ -17,15 +18,15 @@ const (
 	_tableName = "user"
 )
 
-var _ domain.UserRepo = (*userPgRepo)(nil)
+var _ domain.UserRepo = (*userPostgresRepo)(nil)
 
-type userPgRepo struct {
+type userPostgresRepo struct {
 	log  *log.Helper
 	data *data.Data
 }
 
-func NewUserPgRepo(data *data.Data, logger log.Logger) (domain.UserRepo, error) {
-	r := &userPgRepo{
+func NewUserPostgresRepo(data *data.Data, logger log.Logger) (domain.UserRepo, error) {
+	r := &userPostgresRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "player/user/gate/data")),
 	}
@@ -33,7 +34,7 @@ func NewUserPgRepo(data *data.Data, logger log.Logger) (domain.UserRepo, error) 
 	return r, nil
 }
 
-func (r *userPgRepo) GetByID(ctx context.Context, user *dbv1.UserProto, mods []life.ModuleKey) (err error) {
+func (r *userPostgresRepo) GetByID(ctx context.Context, user *dbv1.UserProto, mods []life.ModuleKey) (err error) {
 	if user == nil {
 		return errors.New("user proto is nil")
 	}
@@ -45,7 +46,7 @@ func (r *userPgRepo) GetByID(ctx context.Context, user *dbv1.UserProto, mods []l
 	scanargs := make([]any, 0, len(mods)+3)
 	scanargs = append(scanargs, &user.Id, &user.Version, &user.ServerVersion)
 
-	modcols, modvals, err := data.ParseQueryModuleSQLParam(mods)
+	modcols, modvals, err := pguser.ParseQueryModuleSQLParam(mods)
 	if err != nil {
 		return errors.Wrapf(err, "parsing module sql param for user %d", user.Id)
 	}
@@ -68,11 +69,11 @@ func (r *userPgRepo) GetByID(ctx context.Context, user *dbv1.UserProto, mods []l
 
 	row := r.data.Pdb.QueryRow(ctx, sqlbuilder.String(), user.Id)
 
-	return data.ScanUserRow(row, user, mods, scanargs, modvals)
+	return pguser.ScanUserRow(row, user, mods, scanargs, modvals)
 }
 
-func (r *userPgRepo) GetList(ctx context.Context, start, limit int64, conds map[life.ModuleKey]*dbv1.UserModuleProto, mods []life.ModuleKey) (result []*dbv1.UserProto, count int64, err error) {
-	wheresql, args, err := data.BuildUserWhereSQL(conds)
+func (r *userPostgresRepo) GetList(ctx context.Context, start, limit int64, conds map[life.ModuleKey]*dbv1.UserModuleProto, mods []life.ModuleKey) (result []*dbv1.UserProto, count int64, err error) {
+	wheresql, args, err := pguser.BuildUserWhereSQL(conds)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "building where sql")
 	}
@@ -119,7 +120,7 @@ func (r *userPgRepo) GetList(ctx context.Context, start, limit int64, conds map[
 			scanargs = append(scanargs, &modvals[i])
 		}
 
-		if err := data.ScanUserRow(rows, user, mods, scanargs, modvals); err != nil {
+		if err := pguser.ScanUserRow(rows, user, mods, scanargs, modvals); err != nil {
 			return nil, 0, errors.Wrap(err, "scanning user row")
 		}
 

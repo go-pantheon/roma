@@ -42,7 +42,7 @@ func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Regi
 	if err != nil {
 		return nil, nil, err
 	}
-	roomRepo, err := data2.NewRoomPgRepo(dataData, logger)
+	roomRepo, err := data2.NewRoomMongoRepo(dataData, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -79,7 +79,7 @@ func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Regi
 	serviceRegistrars := registry.NewServiceRegistrars(servicelessUseCase, intraRegistrar)
 	roomRegistrar := registry3.NewRoomRegistrar(roomServiceServer)
 	gateRegistrars := registry.NewGateRegistrars(roomRegistrar)
-	domainRoomRepo, err := data4.NewRoomPgRepo(dataData, logger)
+	domainRoomRepo, err := data4.NewRoomMongoRepo(dataData, logger)
 	if err != nil {
 		cleanup2()
 		cleanup()

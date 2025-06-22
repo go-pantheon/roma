@@ -85,12 +85,13 @@ func (OrderAckState) EnumDescriptor() ([]byte, []int) {
 // Order Data
 type OrderProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Info          *OrderInfoProto        `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty" bson:"info"`                      // @gotags: bson:"info" Order Info
-	Uid           int64                  `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty" bson:"ack"`                       // @gotags: bson:"ack" Confirmation Status
-	Store         string                 `protobuf:"bytes,3,opt,name=store,proto3" json:"store,omitempty" bson:"store"`                    // @gotags: bson:"store" Payment Platform
-	TransId       string                 `protobuf:"bytes,4,opt,name=trans_id,json=transId,proto3" json:"trans_id,omitempty" bson:"transId"` // @gotags: bson:"transId" Transaction ID
-	Ack           int32                  `protobuf:"varint,5,opt,name=ack,proto3" json:"ack,omitempty" bson:"ack"`                       // @gotags: bson:"ack" Confirmation Status
-	AckAt         int64                  `protobuf:"varint,6,opt,name=ack_at,json=ackAt,proto3" json:"ack_at,omitempty" bson:"ack_at"`      // @gotags: bson:"ack_at" Confirmation Time
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" pgname:"id" primarykey:"auto"`                         // @gotags: pgname:"id" primarykey:"auto" Order ID
+	Info          *OrderInfoProto        `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty" pgname:"info" pgtype:"jsonb"`                      // @gotags: pgname:"info" pgtype:"jsonb" Order Info
+	Uid           int64                  `protobuf:"varint,3,opt,name=uid,proto3" json:"uid,omitempty" pgname:"uid"`                       // @gotags: pgname:"uid" Confirmation Status
+	Store         string                 `protobuf:"bytes,4,opt,name=store,proto3" json:"store,omitempty" pgname:"store"`                    // @gotags: pgname:"store" Payment Platform
+	TransId       string                 `protobuf:"bytes,5,opt,name=trans_id,json=transId,proto3" json:"trans_id,omitempty" pgname:"trans_id"` // @gotags: pgname:"trans_id" Transaction ID
+	Ack           int32                  `protobuf:"varint,6,opt,name=ack,proto3" json:"ack,omitempty" pgname:"ack"`                       // @gotags: pgname:"ack" Confirmation Status
+	AckAt         int64                  `protobuf:"varint,7,opt,name=ack_at,json=ackAt,proto3" json:"ack_at,omitempty" pgname:"ack_at"`      // @gotags: pgname:"ack_at" Confirmation Time
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -123,6 +124,13 @@ func (x *OrderProto) ProtoReflect() protoreflect.Message {
 // Deprecated: Use OrderProto.ProtoReflect.Descriptor instead.
 func (*OrderProto) Descriptor() ([]byte, []int) {
 	return file_player_v1_order_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *OrderProto) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
 }
 
 func (x *OrderProto) GetInfo() *OrderInfoProto {
@@ -169,10 +177,10 @@ func (x *OrderProto) GetAckAt() int64 {
 
 type OrderInfoProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty" bson:"token, binData, subtype=2"`                                 // @gotags: bson:"token, binData, subtype=2" Transaction Token
-	Env           string                 `protobuf:"bytes,2,opt,name=env,proto3" json:"env,omitempty" bson:"env"`                                     // @gotags: bson:"env" Environment
-	ProductId     string                 `protobuf:"bytes,3,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty" bson:"product_id"`        // @gotags: bson:"product_id" Product ID
-	PurchasedAt   int64                  `protobuf:"varint,4,opt,name=purchased_at,json=purchasedAt,proto3" json:"purchased_at,omitempty" bson:"purchase_at"` // @gotags: bson:"purchase_at" Purchase Time
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`                                 // Transaction Token
+	Env           string                 `protobuf:"bytes,2,opt,name=env,proto3" json:"env,omitempty"`                                     // Environment
+	ProductId     string                 `protobuf:"bytes,3,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`        // Product ID
+	PurchasedAt   int64                  `protobuf:"varint,4,opt,name=purchased_at,json=purchasedAt,proto3" json:"purchased_at,omitempty"` // Purchase Time
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -239,15 +247,16 @@ var File_player_v1_order_proto protoreflect.FileDescriptor
 
 const file_player_v1_order_proto_rawDesc = "" +
 	"\n" +
-	"\x15player/v1/order.proto\x12\tplayer.v1\"\xa7\x01\n" +
+	"\x15player/v1/order.proto\x12\tplayer.v1\"\xb7\x01\n" +
 	"\n" +
-	"OrderProto\x12-\n" +
-	"\x04info\x18\x01 \x01(\v2\x19.player.v1.OrderInfoProtoR\x04info\x12\x10\n" +
-	"\x03uid\x18\x02 \x01(\x03R\x03uid\x12\x14\n" +
-	"\x05store\x18\x03 \x01(\tR\x05store\x12\x19\n" +
-	"\btrans_id\x18\x04 \x01(\tR\atransId\x12\x10\n" +
-	"\x03ack\x18\x05 \x01(\x05R\x03ack\x12\x15\n" +
-	"\x06ack_at\x18\x06 \x01(\x03R\x05ackAt\"z\n" +
+	"OrderProto\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12-\n" +
+	"\x04info\x18\x02 \x01(\v2\x19.player.v1.OrderInfoProtoR\x04info\x12\x10\n" +
+	"\x03uid\x18\x03 \x01(\x03R\x03uid\x12\x14\n" +
+	"\x05store\x18\x04 \x01(\tR\x05store\x12\x19\n" +
+	"\btrans_id\x18\x05 \x01(\tR\atransId\x12\x10\n" +
+	"\x03ack\x18\x06 \x01(\x05R\x03ack\x12\x15\n" +
+	"\x06ack_at\x18\a \x01(\x03R\x05ackAt\"z\n" +
 	"\x0eOrderInfoProto\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x10\n" +
 	"\x03env\x18\x02 \x01(\tR\x03env\x12\x1d\n" +

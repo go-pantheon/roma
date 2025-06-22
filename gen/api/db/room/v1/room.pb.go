@@ -23,7 +23,7 @@ const (
 
 type RoomProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"_id"`                                // @gotags: bson:"_id" Room ID
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id"`                                // @gotags: bson:"id" Room ID
 	Sid           uint64                 `protobuf:"varint,2,opt,name=sid,proto3" json:"sid,omitempty" bson:"sid"`                              // @gotags: bson:"sid" Room Server ID
 	RoomType      uint64                 `protobuf:"varint,3,opt,name=room_type,json=roomType,proto3" json:"room_type,omitempty" bson:"room_type"`    // @gotags: bson:"room_type" Room Type
 	Members       []*RoomMemberProto     `protobuf:"bytes,4,rep,name=members,proto3" json:"members,omitempty" bson:"members"`                       // @gotags: bson:"members" Members

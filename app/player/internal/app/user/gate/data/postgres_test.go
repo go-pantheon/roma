@@ -49,7 +49,7 @@ func newTestRepoWithMock(t *testing.T) (domain.UserRepo, pgxmock.PgxPoolIface) {
 	alterSQLTest := `ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "testmodule" BYTEA;`
 	mock.ExpectExec(regexp.QuoteMeta(alterSQLTest)).WillReturnResult(pgxmock.NewResult("ALTER", 1))
 
-	repo, err := data.TestNewUserPgRepo(d, logger, testModuleKeys)
+	repo, err := data.TestNewUserPostgresRepo(d, logger, testModuleKeys)
 	require.NoError(t, err)
 	require.NotNil(t, repo)
 

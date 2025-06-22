@@ -10,7 +10,7 @@ import (
 
 type UserRepo interface {
 	GetByID(ctx context.Context, user *dbv1.UserProto, mods []life.ModuleKey) error
-	GetList(ctx context.Context, start, limit int64, conds map[life.ModuleKey]*dbv1.UserModuleProto, mods []life.ModuleKey) ([]*dbv1.UserProto, int64, error)
+	GetList(ctx context.Context, start, limit int64, conds map[life.ModuleKey]*dbv1.UserModuleProto, findmods []life.ModuleKey) ([]*dbv1.UserProto, int64, error)
 }
 
 type UserDomain struct {

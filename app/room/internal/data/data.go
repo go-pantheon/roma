@@ -4,31 +4,30 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-pantheon/fabrica-kit/trace/postgresql"
-	xpg "github.com/go-pantheon/fabrica-util/data/db/postgresql"
+	xmongo "github.com/go-pantheon/fabrica-util/data/db/mongo"
 	xredis "github.com/go-pantheon/fabrica-util/data/redis"
 	"github.com/go-pantheon/roma/app/room/internal/conf"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	mongo "go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Data struct {
-	Pdb xpg.DBPool
+	Mdb *mongo.Database
 	Rdb redis.UniversalClient
 }
 
 func NewData(c *conf.Data, l log.Logger) (d *Data, cleanup func(), err error) {
 	var (
-		pdb        *pgxpool.Pool
-		pdbCleanup func()
+		mdb        *mongo.Database
+		mdbCleanup func()
 
 		rdb        redis.UniversalClient
 		rdbCleanup func()
 	)
 
 	cleanup = func() {
-		if pdbCleanup != nil {
-			pdbCleanup()
+		if mdbCleanup != nil {
+			mdbCleanup()
 		}
 
 		if rdbCleanup != nil {
@@ -36,8 +35,7 @@ func NewData(c *conf.Data, l log.Logger) (d *Data, cleanup func(), err error) {
 		}
 	}
 
-	pgConfig := xpg.NewConfig(c.Postgresql.Source, c.Postgresql.Database)
-	pdb, pdbCleanup, err = postgresql.NewTracingPool(context.Background(), postgresql.DefaultPostgreSQLConfig(pgConfig))
+	mdb, mdbCleanup, err = xmongo.New(context.Background(), c.Mongo.Source, c.Mongo.Database)
 	if err != nil {
 		return
 	}
@@ -70,7 +68,7 @@ func NewData(c *conf.Data, l log.Logger) (d *Data, cleanup func(), err error) {
 	}
 
 	d = &Data{
-		Pdb: pdb,
+		Mdb: mdb,
 		Rdb: rdb,
 	}
 

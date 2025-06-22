@@ -357,7 +357,8 @@ func (x *Server) GetHealth() string {
 type Data struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Redis         *Data_Redis            `protobuf:"bytes,1,opt,name=redis,proto3" json:"redis,omitempty"`
-	Postgresql    *Data_Postgresql       `protobuf:"bytes,2,opt,name=postgresql,proto3" json:"postgresql,omitempty"`
+	Mongo         *Data_Mongo            `protobuf:"bytes,2,opt,name=mongo,proto3" json:"mongo,omitempty"`
+	Postgresql    *Data_Postgresql       `protobuf:"bytes,3,opt,name=postgresql,proto3" json:"postgresql,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -395,6 +396,13 @@ func (*Data) Descriptor() ([]byte, []int) {
 func (x *Data) GetRedis() *Data_Redis {
 	if x != nil {
 		return x.Redis
+	}
+	return nil
+}
+
+func (x *Data) GetMongo() *Data_Mongo {
+	if x != nil {
+		return x.Mongo
 	}
 	return nil
 }
@@ -682,6 +690,66 @@ func (x *Server_GRPC) GetTimeout() *durationpb.Duration {
 	return nil
 }
 
+type Data_Mongo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
+	Database      string                 `protobuf:"bytes,2,opt,name=database,proto3" json:"database,omitempty"`
+	DialTimeout   *durationpb.Duration   `protobuf:"bytes,3,opt,name=dial_timeout,json=dialTimeout,proto3" json:"dial_timeout,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Data_Mongo) Reset() {
+	*x = Data_Mongo{}
+	mi := &file_player_internal_conf_conf_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Data_Mongo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Data_Mongo) ProtoMessage() {}
+
+func (x *Data_Mongo) ProtoReflect() protoreflect.Message {
+	mi := &file_player_internal_conf_conf_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Data_Mongo.ProtoReflect.Descriptor instead.
+func (*Data_Mongo) Descriptor() ([]byte, []int) {
+	return file_player_internal_conf_conf_proto_rawDescGZIP(), []int{5, 0}
+}
+
+func (x *Data_Mongo) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *Data_Mongo) GetDatabase() string {
+	if x != nil {
+		return x.Database
+	}
+	return ""
+}
+
+func (x *Data_Mongo) GetDialTimeout() *durationpb.Duration {
+	if x != nil {
+		return x.DialTimeout
+	}
+	return nil
+}
+
 type Data_Postgresql struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
@@ -693,7 +761,7 @@ type Data_Postgresql struct {
 
 func (x *Data_Postgresql) Reset() {
 	*x = Data_Postgresql{}
-	mi := &file_player_internal_conf_conf_proto_msgTypes[11]
+	mi := &file_player_internal_conf_conf_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -705,7 +773,7 @@ func (x *Data_Postgresql) String() string {
 func (*Data_Postgresql) ProtoMessage() {}
 
 func (x *Data_Postgresql) ProtoReflect() protoreflect.Message {
-	mi := &file_player_internal_conf_conf_proto_msgTypes[11]
+	mi := &file_player_internal_conf_conf_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -718,7 +786,7 @@ func (x *Data_Postgresql) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Data_Postgresql.ProtoReflect.Descriptor instead.
 func (*Data_Postgresql) Descriptor() ([]byte, []int) {
-	return file_player_internal_conf_conf_proto_rawDescGZIP(), []int{5, 0}
+	return file_player_internal_conf_conf_proto_rawDescGZIP(), []int{5, 1}
 }
 
 func (x *Data_Postgresql) GetSource() string {
@@ -756,7 +824,7 @@ type Data_Redis struct {
 
 func (x *Data_Redis) Reset() {
 	*x = Data_Redis{}
-	mi := &file_player_internal_conf_conf_proto_msgTypes[12]
+	mi := &file_player_internal_conf_conf_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -768,7 +836,7 @@ func (x *Data_Redis) String() string {
 func (*Data_Redis) ProtoMessage() {}
 
 func (x *Data_Redis) ProtoReflect() protoreflect.Message {
-	mi := &file_player_internal_conf_conf_proto_msgTypes[12]
+	mi := &file_player_internal_conf_conf_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -781,7 +849,7 @@ func (x *Data_Redis) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Data_Redis.ProtoReflect.Descriptor instead.
 func (*Data_Redis) Descriptor() ([]byte, []int) {
-	return file_player_internal_conf_conf_proto_rawDescGZIP(), []int{5, 1}
+	return file_player_internal_conf_conf_proto_rawDescGZIP(), []int{5, 2}
 }
 
 func (x *Data_Redis) GetAddr() string {
@@ -835,7 +903,7 @@ type Recharge_Apple struct {
 
 func (x *Recharge_Apple) Reset() {
 	*x = Recharge_Apple{}
-	mi := &file_player_internal_conf_conf_proto_msgTypes[13]
+	mi := &file_player_internal_conf_conf_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -847,7 +915,7 @@ func (x *Recharge_Apple) String() string {
 func (*Recharge_Apple) ProtoMessage() {}
 
 func (x *Recharge_Apple) ProtoReflect() protoreflect.Message {
-	mi := &file_player_internal_conf_conf_proto_msgTypes[13]
+	mi := &file_player_internal_conf_conf_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -881,7 +949,7 @@ type Recharge_Google struct {
 
 func (x *Recharge_Google) Reset() {
 	*x = Recharge_Google{}
-	mi := &file_player_internal_conf_conf_proto_msgTypes[14]
+	mi := &file_player_internal_conf_conf_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -893,7 +961,7 @@ func (x *Recharge_Google) String() string {
 func (*Recharge_Google) ProtoMessage() {}
 
 func (x *Recharge_Google) ProtoReflect() protoreflect.Message {
-	mi := &file_player_internal_conf_conf_proto_msgTypes[14]
+	mi := &file_player_internal_conf_conf_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -966,12 +1034,17 @@ const file_player_internal_conf_conf_proto_rawDesc = "" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\x95\x04\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xc8\x05\n" +
 	"\x04Data\x126\n" +
-	"\x05redis\x18\x01 \x01(\v2 .player.internal.conf.Data.RedisR\x05redis\x12E\n" +
+	"\x05redis\x18\x01 \x01(\v2 .player.internal.conf.Data.RedisR\x05redis\x126\n" +
+	"\x05mongo\x18\x02 \x01(\v2 .player.internal.conf.Data.MongoR\x05mongo\x12E\n" +
 	"\n" +
-	"postgresql\x18\x02 \x01(\v2%.player.internal.conf.Data.PostgresqlR\n" +
-	"postgresql\x1a~\n" +
+	"postgresql\x18\x03 \x01(\v2%.player.internal.conf.Data.PostgresqlR\n" +
+	"postgresql\x1ay\n" +
+	"\x05Mongo\x12\x16\n" +
+	"\x06source\x18\x01 \x01(\tR\x06source\x12\x1a\n" +
+	"\bdatabase\x18\x02 \x01(\tR\bdatabase\x12<\n" +
+	"\fdial_timeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\vdialTimeout\x1a~\n" +
 	"\n" +
 	"Postgresql\x12\x16\n" +
 	"\x06source\x18\x01 \x01(\tR\x06source\x12\x1a\n" +
@@ -1012,7 +1085,7 @@ func file_player_internal_conf_conf_proto_rawDescGZIP() []byte {
 	return file_player_internal_conf_conf_proto_rawDescData
 }
 
-var file_player_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_player_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_player_internal_conf_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),           // 0: player.internal.conf.Bootstrap
 	(*Label)(nil),               // 1: player.internal.conf.Label
@@ -1025,11 +1098,12 @@ var file_player_internal_conf_conf_proto_goTypes = []any{
 	(*Recharge)(nil),            // 8: player.internal.conf.Recharge
 	(*Server_HTTP)(nil),         // 9: player.internal.conf.Server.HTTP
 	(*Server_GRPC)(nil),         // 10: player.internal.conf.Server.GRPC
-	(*Data_Postgresql)(nil),     // 11: player.internal.conf.Data.Postgresql
-	(*Data_Redis)(nil),          // 12: player.internal.conf.Data.Redis
-	(*Recharge_Apple)(nil),      // 13: player.internal.conf.Recharge.Apple
-	(*Recharge_Google)(nil),     // 14: player.internal.conf.Recharge.Google
-	(*durationpb.Duration)(nil), // 15: google.protobuf.Duration
+	(*Data_Mongo)(nil),          // 11: player.internal.conf.Data.Mongo
+	(*Data_Postgresql)(nil),     // 12: player.internal.conf.Data.Postgresql
+	(*Data_Redis)(nil),          // 13: player.internal.conf.Data.Redis
+	(*Recharge_Apple)(nil),      // 14: player.internal.conf.Recharge.Apple
+	(*Recharge_Google)(nil),     // 15: player.internal.conf.Recharge.Google
+	(*durationpb.Duration)(nil), // 16: google.protobuf.Duration
 }
 var file_player_internal_conf_conf_proto_depIdxs = []int32{
 	1,  // 0: player.internal.conf.Bootstrap.label:type_name -> player.internal.conf.Label
@@ -1040,22 +1114,24 @@ var file_player_internal_conf_conf_proto_depIdxs = []int32{
 	8,  // 5: player.internal.conf.Bootstrap.recharge:type_name -> player.internal.conf.Recharge
 	9,  // 6: player.internal.conf.Server.http:type_name -> player.internal.conf.Server.HTTP
 	10, // 7: player.internal.conf.Server.grpc:type_name -> player.internal.conf.Server.GRPC
-	12, // 8: player.internal.conf.Data.redis:type_name -> player.internal.conf.Data.Redis
-	11, // 9: player.internal.conf.Data.postgresql:type_name -> player.internal.conf.Data.Postgresql
-	7,  // 10: player.internal.conf.Registry.etcd:type_name -> player.internal.conf.Etcd
-	13, // 11: player.internal.conf.Recharge.apple:type_name -> player.internal.conf.Recharge.Apple
-	14, // 12: player.internal.conf.Recharge.google:type_name -> player.internal.conf.Recharge.Google
-	15, // 13: player.internal.conf.Server.HTTP.timeout:type_name -> google.protobuf.Duration
-	15, // 14: player.internal.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	15, // 15: player.internal.conf.Data.Postgresql.dial_timeout:type_name -> google.protobuf.Duration
-	15, // 16: player.internal.conf.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
-	15, // 17: player.internal.conf.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
-	15, // 18: player.internal.conf.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
-	19, // [19:19] is the sub-list for method output_type
-	19, // [19:19] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	13, // 8: player.internal.conf.Data.redis:type_name -> player.internal.conf.Data.Redis
+	11, // 9: player.internal.conf.Data.mongo:type_name -> player.internal.conf.Data.Mongo
+	12, // 10: player.internal.conf.Data.postgresql:type_name -> player.internal.conf.Data.Postgresql
+	7,  // 11: player.internal.conf.Registry.etcd:type_name -> player.internal.conf.Etcd
+	14, // 12: player.internal.conf.Recharge.apple:type_name -> player.internal.conf.Recharge.Apple
+	15, // 13: player.internal.conf.Recharge.google:type_name -> player.internal.conf.Recharge.Google
+	16, // 14: player.internal.conf.Server.HTTP.timeout:type_name -> google.protobuf.Duration
+	16, // 15: player.internal.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	16, // 16: player.internal.conf.Data.Mongo.dial_timeout:type_name -> google.protobuf.Duration
+	16, // 17: player.internal.conf.Data.Postgresql.dial_timeout:type_name -> google.protobuf.Duration
+	16, // 18: player.internal.conf.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
+	16, // 19: player.internal.conf.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
+	16, // 20: player.internal.conf.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
+	21, // [21:21] is the sub-list for method output_type
+	21, // [21:21] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_player_internal_conf_conf_proto_init() }
@@ -1069,7 +1145,7 @@ func file_player_internal_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_player_internal_conf_conf_proto_rawDesc), len(file_player_internal_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

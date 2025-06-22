@@ -72,7 +72,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	if err != nil {
 		return nil, nil, err
 	}
-	userRepo, err := data2.NewUserPgRepo(dataData, logger)
+	userRepo, err := data2.NewUserMongoRepo(dataData, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -133,7 +133,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	storageRegistrar := registry6.NewStorageRegistrar(storageServiceServer)
 	heroRegistrar := registry7.NewHeroRegistrar(heroServiceServer)
 	gateRegistrars := registry.NewGateRegistrars(systemRegistrar, userRegistrar, devRegistrar, storageRegistrar, heroRegistrar)
-	domainUserRepo, err := data4.NewUserPgRepo(dataData, logger)
+	domainUserRepo, err := data4.NewUserPostgresRepo(dataData, logger)
 	if err != nil {
 		cleanup2()
 		cleanup()

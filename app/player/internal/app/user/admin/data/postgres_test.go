@@ -32,7 +32,7 @@ func newTestRepoWithMock(t *testing.T) (domain.UserRepo, pgxmock.PgxPoolIface) {
 	d := &idata.Data{Pdb: mock}
 	logger := log.DefaultLogger
 
-	repo, err := data.NewUserPgRepo(d, logger)
+	repo, err := data.NewUserPostgresRepo(d, logger)
 	require.NoError(t, err)
 	require.NotNil(t, repo)
 

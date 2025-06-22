@@ -349,7 +349,7 @@ func (x *Server) GetHealth() string {
 type Data struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Redis         *Data_Redis            `protobuf:"bytes,1,opt,name=redis,proto3" json:"redis,omitempty"`
-	Postgresql    *Data_Postgresql       `protobuf:"bytes,2,opt,name=postgresql,proto3" json:"postgresql,omitempty"`
+	Mongo         *Data_Mongo            `protobuf:"bytes,2,opt,name=mongo,proto3" json:"mongo,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -391,9 +391,9 @@ func (x *Data) GetRedis() *Data_Redis {
 	return nil
 }
 
-func (x *Data) GetPostgresql() *Data_Postgresql {
+func (x *Data) GetMongo() *Data_Mongo {
 	if x != nil {
-		return x.Postgresql
+		return x.Mongo
 	}
 	return nil
 }
@@ -622,29 +622,29 @@ func (x *Server_GRPC) GetTimeout() *durationpb.Duration {
 	return nil
 }
 
-type Data_Postgresql struct {
+type Data_Mongo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`
 	Database      string                 `protobuf:"bytes,2,opt,name=database,proto3" json:"database,omitempty"`
-	DialTimeout   *durationpb.Duration   `protobuf:"bytes,3,opt,name=dial_timeout,json=dialTimeout,proto3" json:"dial_timeout,omitempty"`
+	DialTimeout   *durationpb.Duration   `protobuf:"bytes,4,opt,name=dial_timeout,json=dialTimeout,proto3" json:"dial_timeout,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Data_Postgresql) Reset() {
-	*x = Data_Postgresql{}
+func (x *Data_Mongo) Reset() {
+	*x = Data_Mongo{}
 	mi := &file_room_internal_conf_conf_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Data_Postgresql) String() string {
+func (x *Data_Mongo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Data_Postgresql) ProtoMessage() {}
+func (*Data_Mongo) ProtoMessage() {}
 
-func (x *Data_Postgresql) ProtoReflect() protoreflect.Message {
+func (x *Data_Mongo) ProtoReflect() protoreflect.Message {
 	mi := &file_room_internal_conf_conf_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -656,26 +656,26 @@ func (x *Data_Postgresql) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Data_Postgresql.ProtoReflect.Descriptor instead.
-func (*Data_Postgresql) Descriptor() ([]byte, []int) {
+// Deprecated: Use Data_Mongo.ProtoReflect.Descriptor instead.
+func (*Data_Mongo) Descriptor() ([]byte, []int) {
 	return file_room_internal_conf_conf_proto_rawDescGZIP(), []int{5, 0}
 }
 
-func (x *Data_Postgresql) GetSource() string {
+func (x *Data_Mongo) GetSource() string {
 	if x != nil {
 		return x.Source
 	}
 	return ""
 }
 
-func (x *Data_Postgresql) GetDatabase() string {
+func (x *Data_Mongo) GetDatabase() string {
 	if x != nil {
 		return x.Database
 	}
 	return ""
 }
 
-func (x *Data_Postgresql) GetDialTimeout() *durationpb.Duration {
+func (x *Data_Mongo) GetDialTimeout() *durationpb.Duration {
 	if x != nil {
 		return x.DialTimeout
 	}
@@ -801,17 +801,14 @@ const file_room_internal_conf_conf_proto_rawDesc = "" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\x91\x04\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xfd\x03\n" +
 	"\x04Data\x124\n" +
-	"\x05redis\x18\x01 \x01(\v2\x1e.room.internal.conf.Data.RedisR\x05redis\x12C\n" +
-	"\n" +
-	"postgresql\x18\x02 \x01(\v2#.room.internal.conf.Data.PostgresqlR\n" +
-	"postgresql\x1a~\n" +
-	"\n" +
-	"Postgresql\x12\x16\n" +
+	"\x05redis\x18\x01 \x01(\v2\x1e.room.internal.conf.Data.RedisR\x05redis\x124\n" +
+	"\x05mongo\x18\x02 \x01(\v2\x1e.room.internal.conf.Data.MongoR\x05mongo\x1ay\n" +
+	"\x05Mongo\x12\x16\n" +
 	"\x06source\x18\x01 \x01(\tR\x06source\x12\x1a\n" +
 	"\bdatabase\x18\x02 \x01(\tR\bdatabase\x12<\n" +
-	"\fdial_timeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\vdialTimeout\x1a\x8d\x02\n" +
+	"\fdial_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\vdialTimeout\x1a\x8d\x02\n" +
 	"\x05Redis\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x18\n" +
@@ -850,7 +847,7 @@ var file_room_internal_conf_conf_proto_goTypes = []any{
 	(*Etcd)(nil),                // 7: room.internal.conf.Etcd
 	(*Server_HTTP)(nil),         // 8: room.internal.conf.Server.HTTP
 	(*Server_GRPC)(nil),         // 9: room.internal.conf.Server.GRPC
-	(*Data_Postgresql)(nil),     // 10: room.internal.conf.Data.Postgresql
+	(*Data_Mongo)(nil),          // 10: room.internal.conf.Data.Mongo
 	(*Data_Redis)(nil),          // 11: room.internal.conf.Data.Redis
 	(*durationpb.Duration)(nil), // 12: google.protobuf.Duration
 }
@@ -863,11 +860,11 @@ var file_room_internal_conf_conf_proto_depIdxs = []int32{
 	8,  // 5: room.internal.conf.Server.http:type_name -> room.internal.conf.Server.HTTP
 	9,  // 6: room.internal.conf.Server.grpc:type_name -> room.internal.conf.Server.GRPC
 	11, // 7: room.internal.conf.Data.redis:type_name -> room.internal.conf.Data.Redis
-	10, // 8: room.internal.conf.Data.postgresql:type_name -> room.internal.conf.Data.Postgresql
+	10, // 8: room.internal.conf.Data.mongo:type_name -> room.internal.conf.Data.Mongo
 	7,  // 9: room.internal.conf.Registry.etcd:type_name -> room.internal.conf.Etcd
 	12, // 10: room.internal.conf.Server.HTTP.timeout:type_name -> google.protobuf.Duration
 	12, // 11: room.internal.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	12, // 12: room.internal.conf.Data.Postgresql.dial_timeout:type_name -> google.protobuf.Duration
+	12, // 12: room.internal.conf.Data.Mongo.dial_timeout:type_name -> google.protobuf.Duration
 	12, // 13: room.internal.conf.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
 	12, // 14: room.internal.conf.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
 	12, // 15: room.internal.conf.Data.Redis.write_timeout:type_name -> google.protobuf.Duration

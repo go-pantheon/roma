@@ -52,8 +52,14 @@ message Server {
 
 message Data {
 	Redis redis = 1;
-	Postgresql postgresql = 2;
+	Mongo mongo = 2;
+	Postgresql postgresql = 3;
 
+	message Mongo {
+		string source = 1;
+		string database = 2;
+		google.protobuf.Duration dial_timeout = 3;
+	}
 	message Postgresql {
 		string source = 1;
 		string database = 2;

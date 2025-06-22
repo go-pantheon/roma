@@ -24,11 +24,11 @@ const (
 // User Data
 type UserProto struct {
 	state         protoimpl.MessageState      `protogen:"open.v1"`
-	Id            int64                       `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"_id"`                                                                                     // @gotags: bson:"_id"
-	Sid           int64                       `protobuf:"varint,2,opt,name=sid,proto3" json:"sid,omitempty" bson:"sid"`                                                                                   // @gotags: bson:"sid"
-	Modules       map[string]*UserModuleProto `protobuf:"bytes,10,rep,name=modules,proto3" json:"modules,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value" bson:"modules"` // @gotags: bson:"modules" Modules Data
-	Version       int64                       `protobuf:"varint,11,opt,name=version,proto3" json:"version,omitempty" bson:"version"`                                                                          // @gotags: bson:"version" Player Data Version
-	ServerVersion string                      `protobuf:"bytes,12,opt,name=server_version,json=serverVersion,proto3" json:"server_version,omitempty" bson:"server_version"`                                          // @gotags: bson:"server_version" Current Server Version
+	Id            int64                       `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id" pgname:"id" primarykey:"bigint"`                                                                                     // @gotags: bson:"id" pgname:"id" primarykey:"bigint"
+	Sid           int64                       `protobuf:"varint,2,opt,name=sid,proto3" json:"sid,omitempty" bson:"sid" pgname:"sid"`                                                                                   // @gotags: bson:"sid" pgname:"sid"
+	Modules       map[string]*UserModuleProto `protobuf:"bytes,10,rep,name=modules,proto3" json:"modules,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value" bson:"modules"` // @gotags: bson:"modules"
+	Version       int64                       `protobuf:"varint,11,opt,name=version,proto3" json:"version,omitempty" bson:"version" pgname:"version"`                                                                          // @gotags: bson:"version" pgname:"version" Player Data Version
+	ServerVersion string                      `protobuf:"bytes,12,opt,name=server_version,json=serverVersion,proto3" json:"server_version,omitempty" bson:"server_version" pgname:"server_version"`                                          // @gotags: bson:"server_version" pgname:"server_version" Current Server Version
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -239,39 +239,39 @@ type isUserModuleProto_Module interface {
 }
 
 type UserModuleProto_Basic struct {
-	Basic *UserBasicProto `protobuf:"bytes,1,opt,name=basic,proto3,oneof" bson:"basic"` // @gotags: bson:"basic" Basic Data
+	Basic *UserBasicProto `protobuf:"bytes,1,opt,name=basic,proto3,oneof"`
 }
 
 type UserModuleProto_Dev struct {
-	Dev *UserDevProto `protobuf:"bytes,2,opt,name=dev,proto3,oneof" bson:"dev"` // @gotags: bson:"dev" Dev Data
+	Dev *UserDevProto `protobuf:"bytes,2,opt,name=dev,proto3,oneof"`
 }
 
 type UserModuleProto_Status struct {
-	Status *UserStatusProto `protobuf:"bytes,3,opt,name=status,proto3,oneof" bson:"status"` // @gotags: bson:"status" Status Data
+	Status *UserStatusProto `protobuf:"bytes,3,opt,name=status,proto3,oneof"`
 }
 
 type UserModuleProto_System struct {
-	System *UserSystemProto `protobuf:"bytes,4,opt,name=system,proto3,oneof" bson:"system"` // @gotags: bson:"system" System Data
+	System *UserSystemProto `protobuf:"bytes,4,opt,name=system,proto3,oneof"`
 }
 
 type UserModuleProto_PlunderList struct {
-	PlunderList *UserPlunderListProto `protobuf:"bytes,5,opt,name=plunder_list,json=plunderList,proto3,oneof" bson:"plunder_list"` // @gotags: bson:"plunder_list" Plunder List Data
+	PlunderList *UserPlunderListProto `protobuf:"bytes,5,opt,name=plunder_list,json=plunderList,proto3,oneof"`
 }
 
 type UserModuleProto_HeroList struct {
-	HeroList *UserHeroListProto `protobuf:"bytes,6,opt,name=hero_list,json=heroList,proto3,oneof" bson:"hero_list"` // @gotags: bson:"hero_list" Hero Data
+	HeroList *UserHeroListProto `protobuf:"bytes,6,opt,name=hero_list,json=heroList,proto3,oneof"`
 }
 
 type UserModuleProto_Storage struct {
-	Storage *UserStorageProto `protobuf:"bytes,7,opt,name=storage,proto3,oneof" bson:"storage"` // @gotags: bson:"storage" Storage Data
+	Storage *UserStorageProto `protobuf:"bytes,7,opt,name=storage,proto3,oneof"`
 }
 
 type UserModuleProto_Recharge struct {
-	Recharge *UserRechargeProto `protobuf:"bytes,8,opt,name=recharge,proto3,oneof" bson:"recharge"` // @gotags: bson:"recharge" Recharge Data
+	Recharge *UserRechargeProto `protobuf:"bytes,8,opt,name=recharge,proto3,oneof"`
 }
 
 type UserModuleProto_Room struct {
-	Room *UserRoomProto `protobuf:"bytes,9,opt,name=room,proto3,oneof" bson:"room"` // @gotags: bson:"room" Room Data
+	Room *UserRoomProto `protobuf:"bytes,9,opt,name=room,proto3,oneof"`
 }
 
 func (*UserModuleProto_Basic) isUserModuleProto_Module() {}

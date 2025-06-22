@@ -4,4 +4,4 @@ import (
 	"github.com/google/wire"
 )
 
-var ProviderSet = wire.NewSet(NewUserPgRepo)
+var ProviderSet = wire.NewSet(NewUserPostgresRepo)
