@@ -13,6 +13,6 @@ type SelfRouteTable struct {
 
 func NewSelfRouteTable(db *data.Data) *SelfRouteTable {
 	return &SelfRouteTable{
-		ReNewalRouteTable: routetable.NewRenewalRouteTable(redis.New(db.Rdb), profile.ServiceName()),
+		ReNewalRouteTable: routetable.NewRenewalRouteTable(redis.New(db.Rdb), profile.ServiceName(), routetable.WithTTL(db.RTAliveDur)),
 	}
 }

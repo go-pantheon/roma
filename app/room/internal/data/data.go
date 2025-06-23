@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	xmongo "github.com/go-pantheon/fabrica-util/data/db/mongo"
@@ -12,8 +13,9 @@ import (
 )
 
 type Data struct {
-	Mdb *mongo.Database
-	Rdb redis.UniversalClient
+	RTAliveDur time.Duration
+	Mdb        *mongo.Database
+	Rdb        redis.UniversalClient
 }
 
 func NewData(c *conf.Data, l log.Logger) (d *Data, cleanup func(), err error) {
@@ -68,8 +70,9 @@ func NewData(c *conf.Data, l log.Logger) (d *Data, cleanup func(), err error) {
 	}
 
 	d = &Data{
-		Mdb: mdb,
-		Rdb: rdb,
+		RTAliveDur: c.RouteTableAliveDuration.AsDuration(),
+		Mdb:        mdb,
+		Rdb:        rdb,
 	}
 
 	return d, cleanup, nil
