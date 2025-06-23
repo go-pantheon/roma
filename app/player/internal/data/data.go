@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/trace/postgresql"
@@ -18,6 +19,8 @@ type Data struct {
 	Rdb redis.UniversalClient
 	Pdb xpg.DBPool
 	Mdb *mongo.Database
+
+	RTAliveDur time.Duration
 }
 
 func NewData(c *conf.Data, l log.Logger) (d *Data, cleanup func(), err error) {
@@ -77,9 +80,10 @@ func NewData(c *conf.Data, l log.Logger) (d *Data, cleanup func(), err error) {
 	}
 
 	d = &Data{
-		Rdb: rdb,
-		Pdb: pdb,
-		Mdb: mdb,
+		RTAliveDur: c.RouteTableAliveDuration.AsDuration(),
+		Rdb:        rdb,
+		Pdb:        pdb,
+		Mdb:        mdb,
 	}
 
 	return d, cleanup, nil

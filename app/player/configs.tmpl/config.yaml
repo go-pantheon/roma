@@ -18,6 +18,7 @@ server:
     addr: 0.0.0.0:9102
     timeout: 5s
 data:
+  route_table_alive_duration: 600s
   mongo:
     source: ${MONGO_SOURCE}
     database: ${MONGO_DATABASE}

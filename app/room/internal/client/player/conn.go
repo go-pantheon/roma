@@ -18,7 +18,7 @@ type Conn struct {
 	*conn.Conn
 }
 
-func NewConn(logger log.Logger, rt *RouteTable, r registry.Discovery) (*Conn, error) {
+func NewConn(logger log.Logger, rt *PlayerRouteTable, r registry.Discovery) (*Conn, error) {
 	conn, err := conn.NewConn(serviceName, balancer.TypeReader, logger, rt, r)
 	if err != nil {
 		return nil, err
@@ -29,12 +29,12 @@ func NewConn(logger log.Logger, rt *RouteTable, r registry.Discovery) (*Conn, er
 	}, nil
 }
 
-type RouteTable struct {
-	routetable.RouteTable
+type PlayerRouteTable struct {
+	routetable.ReadOnlyRouteTable
 }
 
-func NewRouteTable(d *data.Data) *RouteTable {
-	return &RouteTable{
-		RouteTable: routetable.NewRouteTable("player", redis.New(d.Rdb)),
+func NewPlayerRouteTable(d *data.Data) *PlayerRouteTable {
+	return &PlayerRouteTable{
+		ReadOnlyRouteTable: routetable.NewReadOnlyRouteTable(redis.New(d.Rdb), serviceName),
 	}
 }

@@ -9,9 +9,10 @@ import (
 type Tickers struct {
 	*PreparedTickFuncs
 
-	persistTicker *time.Ticker
+	workerTicker  *time.Ticker
 	secondTicker  *time.Ticker
 	minuteTicker  *time.Ticker
+	persistTicker *time.Ticker
 }
 
 type PreparedTickFuncs struct {
@@ -29,6 +30,7 @@ func newTickers(fs *PreparedTickFuncs) *Tickers {
 	t := &Tickers{
 		PreparedTickFuncs: fs,
 	}
+	t.workerTicker = time.NewTicker(time.Second * 10)
 	t.secondTicker = time.NewTicker(time.Second)
 	t.minuteTicker = time.NewTicker(time.Minute)
 	t.persistTicker = time.NewTicker(constants.WorkerPersistTickDuration)
@@ -36,6 +38,7 @@ func newTickers(fs *PreparedTickFuncs) *Tickers {
 }
 
 func (t *Tickers) stop() {
+	t.workerTicker.Stop()
 	t.persistTicker.Stop()
 	t.secondTicker.Stop()
 	t.minuteTicker.Stop()

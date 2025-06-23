@@ -18,7 +18,7 @@ type Conn struct {
 	*conn.Conn
 }
 
-func NewConn(logger log.Logger, rt *RouteTable, r registry.Discovery) (*Conn, error) {
+func NewConn(logger log.Logger, rt *GateRouteTable, r registry.Discovery) (*Conn, error) {
 	conn, err := conn.NewConn(serviceName, balancer.TypeReader, logger, rt, r)
 	if err != nil {
 		return nil, err
@@ -29,18 +29,18 @@ func NewConn(logger log.Logger, rt *RouteTable, r registry.Discovery) (*Conn, er
 	}, nil
 }
 
-func NewConns(logger log.Logger, rt *RouteTable, r registry.Discovery) ([]*Conn, error) {
+func NewConns(logger log.Logger, rt *GateRouteTable, r registry.Discovery) ([]*Conn, error) {
 	conns := make([]*Conn, 0)
 	// TODO
 	return conns, nil
 }
 
-type RouteTable struct {
-	routetable.RouteTable
+type GateRouteTable struct {
+	routetable.ReadOnlyRouteTable
 }
 
-func NewRouteTable(d *data.Data) *RouteTable {
-	return &RouteTable{
-		RouteTable: routetable.NewRouteTable(serviceName, redis.New(d.Rdb)),
+func NewGateRouteTable(d *data.Data) *GateRouteTable {
+	return &GateRouteTable{
+		ReadOnlyRouteTable: routetable.NewReadOnlyRouteTable(redis.New(d.Rdb), serviceName),
 	}
 }

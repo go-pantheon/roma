@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/router/routetable"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
@@ -55,6 +56,10 @@ type Worker struct {
 	disconnectErr  atomic.Value
 	persistManager *PersistManager
 
+	appRouteTable    routetable.ReNewalRouteTable
+	nextRTRenewAt    time.Time
+	rtRenewFailCount int
+
 	notifyStoppedFunc func(userId int64, index uint64)
 	newContextFunc    newContextFunc
 }
@@ -62,6 +67,7 @@ type Worker struct {
 func newWorker(
 	ctx context.Context,
 	log *log.Helper,
+	appRouteTable routetable.ReNewalRouteTable,
 	persistManager *PersistManager,
 	replier Replier,
 	broadcaster Broadcaster,
@@ -71,6 +77,7 @@ func newWorker(
 ) (w *Worker) {
 	w = &Worker{
 		log:               log,
+		appRouteTable:     appRouteTable,
 		Broadcaster:       broadcaster,
 		Replier:           replier,
 		Tickers:           tickers,
@@ -175,6 +182,20 @@ func (w *Worker) run(ctx context.Context) error {
 			}
 		})
 	})
+	eg.Go(func() error {
+		return xsync.Run(func() error {
+			for {
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case <-w.workerTicker.C:
+					if err := w.workerTick(ctx); err != nil {
+						return err
+					}
+				}
+			}
+		})
+	})
 	err := eg.Wait()
 	if err != nil {
 		w.sendLogoutMsg(ctx, err)
@@ -227,8 +248,8 @@ func (w *Worker) canReuse(ctx context.Context, replier Replier) bool {
 	return true
 }
 
-func (w *Worker) stop(ctx context.Context) {
-	w.TurnOff(func() (err error) {
+func (w *Worker) Stop(ctx context.Context) (err error) {
+	return w.TurnOff(func() (err error) {
 		w.log.Debugf("worker is stopping. id=%d", w.ID())
 		if w.notifyStoppedFunc != nil {
 			w.notifyStoppedFunc(w.ID(), w.Index())
@@ -239,13 +260,14 @@ func (w *Worker) stop(ctx context.Context) {
 		close(w.events)
 		wctx := w.newContextFunc(ctx, w)
 		for e := range w.ConsumeEvent() {
-			if err := w.ExecuteEvent(wctx, e); err != nil {
-				err = errors.Join(err, errs.ErrLifeWorkerStopped)
+			if executeErr := w.ExecuteEvent(wctx, e); executeErr != nil {
+				err = errors.Join(err, executeErr)
 			}
 		}
 
 		w.persistManager.Stop(ctx)
 		w.log.Debugf("worker stopped. %s", w.LogInfo())
+
 		return err
 	})
 }
@@ -314,6 +336,29 @@ func (w *Worker) ExecuteEvent(wctx Context, f EventFunc) error {
 	})
 
 	return e
+}
+
+func (w *Worker) workerTick(ctx context.Context) error {
+	if ct := time.Now(); ct.After(w.nextRTRenewAt) {
+		w.nextRTRenewAt = ct.Add(w.appRouteTable.TTL() / 2)
+
+		if err := w.appRouteTable.RenewSelf(ctx, "gate", w.ID(), w.Referer()); err != nil {
+			if errors.Is(err, routetable.ErrRouteTableNotFound) || errors.Is(err, routetable.ErrRouteTableValueNotSame) {
+				return err
+			}
+
+			w.rtRenewFailCount++
+			w.nextRTRenewAt = ct.Add(w.appRouteTable.TTL() / 10)
+
+			if w.rtRenewFailCount > 3 {
+				return err
+			}
+		}
+	} else {
+		w.rtRenewFailCount = 0
+	}
+
+	return nil
 }
 
 func (w *Worker) ID() int64 {

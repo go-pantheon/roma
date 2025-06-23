@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/router/routetable"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
@@ -28,6 +29,7 @@ type Manager struct {
 	statisticTicker   *time.Ticker
 	workers           *WorkerMap
 	stoppedWorkerChan chan string
+	appRouteTable     routetable.ReNewalRouteTable
 
 	newContext   newContextFunc
 	newPersister newPersisterFunc
@@ -38,10 +40,11 @@ type Manager struct {
 type newContextFunc func(ctx context.Context, w *Worker) Context
 type newPersisterFunc func(ctx context.Context, id int64, sid int64, allowBorn bool) (persister Persistent, born bool, err error)
 
-func NewManager(logger log.Logger, newContext newContextFunc, newPersister newPersisterFunc) (m *Manager, stopFunc func() error) {
+func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, newContext newContextFunc, newPersister newPersisterFunc) (m *Manager, stopFunc func() error) {
 	m = &Manager{
 		PreparedTickFuncs: newPreparedTickFuncs(),
 		log:               log.NewHelper(log.With(logger, "module", "universe/life/manager")),
+		appRouteTable:     rt,
 		newContext:        newContext,
 		newPersister:      newPersister,
 	}
@@ -63,7 +66,7 @@ func NewManager(logger log.Logger, newContext newContextFunc, newPersister newPe
 }
 
 func (m *Manager) Worker(ctx context.Context, oid int64, sid int64, replier Replier, broadcaster Broadcaster) (worker *Worker, err error) {
-	v, err, _ := m.group.Do(workerSingleFlightKey(oid), func() (interface{}, error) {
+	v, err, _ := m.group.Do(workerSingleFlightKey(oid), func() (any, error) {
 		status := OnlineStatus(xcontext.Status(ctx))
 
 		if old := m.get(ctx, oid); old != nil {
@@ -115,7 +118,7 @@ func (m *Manager) load(ctx context.Context, oid int64, sid int64, replier Replie
 		return nil, errors.WithMessagef(err, "allowBorn=%v status=%d", allowBorn, OnlineStatus(xcontext.Status(ctx)))
 	}
 
-	w := newWorker(ctx, m.log, newPersistManager(m.log, persister),
+	w := newWorker(ctx, m.log, m.appRouteTable, newPersistManager(m.log, persister),
 		replier, broadcaster, newTickers(m.PreparedTickFuncs),
 		m.notifyWorkerStopped, m.newContext)
 

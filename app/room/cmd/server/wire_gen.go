@@ -22,6 +22,7 @@ import (
 	"github.com/go-pantheon/roma/app/room/internal/app/room/gate/service"
 	"github.com/go-pantheon/roma/app/room/internal/client"
 	"github.com/go-pantheon/roma/app/room/internal/client/gate"
+	"github.com/go-pantheon/roma/app/room/internal/client/self"
 	"github.com/go-pantheon/roma/app/room/internal/conf"
 	"github.com/go-pantheon/roma/app/room/internal/core"
 	"github.com/go-pantheon/roma/app/room/internal/data"
@@ -42,6 +43,7 @@ func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Regi
 	if err != nil {
 		return nil, nil, err
 	}
+	selfRouteTable := self.NewSelfRouteTable(dataData)
 	roomRepo, err := data2.NewRoomMongoRepo(dataData, logger)
 	if err != nil {
 		cleanup()
@@ -49,26 +51,26 @@ func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Regi
 	}
 	roomProtoCache := data2.NewProtoCache()
 	roomDomain := domain.NewRoomDomain(roomRepo, logger, roomProtoCache)
-	routeTable := gate.NewRouteTable(dataData)
+	gateRouteTable := gate.NewGateRouteTable(dataData)
 	discovery, err := client.NewDiscovery(confRegistry)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	conn, err := gate.NewConn(logger, routeTable, discovery)
+	conn, err := gate.NewConn(logger, gateRouteTable, discovery)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	pushServiceClient := gate.NewClient(conn)
-	v, err := gate.NewConns(logger, routeTable, discovery)
+	v, err := gate.NewConns(logger, gateRouteTable, discovery)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	v2 := gate.NewClients(v)
 	pushRepo := data3.NewPushRepo(pushServiceClient, v2, logger)
-	manager, cleanup2 := core.NewManager(logger, roomDomain, pushRepo)
+	manager, cleanup2 := core.NewManager(logger, selfRouteTable, roomDomain, pushRepo)
 	httpFilter := filter.NewHttpFilter(manager)
 	servicelessUseCase := registry.NewServicelessUseCase()
 	roomUseCase := biz.NewRoomUseCase(manager, roomDomain, logger)

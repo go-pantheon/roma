@@ -347,11 +347,12 @@ func (x *Server) GetHealth() string {
 }
 
 type Data struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Redis         *Data_Redis            `protobuf:"bytes,1,opt,name=redis,proto3" json:"redis,omitempty"`
-	Mongo         *Data_Mongo            `protobuf:"bytes,2,opt,name=mongo,proto3" json:"mongo,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"open.v1"`
+	Redis                   *Data_Redis            `protobuf:"bytes,1,opt,name=redis,proto3" json:"redis,omitempty"`
+	Mongo                   *Data_Mongo            `protobuf:"bytes,2,opt,name=mongo,proto3" json:"mongo,omitempty"`
+	RouteTableAliveDuration *durationpb.Duration   `protobuf:"bytes,3,opt,name=route_table_alive_duration,json=routeTableAliveDuration,proto3" json:"route_table_alive_duration,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *Data) Reset() {
@@ -394,6 +395,13 @@ func (x *Data) GetRedis() *Data_Redis {
 func (x *Data) GetMongo() *Data_Mongo {
 	if x != nil {
 		return x.Mongo
+	}
+	return nil
+}
+
+func (x *Data) GetRouteTableAliveDuration() *durationpb.Duration {
+	if x != nil {
+		return x.RouteTableAliveDuration
 	}
 	return nil
 }
@@ -801,10 +809,11 @@ const file_room_internal_conf_conf_proto_rawDesc = "" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xfd\x03\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xd5\x04\n" +
 	"\x04Data\x124\n" +
 	"\x05redis\x18\x01 \x01(\v2\x1e.room.internal.conf.Data.RedisR\x05redis\x124\n" +
-	"\x05mongo\x18\x02 \x01(\v2\x1e.room.internal.conf.Data.MongoR\x05mongo\x1ay\n" +
+	"\x05mongo\x18\x02 \x01(\v2\x1e.room.internal.conf.Data.MongoR\x05mongo\x12V\n" +
+	"\x1aroute_table_alive_duration\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\x17routeTableAliveDuration\x1ay\n" +
 	"\x05Mongo\x12\x16\n" +
 	"\x06source\x18\x01 \x01(\tR\x06source\x12\x1a\n" +
 	"\bdatabase\x18\x02 \x01(\tR\bdatabase\x12<\n" +
@@ -861,18 +870,19 @@ var file_room_internal_conf_conf_proto_depIdxs = []int32{
 	9,  // 6: room.internal.conf.Server.grpc:type_name -> room.internal.conf.Server.GRPC
 	11, // 7: room.internal.conf.Data.redis:type_name -> room.internal.conf.Data.Redis
 	10, // 8: room.internal.conf.Data.mongo:type_name -> room.internal.conf.Data.Mongo
-	7,  // 9: room.internal.conf.Registry.etcd:type_name -> room.internal.conf.Etcd
-	12, // 10: room.internal.conf.Server.HTTP.timeout:type_name -> google.protobuf.Duration
-	12, // 11: room.internal.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	12, // 12: room.internal.conf.Data.Mongo.dial_timeout:type_name -> google.protobuf.Duration
-	12, // 13: room.internal.conf.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
-	12, // 14: room.internal.conf.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
-	12, // 15: room.internal.conf.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
-	16, // [16:16] is the sub-list for method output_type
-	16, // [16:16] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	12, // 9: room.internal.conf.Data.route_table_alive_duration:type_name -> google.protobuf.Duration
+	7,  // 10: room.internal.conf.Registry.etcd:type_name -> room.internal.conf.Etcd
+	12, // 11: room.internal.conf.Server.HTTP.timeout:type_name -> google.protobuf.Duration
+	12, // 12: room.internal.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	12, // 13: room.internal.conf.Data.Mongo.dial_timeout:type_name -> google.protobuf.Duration
+	12, // 14: room.internal.conf.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
+	12, // 15: room.internal.conf.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
+	12, // 16: room.internal.conf.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
+	17, // [17:17] is the sub-list for method output_type
+	17, // [17:17] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_room_internal_conf_conf_proto_init() }

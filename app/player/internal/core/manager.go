@@ -6,6 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
+	"github.com/go-pantheon/roma/app/player/internal/client/self"
 	"github.com/go-pantheon/roma/pkg/universe/data"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 )
@@ -16,12 +17,12 @@ type Manager struct {
 	pusher *data.PushRepo
 }
 
-func NewManager(logger log.Logger, userDo *domain.UserDomain, pusher *data.PushRepo) (*Manager, func()) {
+func NewManager(logger log.Logger, rt *self.SelfRouteTable, userDo *domain.UserDomain, pusher *data.PushRepo) (*Manager, func()) {
 	newPersister := func(ctx context.Context, uid int64, sid int64, allowBorn bool) (persister life.Persistent, born bool, err error) {
 		return newUserPersister(ctx, userDo, uid, sid, allowBorn)
 	}
 
-	lifeMgr, stopFunc := life.NewManager(logger, newContext, newPersister)
+	lifeMgr, stopFunc := life.NewManager(logger, rt, newContext, newPersister)
 	m := &Manager{
 		Manager: lifeMgr,
 		pusher:  pusher,

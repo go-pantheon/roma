@@ -355,12 +355,13 @@ func (x *Server) GetHealth() string {
 }
 
 type Data struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Redis         *Data_Redis            `protobuf:"bytes,1,opt,name=redis,proto3" json:"redis,omitempty"`
-	Mongo         *Data_Mongo            `protobuf:"bytes,2,opt,name=mongo,proto3" json:"mongo,omitempty"`
-	Postgresql    *Data_Postgresql       `protobuf:"bytes,3,opt,name=postgresql,proto3" json:"postgresql,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"open.v1"`
+	Redis                   *Data_Redis            `protobuf:"bytes,1,opt,name=redis,proto3" json:"redis,omitempty"`
+	Mongo                   *Data_Mongo            `protobuf:"bytes,2,opt,name=mongo,proto3" json:"mongo,omitempty"`
+	Postgresql              *Data_Postgresql       `protobuf:"bytes,3,opt,name=postgresql,proto3" json:"postgresql,omitempty"`
+	RouteTableAliveDuration *durationpb.Duration   `protobuf:"bytes,4,opt,name=route_table_alive_duration,json=routeTableAliveDuration,proto3" json:"route_table_alive_duration,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *Data) Reset() {
@@ -410,6 +411,13 @@ func (x *Data) GetMongo() *Data_Mongo {
 func (x *Data) GetPostgresql() *Data_Postgresql {
 	if x != nil {
 		return x.Postgresql
+	}
+	return nil
+}
+
+func (x *Data) GetRouteTableAliveDuration() *durationpb.Duration {
+	if x != nil {
+		return x.RouteTableAliveDuration
 	}
 	return nil
 }
@@ -1034,13 +1042,14 @@ const file_player_internal_conf_conf_proto_rawDesc = "" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xc8\x05\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xa0\x06\n" +
 	"\x04Data\x126\n" +
 	"\x05redis\x18\x01 \x01(\v2 .player.internal.conf.Data.RedisR\x05redis\x126\n" +
 	"\x05mongo\x18\x02 \x01(\v2 .player.internal.conf.Data.MongoR\x05mongo\x12E\n" +
 	"\n" +
 	"postgresql\x18\x03 \x01(\v2%.player.internal.conf.Data.PostgresqlR\n" +
-	"postgresql\x1ay\n" +
+	"postgresql\x12V\n" +
+	"\x1aroute_table_alive_duration\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\x17routeTableAliveDuration\x1ay\n" +
 	"\x05Mongo\x12\x16\n" +
 	"\x06source\x18\x01 \x01(\tR\x06source\x12\x1a\n" +
 	"\bdatabase\x18\x02 \x01(\tR\bdatabase\x12<\n" +
@@ -1117,21 +1126,22 @@ var file_player_internal_conf_conf_proto_depIdxs = []int32{
 	13, // 8: player.internal.conf.Data.redis:type_name -> player.internal.conf.Data.Redis
 	11, // 9: player.internal.conf.Data.mongo:type_name -> player.internal.conf.Data.Mongo
 	12, // 10: player.internal.conf.Data.postgresql:type_name -> player.internal.conf.Data.Postgresql
-	7,  // 11: player.internal.conf.Registry.etcd:type_name -> player.internal.conf.Etcd
-	14, // 12: player.internal.conf.Recharge.apple:type_name -> player.internal.conf.Recharge.Apple
-	15, // 13: player.internal.conf.Recharge.google:type_name -> player.internal.conf.Recharge.Google
-	16, // 14: player.internal.conf.Server.HTTP.timeout:type_name -> google.protobuf.Duration
-	16, // 15: player.internal.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	16, // 16: player.internal.conf.Data.Mongo.dial_timeout:type_name -> google.protobuf.Duration
-	16, // 17: player.internal.conf.Data.Postgresql.dial_timeout:type_name -> google.protobuf.Duration
-	16, // 18: player.internal.conf.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
-	16, // 19: player.internal.conf.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
-	16, // 20: player.internal.conf.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
-	21, // [21:21] is the sub-list for method output_type
-	21, // [21:21] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	16, // 11: player.internal.conf.Data.route_table_alive_duration:type_name -> google.protobuf.Duration
+	7,  // 12: player.internal.conf.Registry.etcd:type_name -> player.internal.conf.Etcd
+	14, // 13: player.internal.conf.Recharge.apple:type_name -> player.internal.conf.Recharge.Apple
+	15, // 14: player.internal.conf.Recharge.google:type_name -> player.internal.conf.Recharge.Google
+	16, // 15: player.internal.conf.Server.HTTP.timeout:type_name -> google.protobuf.Duration
+	16, // 16: player.internal.conf.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	16, // 17: player.internal.conf.Data.Mongo.dial_timeout:type_name -> google.protobuf.Duration
+	16, // 18: player.internal.conf.Data.Postgresql.dial_timeout:type_name -> google.protobuf.Duration
+	16, // 19: player.internal.conf.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
+	16, // 20: player.internal.conf.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
+	16, // 21: player.internal.conf.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
+	22, // [22:22] is the sub-list for method output_type
+	22, // [22:22] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_player_internal_conf_conf_proto_init() }

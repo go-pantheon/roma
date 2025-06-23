@@ -31,6 +31,7 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+*.swo
 
 # private config
 app/*/configs
@@ -50,4 +51,8 @@ vulcan/fixtures/outputs/
 
 .specstory/
 .cursor*
+
+.CLAUDE*
+.claude*
+
 .actrc

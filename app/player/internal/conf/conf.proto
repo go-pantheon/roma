@@ -54,7 +54,8 @@ message Data {
 	Redis redis = 1;
 	Mongo mongo = 2;
 	Postgresql postgresql = 3;
-
+	google.protobuf.Duration route_table_alive_duration = 4;
+	
 	message Mongo {
 		string source = 1;
 		string database = 2;

@@ -52,6 +52,7 @@ message Server {
 message Data {
 	Redis redis = 1;
 	Mongo mongo = 2;
+	google.protobuf.Duration route_table_alive_duration = 3;
 
 	message Mongo {
 		string source = 1;

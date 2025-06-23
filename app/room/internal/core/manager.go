@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/roma/app/room/internal/app/room/gate/domain"
+	"github.com/go-pantheon/roma/app/room/internal/client/self"
 	"github.com/go-pantheon/roma/pkg/universe/data"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 )
@@ -15,12 +16,12 @@ type Manager struct {
 	pusher *data.PushRepo
 }
 
-func NewManager(logger log.Logger, roomDo *domain.RoomDomain, pusher *data.PushRepo) (*Manager, func()) {
+func NewManager(logger log.Logger, rt *self.SelfRouteTable, roomDo *domain.RoomDomain, pusher *data.PushRepo) (*Manager, func()) {
 	newPersist := func(ctx context.Context, id, sid int64, allowBorn bool) (hold life.Persistent, born bool, err error) {
 		return newRoomPersister(ctx, roomDo, id, sid, allowBorn)
 	}
 
-	lifeMgr, stopFunc := life.NewManager(logger, newContext, newPersist)
+	lifeMgr, stopFunc := life.NewManager(logger, rt, newContext, newPersist)
 
 	m := &Manager{
 		Manager: lifeMgr,

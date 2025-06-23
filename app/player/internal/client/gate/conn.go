@@ -36,11 +36,11 @@ func NewConns(logger log.Logger, rt *RouteTable, r registry.Discovery) ([]*Conn,
 }
 
 type RouteTable struct {
-	routetable.RouteTable
+	routetable.ReadOnlyRouteTable
 }
 
 func NewRouteTable(d *data.Data) *RouteTable {
 	return &RouteTable{
-		RouteTable: routetable.NewRouteTable(serviceName, redis.New(d.Rdb)),
+		ReadOnlyRouteTable: routetable.NewReadOnlyRouteTable(redis.New(d.Rdb), serviceName),
 	}
 }

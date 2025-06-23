@@ -52,6 +52,7 @@ import (
 	service5 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/service"
 	"github.com/go-pantheon/roma/app/player/internal/client"
 	"github.com/go-pantheon/roma/app/player/internal/client/gate"
+	"github.com/go-pantheon/roma/app/player/internal/client/self"
 	"github.com/go-pantheon/roma/app/player/internal/conf"
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	"github.com/go-pantheon/roma/app/player/internal/data"
@@ -72,6 +73,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	if err != nil {
 		return nil, nil, err
 	}
+	selfRouteTable := self.NewSelfRouteTable(dataData)
 	userRepo, err := data2.NewUserMongoRepo(dataData, logger)
 	if err != nil {
 		cleanup()
@@ -98,7 +100,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	}
 	v2 := gate.NewClients(v)
 	pushRepo := data3.NewPushRepo(pushServiceClient, v2, logger)
-	manager, cleanup2 := core.NewManager(logger, userDomain, pushRepo)
+	manager, cleanup2 := core.NewManager(logger, selfRouteTable, userDomain, pushRepo)
 	httpFilter := filter.NewHttpFilter(manager)
 	servicelessUseCase := registry.NewServicelessUseCase()
 	devUseCase := biz.NewDevUseCase(manager, logger)
