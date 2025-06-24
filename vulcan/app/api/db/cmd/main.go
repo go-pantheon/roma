@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-pantheon/roma/vulcan/app/api/db/internal/gen/pool"
 	tmpl "github.com/go-pantheon/roma/vulcan/app/api/db/internal/template"
+	"github.com/go-pantheon/roma/vulcan/pkg/cmd"
 	"github.com/go-pantheon/roma/vulcan/pkg/filewriter"
 )
 
@@ -74,6 +75,11 @@ func main() {
 
 			slog.Info("generate db module codec", "file", filewriter.SprintGenPath(destFilePath))
 		}
+	}
+
+	_, err = cmd.CmdExecute(destDir, "gofmt", "-w", destDir)
+	if err != nil {
+		panic(err)
 	}
 
 	slog.Info("=== db module generated.", "dir", destPath)

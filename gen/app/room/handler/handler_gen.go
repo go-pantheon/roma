@@ -18,7 +18,7 @@ func RoomHandle(ctx context.Context, s *service.RoomServices, in xnet.TunnelMess
 	)
 
 	switch climod.ModuleID(in.GetMod()) {
-	
+
 	case climod.ModuleID_Room:
 		out, err = handleRoom(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	default:
@@ -26,4 +26,3 @@ func RoomHandle(ctx context.Context, s *service.RoomServices, in xnet.TunnelMess
 	}
 	return out, err
 }
-

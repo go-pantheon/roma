@@ -9,6 +9,7 @@ import (
 	"github.com/go-pantheon/roma/vulcan/app/api/client/internal/gens/codec"
 	"github.com/go-pantheon/roma/vulcan/app/api/client/internal/gens/handler"
 	"github.com/go-pantheon/roma/vulcan/app/api/client/internal/gens/service"
+	"github.com/go-pantheon/roma/vulcan/pkg/cmd"
 	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 	"github.com/go-pantheon/roma/vulcan/pkg/filewriter"
 	"github.com/pkg/errors"
@@ -95,9 +96,17 @@ func gen(base string, mcs []*compilers.ModsCompiler, scs []*compilers.SeqCompile
 	if err := os.RemoveAll(dir); err != nil {
 		return err
 	}
+
 	if err := os.Rename(tmpDir, dir); err != nil {
 		return err
 	}
+
+	_, err := cmd.CmdExecute(dir, "gofmt", "-w", dir)
+	if err != nil {
+		panic(err)
+	}
+
 	slog.Info("=== api files generated.", "dir", destPath)
+
 	return nil
 }

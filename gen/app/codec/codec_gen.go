@@ -2,7 +2,7 @@
 
 package codec
 
-import (	
+import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
@@ -30,7 +30,7 @@ func UnmarshalCS(mod, seq int32, bytes []byte) (cs proto.Message, err error) {
 }
 
 func UnmarshalSC(in *clipkt.Packet) (sc proto.Message, err error) {
-    if in == nil {
+	if in == nil {
 		err = errors.Errorf("packet is nil")
 		return
 	}

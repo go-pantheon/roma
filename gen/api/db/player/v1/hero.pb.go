@@ -69,9 +69,9 @@ func (x *UserHeroListProto) GetHeroes() map[int64]*UserHeroProto {
 // Hero
 type UserHeroProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id"`                                                                                    // @gotags: bson:"id" Hero ID
-	DataId        int64                  `protobuf:"varint,2,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty" bson:"data_id"`                                                              // @gotags: bson:"data_id" Hero DataID
-	Level         int64                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty" bson:"level"`                                                                              // @gotags: bson:"level" Level
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id"`                                                                                        // @gotags: bson:"id" Hero ID
+	DataId        int64                  `protobuf:"varint,2,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty" bson:"data_id"`                                                             // @gotags: bson:"data_id" Hero DataID
+	Level         int64                  `protobuf:"varint,3,opt,name=level,proto3" json:"level,omitempty" bson:"level"`                                                                               // @gotags: bson:"level" Level
 	Skills        map[int64]int64        `protobuf:"bytes,4,rep,name=skills,proto3" json:"skills,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value" bson:"skills"` // @gotags: bson:"skills" Skill ID -> Skill Level
 	Equips        []int64                `protobuf:"varint,5,rep,packed,name=equips,proto3" json:"equips,omitempty" bson:"equips"`                                                                     // @gotags: bson:"equips" Wearing Equipments
 	unknownFields protoimpl.UnknownFields

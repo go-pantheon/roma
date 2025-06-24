@@ -2,12 +2,14 @@ package data
 
 import (
 	"bytes"
+	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/go-pantheon/fabrica-util/camelcase"
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/field"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/sheet"
-	"github.com/pkg/errors"
 )
 
 var dataTemplate = `
@@ -17,8 +19,8 @@ var dataTemplate = `
 package gamedata
 
 import (
+  "{{.Org}}/fabrica-util/errors"
 	{{.Package}}_base "github.com/go-pantheon/roma/gen/gamedata/base/{{.Package}}"
-	"github.com/pkg/errors"
 )
 
 var _ = errors.New("import holding")
@@ -237,6 +239,7 @@ func (d *{{.DataStruct}}Gen) init() error {
 `
 
 type DataService struct {
+	Org           string
 	TablePath     string
 	Project       string
 	Package       string
@@ -276,6 +279,7 @@ func NewDataService(project string, sh sheet.Sheet) *DataService {
 		Project:   project,
 		TablePath: sh.GetMetadata().Path + ":" + sh.GetMetadata().Sheet,
 		IsTable:   sh.GetMetadata().Type == sheet.SheetTypeTable,
+		Org:       filepath.Clean(strings.Replace(project, filepath.Base(project), "", 1)),
 	}
 	packageName := sh.GetMetadata().Package
 	s.Package = camelcase.ToUnderScore(packageName)
@@ -291,49 +295,54 @@ func NewDataService(project string, sh sheet.Sheet) *DataService {
 	}
 
 	sh.WalkFieldMetadata(func(md *field.Metadata) error {
-		if md.JoinedType == field.JoinedType {
+		switch md.JoinedType {
+		case field.JoinedType:
 			s.JoinedStructs = append(s.JoinedStructs, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.JoinedName),
 			})
-		} else if md.JoinedType == field.JoinedListType {
+		case field.JoinedListType:
 			s.JoinedListStructs = append(s.JoinedListStructs, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.JoinedName),
 			})
-		} else if md.JoinedType == field.JoinedMapType {
+		case field.JoinedMapType:
 			s.JoinedMapStructs = append(s.JoinedMapStructs, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.JoinedName),
 			})
 		}
+
 		if md.GameStructName != "" {
 			s.GameStructs = append(s.GameStructs, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.GameStructName),
 			})
 		}
+
 		if md.GameStructListName != "" {
 			s.GameStructLists = append(s.GameStructLists, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.GameStructListName),
 			})
 		}
+
 		return nil
 	})
 
 	sh.WalkSubFieldMetadata(func(md *field.Metadata) error {
-		if md.JoinedType == field.JoinedType {
+		switch md.JoinedType {
+		case field.JoinedType:
 			s.JoinedSubStructs = append(s.JoinedSubStructs, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.JoinedName),
 			})
-		} else if md.JoinedType == field.JoinedListType {
+		case field.JoinedListType:
 			s.JoinedListSubStructs = append(s.JoinedListSubStructs, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.JoinedName),
 			})
-		} else if md.JoinedType == field.JoinedMapType {
+		case field.JoinedMapType:
 			s.JoinedMapSubStructs = append(s.JoinedMapSubStructs, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.JoinedName),

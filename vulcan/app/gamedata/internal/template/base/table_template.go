@@ -17,8 +17,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"{{.Org}}/fabrica-util/errors"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 // {{.Struct}}s {{.TablePath}}
@@ -100,8 +100,8 @@ type TableService struct {
 	*service
 }
 
-func NewTableService(sh sheet.Sheet) (*TableService, error) {
-	s, err := newService(sh)
+func NewTableService(project string, sh sheet.Sheet) (*TableService, error) {
+	s, err := newService(project, sh)
 	if err != nil {
 		return nil, err
 	}

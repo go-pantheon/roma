@@ -3,8 +3,8 @@
 package gamedata
 
 import (
+	"github.com/go-pantheon/fabrica-util/errors"
 	hero_base "github.com/go-pantheon/roma/gen/gamedata/base/hero"
-	"github.com/pkg/errors"
 )
 
 var _ = errors.New("import holding")

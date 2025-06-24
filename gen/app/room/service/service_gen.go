@@ -3,8 +3,8 @@
 package service
 
 import (
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	"github.com/google/wire"
-	"github.com/go-pantheon/roma/gen/api/client/message"
 )
 
 var RoomServicesProviderSet = wire.NewSet(

@@ -9,9 +9,9 @@ import (
 	"github.com/go-pantheon/fabrica-util/camelcase"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/sheet"
-	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/pkg"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/template/base"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/template/baseload"
+	"github.com/go-pantheon/roma/vulcan/pkg/cmd"
 	"github.com/go-pantheon/roma/vulcan/pkg/filewriter"
 )
 
@@ -60,13 +60,16 @@ func main() {
 	if err := os.RemoveAll(destDir); err != nil {
 		panic(err)
 	}
+
 	if err := os.Rename(tmpDir, destDir); err != nil {
 		panic(err)
 	}
-	_, err = pkg.CmdExecute(destDir, "gofmt", "-w", destDir)
+
+	_, err = cmd.CmdExecute(destDir, "gofmt", "-w", destDir)
 	if err != nil {
 		panic(err)
 	}
+
 	slog.Info("=== Base directory generated.", "dir", destPath)
 }
 
@@ -81,11 +84,11 @@ func genBase(dir string, sh sheet.Sheet) (err error) {
 	var s filewriter.GenService
 	switch md.Type {
 	case sheet.SheetTypeTable:
-		if s, err = base.NewTableService(sh); err != nil {
+		if s, err = base.NewTableService(project, sh); err != nil {
 			return
 		}
 	case sheet.SheetTypeKV:
-		if s, err = base.NewKvService(sh); err != nil {
+		if s, err = base.NewKvService(project, sh); err != nil {
 			return
 		}
 	}

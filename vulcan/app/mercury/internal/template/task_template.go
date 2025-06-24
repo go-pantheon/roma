@@ -15,11 +15,12 @@ var taskTemplate = `
 package {{.UnderScoreMod}}
 
 import (
-	"{{.Project}}/gen/api/client/message"
-	"{{.Project}}/gen/api/client/module"
-	"{{.Project}}/gen/api/client/sequence"
-	"{{.Project}}/mercury/internal/task"
 	"reflect"
+
+	climsg "{{.Project}}/gen/api/client/message"
+	climod "{{.Project}}/gen/api/client/module"
+	cliseq "{{.Project}}/gen/api/client/sequence"
+	"{{.Project}}/mercury/internal/task"
 )
 
 var _ task.Taskable = (*{{.Api.UpperCamelName}}Task)(nil)

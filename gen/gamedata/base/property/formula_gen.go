@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/go-pantheon/fabrica-util/errors"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 // FormulaDataBaseGens excel/Property/Attribute.xlsx:Formula

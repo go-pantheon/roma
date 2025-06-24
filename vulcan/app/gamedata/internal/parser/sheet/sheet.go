@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/field"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/line"
-	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/pkg"
+	"github.com/go-pantheon/roma/vulcan/pkg/align"
 	"github.com/pkg/errors"
 	"github.com/xuri/excelize/v2"
 )
@@ -77,7 +77,7 @@ func getCols(rows [][]string) [][]string {
 	results := make([][]string, field.KvMetadataColSize)
 	newRows := make([][]string, 0, len(rows))
 	for _, row := range rows {
-		newRows = append(newRows, pkg.Align(row, field.KvMetadataColSize))
+		newRows = append(newRows, align.Align(row, field.KvMetadataColSize))
 	}
 
 	for i, row := range newRows {

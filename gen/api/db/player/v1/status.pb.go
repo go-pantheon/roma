@@ -24,11 +24,11 @@ const (
 // Basic Information
 type UserStatusProto struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
-	OnlineIp           string                 `protobuf:"bytes,1,opt,name=online_ip,json=onlineIp,proto3" json:"online_ip,omitempty" bson:"online_ip"`                                  // @gotags: bson:"online_ip" Online IP Address
-	LoginAt            int64                  `protobuf:"varint,2,opt,name=login_at,json=loginAt,proto3" json:"login_at,omitempty" bson:"login_at"`                                    // @gotags: bson:"login_at" Login Time(Unix Timestamp)
-	LogoutAt           int64                  `protobuf:"varint,3,opt,name=logout_at,json=logoutAt,proto3" json:"logout_at,omitempty" bson:"logout_at"`                                 // @gotags: bson:"logout_at" Logout Time(Unix Timestamp)
-	LatestOnlineAt     int64                  `protobuf:"varint,4,opt,name=latest_online_at,json=latestOnlineAt,proto3" json:"latest_online_at,omitempty" bson:"last_online_at"`             // @gotags: bson:"last_online_at" Last Online Time(Unix Timestamp)
-	NextDailyResetAt   int64                  `protobuf:"varint,5,opt,name=next_daily_reset_at,json=nextDailyResetAt,proto3" json:"next_daily_reset_at,omitempty" bson:"next_daily_reset_at"`     // @gotags: bson:"next_daily_reset_at" Next Daily Reset Time(Unix Timestamp)
+	OnlineIp           string                 `protobuf:"bytes,1,opt,name=online_ip,json=onlineIp,proto3" json:"online_ip,omitempty" bson:"online_ip"`                                             // @gotags: bson:"online_ip" Online IP Address
+	LoginAt            int64                  `protobuf:"varint,2,opt,name=login_at,json=loginAt,proto3" json:"login_at,omitempty" bson:"login_at"`                                                // @gotags: bson:"login_at" Login Time(Unix Timestamp)
+	LogoutAt           int64                  `protobuf:"varint,3,opt,name=logout_at,json=logoutAt,proto3" json:"logout_at,omitempty" bson:"logout_at"`                                            // @gotags: bson:"logout_at" Logout Time(Unix Timestamp)
+	LatestOnlineAt     int64                  `protobuf:"varint,4,opt,name=latest_online_at,json=latestOnlineAt,proto3" json:"latest_online_at,omitempty" bson:"last_online_at"`                   // @gotags: bson:"last_online_at" Last Online Time(Unix Timestamp)
+	NextDailyResetAt   int64                  `protobuf:"varint,5,opt,name=next_daily_reset_at,json=nextDailyResetAt,proto3" json:"next_daily_reset_at,omitempty" bson:"next_daily_reset_at"`      // @gotags: bson:"next_daily_reset_at" Next Daily Reset Time(Unix Timestamp)
 	DailyOnlineSeconds int64                  `protobuf:"varint,6,opt,name=daily_online_seconds,json=dailyOnlineSeconds,proto3" json:"daily_online_seconds,omitempty" bson:"daily_online_seconds"` // @gotags: bson:"daily_online_seconds" Daily Online Time(Seconds)
 	TotalOnlineSeconds int64                  `protobuf:"varint,7,opt,name=total_online_seconds,json=totalOnlineSeconds,proto3" json:"total_online_seconds,omitempty" bson:"total_online_seconds"` // @gotags: bson:"total_online_seconds" Total Online Time(Seconds)
 	unknownFields      protoimpl.UnknownFields

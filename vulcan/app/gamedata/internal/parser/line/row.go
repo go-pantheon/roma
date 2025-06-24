@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/field"
-	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/pkg"
+	"github.com/go-pantheon/roma/vulcan/pkg/align"
 	"github.com/pkg/errors"
 )
 
@@ -86,7 +86,7 @@ func newRows(mds []*field.Metadata, values [][]string) (rows []*RowGroup, err er
 }
 
 func newRow(mds []*field.Metadata, values []string) (row *Row, err error) {
-	values = pkg.Align(values, len(mds))
+	values = align.Align(values, len(mds))
 
 	row = &Row{
 		FieldMap: make(map[string]*field.Field, len(mds)),

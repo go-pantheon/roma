@@ -20,7 +20,7 @@ func handleHero(ctx context.Context, s *service.PlayerServices, mod, seq int32, 
 	}
 
 	var (
-		sc  proto.Message
+		sc proto.Message
 	)
 	switch cliseq.HeroSeq(seq) {
 

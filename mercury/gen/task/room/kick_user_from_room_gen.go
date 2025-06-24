@@ -3,11 +3,12 @@
 package room
 
 import (
-	"github.com/go-pantheon/roma/gen/api/client/message"
-	"github.com/go-pantheon/roma/gen/api/client/module"
-	"github.com/go-pantheon/roma/gen/api/client/sequence"
-	"github.com/go-pantheon/roma/mercury/internal/task"
 	"reflect"
+
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
+	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
+	"github.com/go-pantheon/roma/mercury/internal/task"
 )
 
 var _ task.Taskable = (*KickUserFromRoomTask)(nil)

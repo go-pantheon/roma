@@ -1,12 +1,16 @@
 package base
 
 import (
+	"path/filepath"
+	"strings"
+
 	"github.com/go-pantheon/fabrica-util/camelcase"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/field"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/sheet"
 )
 
 type service struct {
+	Org       string
 	TablePath string
 
 	Package   string
@@ -29,9 +33,10 @@ type DataBaseField struct {
 	Comment string
 }
 
-func newService(sh sheet.Sheet) (*service, error) {
+func newService(project string, sh sheet.Sheet) (*service, error) {
 	md := sh.GetMetadata()
 	s := &service{}
+	s.Org = filepath.Clean(strings.Replace(project, filepath.Base(project), "", 1))
 	s.TablePath = md.Path + ":" + md.Sheet
 	s.Package = camelcase.ToUnderScore(md.Package)
 	s.LowerName = camelcase.ToLowerCamel(md.Name)

@@ -20,7 +20,7 @@ func handleStorage(ctx context.Context, s *service.PlayerServices, mod, seq int3
 	}
 
 	var (
-		sc  proto.Message
+		sc proto.Message
 	)
 	switch cliseq.StorageSeq(seq) {
 

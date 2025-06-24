@@ -8,9 +8,9 @@ import (
 	"github.com/go-pantheon/fabrica-util/camelcase"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/sheet"
-	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/pkg"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/template/data"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/template/dataload"
+	"github.com/go-pantheon/roma/vulcan/pkg/cmd"
 	"github.com/go-pantheon/roma/vulcan/pkg/filewriter"
 	"github.com/pkg/errors"
 )
@@ -56,7 +56,7 @@ func main() {
 		panic(err)
 	}
 
-	_, err = pkg.CmdExecute(destDir, "gofmt", "-w", destDir)
+	_, err = cmd.CmdExecute(destDir, "gofmt", "-w", destDir)
 	if err != nil {
 		panic(err)
 	}

@@ -85,13 +85,13 @@ func (OrderAckState) EnumDescriptor() ([]byte, []int) {
 // Order Data
 type OrderProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" pgname:"id" primarykey:"auto"`                         // @gotags: pgname:"id" primarykey:"auto" Order ID
-	Info          *OrderInfoProto        `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty" pgname:"info" pgtype:"jsonb"`                      // @gotags: pgname:"info" pgtype:"jsonb" Order Info
-	Uid           int64                  `protobuf:"varint,3,opt,name=uid,proto3" json:"uid,omitempty" pgname:"uid"`                       // @gotags: pgname:"uid" Confirmation Status
-	Store         string                 `protobuf:"bytes,4,opt,name=store,proto3" json:"store,omitempty" pgname:"store"`                    // @gotags: pgname:"store" Payment Platform
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" pgname:"id" primarykey:"auto"`             // @gotags: pgname:"id" primarykey:"auto" Order ID
+	Info          *OrderInfoProto        `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty" pgname:"info" pgtype:"jsonb"`           // @gotags: pgname:"info" pgtype:"jsonb" Order Info
+	Uid           int64                  `protobuf:"varint,3,opt,name=uid,proto3" json:"uid,omitempty" pgname:"uid"`                            // @gotags: pgname:"uid" Confirmation Status
+	Store         string                 `protobuf:"bytes,4,opt,name=store,proto3" json:"store,omitempty" pgname:"store"`                       // @gotags: pgname:"store" Payment Platform
 	TransId       string                 `protobuf:"bytes,5,opt,name=trans_id,json=transId,proto3" json:"trans_id,omitempty" pgname:"trans_id"` // @gotags: pgname:"trans_id" Transaction ID
-	Ack           int32                  `protobuf:"varint,6,opt,name=ack,proto3" json:"ack,omitempty" pgname:"ack"`                       // @gotags: pgname:"ack" Confirmation Status
-	AckAt         int64                  `protobuf:"varint,7,opt,name=ack_at,json=ackAt,proto3" json:"ack_at,omitempty" pgname:"ack_at"`      // @gotags: pgname:"ack_at" Confirmation Time
+	Ack           int32                  `protobuf:"varint,6,opt,name=ack,proto3" json:"ack,omitempty" pgname:"ack"`                            // @gotags: pgname:"ack" Confirmation Status
+	AckAt         int64                  `protobuf:"varint,7,opt,name=ack_at,json=ackAt,proto3" json:"ack_at,omitempty" pgname:"ack_at"`        // @gotags: pgname:"ack_at" Confirmation Time
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

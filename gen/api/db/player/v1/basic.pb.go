@@ -24,8 +24,8 @@ const (
 // Basic Information
 type UserBasicProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" bson:"name"`                             // @gotags: bson:"name"
-	Gender        int32                  `protobuf:"varint,2,opt,name=gender,proto3" json:"gender,omitempty" bson:"gender"`                        // @gotags: bson:"gender" Gender. 0: Default Not Selected Gender, 1: Male, 2: Female
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" bson:"name"`                                   // @gotags: bson:"name"
+	Gender        int32                  `protobuf:"varint,2,opt,name=gender,proto3" json:"gender,omitempty" bson:"gender"`                            // @gotags: bson:"gender" Gender. 0: Default Not Selected Gender, 1: Male, 2: Female
 	CreatedAt     int64                  `protobuf:"varint,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" bson:"created_at"` // @gotags: bson:"created_at"
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

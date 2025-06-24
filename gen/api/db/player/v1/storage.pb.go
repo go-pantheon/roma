@@ -24,8 +24,8 @@ const (
 // Storage
 type UserStorageProto struct {
 	state         protoimpl.MessageState           `protogen:"open.v1"`
-	Items         map[int64]uint64                 `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value" bson:"items"`                                     // @gotags: bson:"items"
-	Packs         map[int64]uint64                 `protobuf:"bytes,2,rep,name=packs,proto3" json:"packs,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value" bson:"packs"`                                     // @gotags: bson:"packs"
+	Items         map[int64]uint64                 `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value" bson:"items"`                                              // @gotags: bson:"items"
+	Packs         map[int64]uint64                 `protobuf:"bytes,2,rep,name=packs,proto3" json:"packs,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value" bson:"packs"`                                              // @gotags: bson:"packs"
 	RecoveryInfos map[int64]*ItemRecoveryInfoProto `protobuf:"bytes,3,rep,name=recovery_infos,json=recoveryInfos,proto3" json:"recovery_infos,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value" bson:"recovery_infos"` // @gotags: bson:"recovery_infos"
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -85,7 +85,7 @@ func (x *UserStorageProto) GetRecoveryInfos() map[int64]*ItemRecoveryInfoProto {
 // Item Recovery Info
 type ItemRecoveryInfoProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DataId        int64                  `protobuf:"varint,1,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty" bson:"data_id"`          // @gotags: bson:"data_id" Item DataID
+	DataId        int64                  `protobuf:"varint,1,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty" bson:"data_id"`             // @gotags: bson:"data_id" Item DataID
 	UpdatedAt     int64                  `protobuf:"varint,2,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" bson:"updated_at"` // @gotags: bson:"updated_at" Last Updated Time(Unix Timestamp)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

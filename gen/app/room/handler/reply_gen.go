@@ -33,7 +33,7 @@ func NewRoomResponseProto(mod, seq int32, Obj int64, in proto.Message) (ret *int
 		return
 	}
 	ret = NewRoomResponseProtoByData(mod, seq, Obj, data)
-	return 
+	return
 }
 
 func NewRoomResponseProtoByData(mod, seq int32, Obj int64, data []byte) (p *intrav1.TunnelResponse) {
@@ -45,4 +45,3 @@ func NewRoomResponseProtoByData(mod, seq int32, Obj int64, data []byte) (p *intr
 	}
 	return
 }
-

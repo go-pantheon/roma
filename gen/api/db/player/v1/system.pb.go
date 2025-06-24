@@ -25,7 +25,7 @@ const (
 type UserSystemProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CurrentGenId  int64                  `protobuf:"varint,1,opt,name=current_gen_id,json=currentGenId,proto3" json:"current_gen_id,omitempty" bson:"current_gen_id"` // @gotags: bson:"current_gen_id" Current Maximum Auto-Increment ID
-	Events        []*WorkerEvent         `protobuf:"bytes,2,rep,name=events,proto3" json:"events,omitempty" bson:"events"`                                    // @gotags: bson:"events"
+	Events        []*WorkerEvent         `protobuf:"bytes,2,rep,name=events,proto3" json:"events,omitempty" bson:"events"`                                            // @gotags: bson:"events"
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -77,7 +77,7 @@ func (x *UserSystemProto) GetEvents() []*WorkerEvent {
 // Worker Event
 type WorkerEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id"`            // @gotags: bson:"id"
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id"`              // @gotags: bson:"id"
 	Type          int64                  `protobuf:"varint,2,opt,name=type,proto3" json:"type,omitempty" bson:"type"`        // @gotags: bson:"type"
 	Args          []int64                `protobuf:"varint,3,rep,packed,name=args,proto3" json:"args,omitempty" bson:"args"` // @gotags: bson:"args"
 	unknownFields protoimpl.UnknownFields

@@ -20,7 +20,7 @@ func handleDev(ctx context.Context, s *service.PlayerServices, mod, seq int32, o
 	}
 
 	var (
-		sc  proto.Message
+		sc proto.Message
 	)
 	switch cliseq.DevSeq(seq) {
 

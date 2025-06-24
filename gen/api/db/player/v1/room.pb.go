@@ -23,7 +23,7 @@ const (
 
 type UserRoomProto struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id"`                                // @gotags: bson:"id" Room ID
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id"`                                        // @gotags: bson:"id" Room ID
 	IsCreator     bool                   `protobuf:"varint,2,opt,name=is_creator,json=isCreator,proto3" json:"is_creator,omitempty" bson:"is_creator"` // @gotags: bson:"is_creator" Is Creator of the Room
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

@@ -17,8 +17,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"{{.Org}}/fabrica-util/errors"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 // {{.Struct}} {{.TablePath}}
@@ -59,8 +59,8 @@ type KvService struct {
 	*service
 }
 
-func NewKvService(sh sheet.Sheet) (*KvService, error) {
-	s, err := newService(sh)
+func NewKvService(project string, sh sheet.Sheet) (*KvService, error) {
+	s, err := newService(project, sh)
 	if err != nil {
 		return nil, err
 	}

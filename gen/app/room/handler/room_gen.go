@@ -20,7 +20,7 @@ func handleRoom(ctx context.Context, s *service.RoomServices, mod, seq int32, ob
 	}
 
 	var (
-		sc  proto.Message
+		sc proto.Message
 	)
 	switch cliseq.RoomSeq(seq) {
 

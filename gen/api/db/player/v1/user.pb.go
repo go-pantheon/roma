@@ -24,11 +24,11 @@ const (
 // User Data
 type UserProto struct {
 	state         protoimpl.MessageState      `protogen:"open.v1"`
-	Id            int64                       `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id" pgname:"id" primarykey:"bigint"`                                                                                     // @gotags: bson:"id" pgname:"id" primarykey:"bigint"
-	Sid           int64                       `protobuf:"varint,2,opt,name=sid,proto3" json:"sid,omitempty" bson:"sid" pgname:"sid"`                                                                                   // @gotags: bson:"sid" pgname:"sid"
+	Id            int64                       `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" bson:"id" pgname:"id" primarykey:"bigint"`                                                          // @gotags: bson:"id" pgname:"id" primarykey:"bigint"
+	Sid           int64                       `protobuf:"varint,2,opt,name=sid,proto3" json:"sid,omitempty" bson:"sid" pgname:"sid"`                                                                          // @gotags: bson:"sid" pgname:"sid"
 	Modules       map[string]*UserModuleProto `protobuf:"bytes,10,rep,name=modules,proto3" json:"modules,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value" bson:"modules"` // @gotags: bson:"modules"
-	Version       int64                       `protobuf:"varint,11,opt,name=version,proto3" json:"version,omitempty" bson:"version" pgname:"version"`                                                                          // @gotags: bson:"version" pgname:"version" Player Data Version
-	ServerVersion string                      `protobuf:"bytes,12,opt,name=server_version,json=serverVersion,proto3" json:"server_version,omitempty" bson:"server_version" pgname:"server_version"`                                          // @gotags: bson:"server_version" pgname:"server_version" Current Server Version
+	Version       int64                       `protobuf:"varint,11,opt,name=version,proto3" json:"version,omitempty" bson:"version" pgname:"version"`                                                         // @gotags: bson:"version" pgname:"version" Player Data Version
+	ServerVersion string                      `protobuf:"bytes,12,opt,name=server_version,json=serverVersion,proto3" json:"server_version,omitempty" bson:"server_version" pgname:"server_version"`           // @gotags: bson:"server_version" pgname:"server_version" Current Server Version
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

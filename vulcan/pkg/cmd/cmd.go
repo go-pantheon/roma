@@ -1,4 +1,4 @@
-package pkg
+package cmd
 
 import (
 	"bytes"
@@ -6,19 +6,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/fabrica-util/errors"
 )
-
-func Align(slice []string, size int) []string {
-	if len(slice) > size {
-		return slice[:size]
-	}
-
-	if len(slice) < size {
-		slice = append(slice, make([]string, size-len(slice))...)
-	}
-	return slice
-}
 
 func CmdExecute(dir, name string, arg ...string) (string, error) {
 	cmd := exec.Command(name, arg...)

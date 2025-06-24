@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/go-pantheon/fabrica-util/camelcase"
-	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/pkg"
+	"github.com/go-pantheon/roma/vulcan/pkg/align"
 	"github.com/pkg/errors"
 )
 
@@ -87,10 +87,10 @@ func NewMetadataList(rows [][]string) (mds []*Metadata, err error) {
 	}
 
 	typeRow := rows[TypeRowIndex]
-	commentRow := pkg.Align(rows[CommentRowIndex], len(typeRow))
-	nameRow := pkg.Align(rows[NameRowIndex], len(typeRow))
-	protoRow := pkg.Align(rows[ProtoRowIndex], len(typeRow))
-	conditionRow := pkg.Align(rows[ConditionRowIndex], len(typeRow))
+	commentRow := align.Align(rows[CommentRowIndex], len(typeRow))
+	nameRow := align.Align(rows[NameRowIndex], len(typeRow))
+	protoRow := align.Align(rows[ProtoRowIndex], len(typeRow))
+	conditionRow := align.Align(rows[ConditionRowIndex], len(typeRow))
 
 	mds = make([]*Metadata, 0, len(nameRow))
 	names := make(map[string]*Metadata, len(nameRow))

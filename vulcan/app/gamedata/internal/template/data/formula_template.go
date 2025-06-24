@@ -2,15 +2,16 @@ package data
 
 import (
 	"bytes"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
 
 	"github.com/go-pantheon/fabrica-util/camelcase"
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/field"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/line"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/sheet"
-	"github.com/pkg/errors"
 )
 
 var formulaTemplate = `
@@ -40,6 +41,7 @@ func (d *{{$dataStruct}}Gen) Calc{{.Attribute}}(
 `
 
 type FormulaService struct {
+	Org        string
 	Project    string
 	Package    string
 	DataStruct string
@@ -55,6 +57,7 @@ type FormulaField struct {
 func NewFormulaService(project string, sh sheet.Sheet) *FormulaService {
 	s := &FormulaService{
 		Project: project,
+		Org:     filepath.Clean(strings.Replace(project, filepath.Base(project), "", 1)),
 	}
 	packageName := sh.GetMetadata().Package
 	s.Package = camelcase.ToUnderScore(packageName)

@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-pantheon/fabrica-util/errors"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
-	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"	
+	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
 	"google.golang.org/protobuf/proto"
 )
 
