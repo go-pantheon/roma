@@ -29,7 +29,6 @@ version:
 # Generate wire
 wire:
 	@find app -type d -depth 1 -print | xargs -L 1 bash -c 'echo "wire: $$0" && cd "$$0" && $(MAKE) wire'
-	cd mercury/cmd && wire
 
 .PHONY: proto
 # Generate internal proto pb.go files.
@@ -56,6 +55,15 @@ db:
 		fi; \
 	done
 	bin/tools/gen-api-db
+
+.PHONY: run
+# Run app
+run:
+	@if [ -z "$(app)" ]; then \
+  	echo "error: app must exist. ex: app=player"; \
+	else \
+		echo "run: app/$(app)" && cd app/$(app) && $(MAKE) run; \
+	fi
 
 .PHONY: build
 # Build app execute file. Use app=app_name to build specific service.
@@ -88,7 +96,7 @@ stop:
 # Tail app service log file. Must use app=app_name to tail specific service.
 log:
 	@if [ -z "$(app)" ]; then \
-  	    echo "error: app must exist. ex: app=player"; \
+  	echo "error: app must exist. ex: app=player"; \
 	else \
 		echo "log: app/$(app)" && cd app/$(app) && $(MAKE) log; \
 	fi

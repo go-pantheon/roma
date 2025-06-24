@@ -20,20 +20,15 @@ version:
 .PHONY: wire
 # Generate wire
 wire:
-	cd cmd/server && wire
+	@cd cmd/server && wire
 
 .PHONY: build
 # Build executable file
 build:
 	@rm -rf bin/ && mkdir -p bin/ && $(GOBUILD) -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
-.PHONY: test
-# Test
-test:
-	go test -v ./... -cover
-
 .PHONY: run
-run: start log
+run: stop build start log
 
 .PHONY: start
 start:
@@ -47,6 +42,11 @@ stop:
 # tail -f app/player/bin/debug.log
 log:
 	@tail -20f bin/debug.log
+
+.PHONY: test
+# Test
+test:
+	go test -v ./... -cover
 
 .PHONY: docker
 docker:
