@@ -38,7 +38,7 @@ type Manager struct {
 }
 
 type newContextFunc func(ctx context.Context, w *Worker) Context
-type newPersisterFunc func(ctx context.Context, id int64, sid int64, allowBorn bool) (persister Persistent, born bool, err error)
+type newPersisterFunc func(ctx context.Context, id int64, allowBorn bool) (persister Persistent, born bool, err error)
 
 func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, newContext newContextFunc, newPersister newPersisterFunc) (m *Manager, stopFunc func() error) {
 	m = &Manager{
@@ -65,7 +65,7 @@ func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, newContext n
 	}
 }
 
-func (m *Manager) Worker(ctx context.Context, oid int64, sid int64, replier Replier, broadcaster Broadcaster) (worker *Worker, err error) {
+func (m *Manager) Worker(ctx context.Context, oid int64, replier Replier, broadcaster Broadcaster) (worker *Worker, err error) {
 	v, err, _ := m.group.Do(workerSingleFlightKey(oid), func() (any, error) {
 		status := OnlineStatus(xcontext.Status(ctx))
 
@@ -89,7 +89,7 @@ func (m *Manager) Worker(ctx context.Context, oid int64, sid int64, replier Repl
 
 		allowBorn := !IsInnerStatus(status)
 
-		return m.load(ctx, oid, sid, replier, broadcaster, allowBorn)
+		return m.load(ctx, oid, replier, broadcaster, allowBorn)
 	})
 	if err != nil {
 		return
@@ -112,8 +112,8 @@ func (m *Manager) get(_ context.Context, id int64) *Worker {
 	return m.workers.Get(id)
 }
 
-func (m *Manager) load(ctx context.Context, oid int64, sid int64, replier Replier, broadcaster Broadcaster, allowBorn bool) (*Worker, error) {
-	persister, born, err := m.newPersister(ctx, oid, sid, allowBorn)
+func (m *Manager) load(ctx context.Context, oid int64, replier Replier, broadcaster Broadcaster, allowBorn bool) (*Worker, error) {
+	persister, born, err := m.newPersister(ctx, oid, allowBorn)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "allowBorn=%v status=%d", allowBorn, OnlineStatus(xcontext.Status(ctx)))
 	}
