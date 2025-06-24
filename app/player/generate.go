@@ -1,3 +1,3 @@
 package player
 
-//go:generate  ../../sh/gen.sh datas
+//go:generate make generate -C ../../

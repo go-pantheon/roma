@@ -23,13 +23,13 @@ import (
 )
 
 var (
-	flagConf    string
-	gameDataDir string
+	flagConf        string
+	flagGameDataDir string
 )
 
 func init() {
 	flag.StringVar(&flagConf, "conf", "app/player/configs", "config path, eg: -conf config.yaml")
-	flag.StringVar(&gameDataDir, "gamedata", "gen/gamedata/json", "config path, eg: -gamedata json")
+	flag.StringVar(&flagGameDataDir, "gamedata", "gen/gamedata/json", "gamedata path, eg: -gamedata json")
 }
 
 func newApp(logger log.Logger, hs *http.Server, gs *grpc.Server, health *health.Server, label *conf.Label, rr registry.Registrar) *kratos.App {
@@ -66,7 +66,7 @@ func main() {
 		panic(err)
 	}
 
-	gameDataDir, err = filepath.Abs(gameDataDir)
+	flagGameDataDir, err = filepath.Abs(flagGameDataDir)
 	if err != nil {
 		panic(err)
 	}
@@ -86,9 +86,9 @@ func main() {
 		panic(err)
 	}
 
-	xtime.Init(xtime.Config{
-		Language: xtime.Language(bc.Label.Language),
-	})
+	if err := xtime.InitSimple(bc.Label.Language); err != nil {
+		panic(err)
+	}
 
 	var rc conf.Registry
 	if err := c.Scan(&rc); err != nil {
@@ -99,10 +99,10 @@ func main() {
 		panic(err)
 	}
 
-	logger := xlog.Init(bc.Log.Type, bc.Log.Level, bc.Label.Profile, bc.Label.Color, bc.Label.Service, bc.Label.Version, bc.Label.Node)
 	metrics.Init(bc.Label.Service)
+	gamedata.Load(flagGameDataDir)
 
-	gamedata.Load(gameDataDir)
+	logger := xlog.Init(bc.Log.Type, bc.Log.Level, bc.Label.Profile, bc.Label.Color, bc.Label.Service, bc.Label.Version, bc.Label.Node)
 
 	app, cleanup, err := initApp(bc.Server, bc.Label, bc.Recharge, &rc, bc.Data, logger, health.NewServer(bc.Server.Health))
 	if err != nil {

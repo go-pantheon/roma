@@ -12,10 +12,10 @@ log:
   level: debug
 server:
   http:
-    addr: 0.0.0.0:8102
+    addr: 0.0.0.0:8103
     timeout: 5s
   grpc:
-    addr: 0.0.0.0:9102
+    addr: 0.0.0.0:9103
     timeout: 5s
 data:
   route_table_alive_duration: 600s
