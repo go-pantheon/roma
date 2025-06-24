@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	ModuleKey = "hero"
+	ModuleKey = life.ModuleKey("hero")
 )
 
 func init() {
@@ -29,6 +29,8 @@ func NewHeroList() life.Module {
 	}
 	return o
 }
+
+func (o *HeroList) IsLifeModule() {}
 
 func (o *HeroList) EncodeServer() proto.Message {
 	p := dbv1.UserHeroListProtoPool.Get()

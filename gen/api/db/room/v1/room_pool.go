@@ -30,7 +30,6 @@ func (pool *roomProtoPool) Get() *RoomProto {
 }
 
 func (pool *roomProtoPool) Put(p *RoomProto) {
-
 	for _, v := range p.Members {
 		RoomMemberProtoPool.Put(v)
 	}

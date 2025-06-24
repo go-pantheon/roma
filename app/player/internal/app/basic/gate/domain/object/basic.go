@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	ModuleKey = "basic"
+	ModuleKey = life.ModuleKey("basic")
 )
 
 const (
@@ -37,6 +37,8 @@ type Basic struct {
 func NewBasic() life.Module {
 	return &Basic{}
 }
+
+func (o *Basic) IsLifeModule() {}
 
 func (o *Basic) EncodeServer() proto.Message {
 	p := dbv1.UserBasicProtoPool.Get()

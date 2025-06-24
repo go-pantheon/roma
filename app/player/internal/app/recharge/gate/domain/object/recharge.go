@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	ModuleKey = "recharge"
+	ModuleKey = life.ModuleKey("recharge")
 )
 
 const (
@@ -46,10 +46,7 @@ func buildRecharge(cents int64) *Recharge {
 	return r
 }
 
-func NewRechargeProto() *dbv1.UserRechargeProto {
-	p := &dbv1.UserRechargeProto{}
-	return p
-}
+func (o *Recharge) IsLifeModule() {}
 
 func (o *Recharge) EncodeServer() proto.Message {
 	p := dbv1.UserRechargeProtoPool.Get()

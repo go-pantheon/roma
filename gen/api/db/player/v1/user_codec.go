@@ -5,21 +5,33 @@ package dbv1
 import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/pkg/universe/life"
-	"google.golang.org/protobuf/proto"
 )
 
-func EncodeUserModuleProto(module life.Module) (*UserModuleProto, error) {
+func EncodeUserModuleProto(module life.Module) *UserModuleProto {
 	p := module.EncodeServer()
-	mp := UserModuleProtoPool.Get()
 
-	encoder, ok := p.(userModuleProtoEncoder)
-	if !ok {
-		return nil, errors.Errorf("UserModuleProto encode invalid type: %T", module)
+	switch p.(type) {
+	case *UserBasicProto:
+		return p.(*UserBasicProto).Wrap()
+	case *UserDevProto:
+		return p.(*UserDevProto).Wrap()
+	case *UserStatusProto:
+		return p.(*UserStatusProto).Wrap()
+	case *UserSystemProto:
+		return p.(*UserSystemProto).Wrap()
+	case *UserPlunderListProto:
+		return p.(*UserPlunderListProto).Wrap()
+	case *UserHeroListProto:
+		return p.(*UserHeroListProto).Wrap()
+	case *UserStorageProto:
+		return p.(*UserStorageProto).Wrap()
+	case *UserRechargeProto:
+		return p.(*UserRechargeProto).Wrap()
+	case *UserRoomProto:
+		return p.(*UserRoomProto).Wrap()
+	default:
+		return nil
 	}
-
-	mp.Module = encoder.Wrap()
-
-	return mp, nil
 }
 
 func DecodeUserModuleProto(p *UserModuleProto, module life.Module) error {
@@ -27,108 +39,89 @@ func DecodeUserModuleProto(p *UserModuleProto, module life.Module) error {
 		return errors.New("UserModuleProto.Module is nil")
 	}
 
-	decoder, ok := p.Module.(userModuleProtoDecoder)
-	if !ok {
+	switch p.Module.(type) {
+	case *UserModuleProto_Basic:
+		return module.DecodeServer(p.GetBasic())
+	case *UserModuleProto_Dev:
+		return module.DecodeServer(p.GetDev())
+	case *UserModuleProto_Status:
+		return module.DecodeServer(p.GetStatus())
+	case *UserModuleProto_System:
+		return module.DecodeServer(p.GetSystem())
+	case *UserModuleProto_PlunderList:
+		return module.DecodeServer(p.GetPlunderList())
+	case *UserModuleProto_HeroList:
+		return module.DecodeServer(p.GetHeroList())
+	case *UserModuleProto_Storage:
+		return module.DecodeServer(p.GetStorage())
+	case *UserModuleProto_Recharge:
+		return module.DecodeServer(p.GetRecharge())
+	case *UserModuleProto_Room:
+		return module.DecodeServer(p.GetRoom())
+	default:
 		return errors.Errorf("UserModuleProto decode invalid type: %T", p.Module)
 	}
-
-	return module.DecodeServer(decoder.Unwrap())
 }
 
-type userModuleProtoEncoder interface {
-	Wrap() isUserModuleProto_Module
+func (x *UserBasicProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetBasic()
+	mp.Module.(*UserModuleProto_Basic).Basic = x
+
+	return mp
 }
 
-type userModuleProtoDecoder interface {
-	Unwrap() proto.Message
+func (x *UserDevProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetDev()
+	mp.Module.(*UserModuleProto_Dev).Dev = x
+
+	return mp
 }
 
-func (x *UserBasicProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_Basic{
-		Basic: x,
-	}
+func (x *UserStatusProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetStatus()
+	mp.Module.(*UserModuleProto_Status).Status = x
+
+	return mp
 }
 
-func (x *UserModuleProto_Basic) Unwrap() proto.Message {
-	return x.Basic
+func (x *UserSystemProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetSystem()
+	mp.Module.(*UserModuleProto_System).System = x
+
+	return mp
 }
 
-func (x *UserDevProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_Dev{
-		Dev: x,
-	}
+func (x *UserPlunderListProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetPlunderList()
+	mp.Module.(*UserModuleProto_PlunderList).PlunderList = x
+
+	return mp
 }
 
-func (x *UserModuleProto_Dev) Unwrap() proto.Message {
-	return x.Dev
+func (x *UserHeroListProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetHeroList()
+	mp.Module.(*UserModuleProto_HeroList).HeroList = x
+
+	return mp
 }
 
-func (x *UserStatusProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_Status{
-		Status: x,
-	}
+func (x *UserStorageProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetStorage()
+	mp.Module.(*UserModuleProto_Storage).Storage = x
+
+	return mp
 }
 
-func (x *UserModuleProto_Status) Unwrap() proto.Message {
-	return x.Status
+func (x *UserRechargeProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetRecharge()
+	mp.Module.(*UserModuleProto_Recharge).Recharge = x
+
+	return mp
 }
 
-func (x *UserSystemProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_System{
-		System: x,
-	}
-}
+func (x *UserRoomProto) Wrap() *UserModuleProto {
+	mp := UserModuleProtoPool.GetRoom()
+	mp.Module.(*UserModuleProto_Room).Room = x
 
-func (x *UserModuleProto_System) Unwrap() proto.Message {
-	return x.System
-}
-
-func (x *UserPlunderListProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_PlunderList{
-		PlunderList: x,
-	}
-}
-
-func (x *UserModuleProto_PlunderList) Unwrap() proto.Message {
-	return x.PlunderList
-}
-
-func (x *UserHeroListProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_HeroList{
-		HeroList: x,
-	}
-}
-
-func (x *UserModuleProto_HeroList) Unwrap() proto.Message {
-	return x.HeroList
-}
-
-func (x *UserStorageProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_Storage{
-		Storage: x,
-	}
-}
-
-func (x *UserModuleProto_Storage) Unwrap() proto.Message {
-	return x.Storage
-}
-
-func (x *UserRechargeProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_Recharge{
-		Recharge: x,
-	}
-}
-
-func (x *UserModuleProto_Recharge) Unwrap() proto.Message {
-	return x.Recharge
-}
-
-func (x *UserRoomProto) Wrap() isUserModuleProto_Module {
-	return &UserModuleProto_Room{
-		Room: x,
-	}
-}
-
-func (x *UserModuleProto_Room) Unwrap() proto.Message {
-	return x.Room
+	return mp
 }

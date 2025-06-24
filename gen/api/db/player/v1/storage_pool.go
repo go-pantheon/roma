@@ -30,7 +30,6 @@ func (pool *userStorageProtoPool) Get() *UserStorageProto {
 }
 
 func (pool *userStorageProtoPool) Put(p *UserStorageProto) {
-
 	for _, v := range p.RecoveryInfos {
 		ItemRecoveryInfoProtoPool.Put(v)
 	}

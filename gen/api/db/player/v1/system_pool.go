@@ -30,7 +30,6 @@ func (pool *userSystemProtoPool) Get() *UserSystemProto {
 }
 
 func (pool *userSystemProtoPool) Put(p *UserSystemProto) {
-
 	for _, v := range p.Events {
 		WorkerEventPool.Put(v)
 	}

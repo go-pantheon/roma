@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ModuleKey = "system"
+	ModuleKey = life.ModuleKey("system")
 )
 
 func init() {
@@ -28,6 +28,8 @@ type System struct {
 func NewSystem() life.Module {
 	return &System{}
 }
+
+func (o *System) IsLifeModule() {}
 
 func (o *System) EncodeServer() proto.Message {
 	p := dbv1.UserSystemProtoPool.Get()

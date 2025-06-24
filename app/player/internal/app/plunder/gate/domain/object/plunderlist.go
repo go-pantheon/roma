@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	ModuleKey = "plunder"
+	ModuleKey = life.ModuleKey("plunder")
 )
 
 func init() {
@@ -29,6 +29,8 @@ func NewPlunderList() life.Module {
 
 	return o
 }
+
+func (os *PlunderList) IsLifeModule() {}
 
 func (os *PlunderList) EncodeServer() proto.Message {
 	p := dbv1.UserPlunderListProtoPool.Get()

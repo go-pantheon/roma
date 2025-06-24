@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	ModuleKey = "storage"
+	ModuleKey = life.ModuleKey("storage")
 )
 
 func init() {
@@ -38,6 +38,8 @@ func NewStorage() life.Module {
 
 	return o
 }
+
+func (o *Storage) IsLifeModule() {}
 
 func (o *Storage) EncodeServer() proto.Message {
 	p := dbv1.UserStorageProtoPool.Get()

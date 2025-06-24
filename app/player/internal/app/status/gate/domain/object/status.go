@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	ModuleKey = "status"
+	ModuleKey = life.ModuleKey("status")
 )
 
 func init() {
@@ -35,6 +35,8 @@ type Status struct {
 func NewStatus() life.Module {
 	return &Status{}
 }
+
+func (o *Status) IsLifeModule() {}
 
 func (o *Status) EncodeServer() proto.Message {
 	p := dbv1.UserStatusProtoPool.Get()

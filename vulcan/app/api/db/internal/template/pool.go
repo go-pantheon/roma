@@ -56,7 +56,8 @@ func (pool *{{ .Name | ToLowerCamel }}Pool) Put(p *{{ .Name }}) {
 			  switch p.{{ .Name | ToUpperCamel }}.(type) {
 		    {{- range .OneofElements }}
 				case *{{ $msgName }}_{{ .Name | ToUpperCamel }}:
-				  {{ .Type }}Pool.Put(p.Get{{ .Name | ToUpperCamel }}())
+					{{ .Type }}Pool.Put(p.Get{{ .Name | ToUpperCamel }}())
+			    {{ $msgName | ToLowerCamel }}{{ .Name | ToUpperCamel }}Pool.put(p.Module.(*{{ $msgName }}_{{ .Name | ToUpperCamel }}))
 				{{- end }}
 				default:
 					log.Errorf("{{ $msgName }} put invalid type: %T", p.{{ .Name | ToUpperCamel }})
@@ -67,23 +68,63 @@ func (pool *{{ .Name | ToLowerCamel }}Pool) Put(p *{{ .Name }}) {
 				for _, v := range p.{{ .Name | ToUpperCamel }} {
 					{{ .MapValueType }}Pool.Put(v)
 				}
-			{{ end }}
+			{{- end }}
 		{{- else if .IsRepeated }}
 			{{- if .RepeatedValueIsMessage }}
 				for _, v := range p.{{ .Name | ToUpperCamel }} {
 					{{ .RepeatedValueType }}Pool.Put(v)
 				}
-			{{ end }}
+			{{- end }}
 		{{- else if .IsMessage }}
 			{{- if .IsMessage }}
 				{{ .Type }}Pool.Put(p.{{ .Name | ToUpperCamel }})
 			{{- end }}
-		{{ end }}
-	{{ end }}
+		{{- end }}
+	{{- end }}
+
 	p.Reset()
 	pool.Pool.Put(p)
 }
 
+{{- range .Fields }}
+	{{- if .IsOneof }}
+		{{- range .OneofElements }}
+var	{{ $msgName | ToLowerCamel }}{{ .Name | ToUpperCamel }}Pool = new{{ $msgName }}_{{ .Name | ToUpperCamel }}Pool()
+
+type {{ $msgName | ToLowerCamel }}_{{ .Name | ToUpperCamel }}Pool struct {
+	sync.Pool
+}
+
+func new{{ $msgName }}_{{ .Name | ToUpperCamel }}Pool() *{{ $msgName | ToLowerCamel }}_{{ .Name | ToUpperCamel }}Pool {
+	return &{{ $msgName | ToLowerCamel }}_{{ .Name | ToUpperCamel }}Pool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &{{ $msgName }}_{{ .Name | ToUpperCamel }}{}
+			},
+		},
+	}
+}
+
+func (pool *{{ $msgName | ToLowerCamel }}Pool) Get{{ .Name | ToUpperCamel }}() *{{ $msgName }} {
+	ump := pool.Pool.Get().(*{{ $msgName }})
+
+	ump.Module = {{ $msgName | ToLowerCamel }}{{ .Name | ToUpperCamel }}Pool.get()
+	ump.Module.(*{{ $msgName }}_{{ .Name | ToUpperCamel }}).{{ .Name | ToUpperCamel }} = {{ .Type }}Pool.Get()
+
+	return ump
+}
+
+func (pool *{{ $msgName | ToLowerCamel }}_{{ .Name | ToUpperCamel }}Pool) get() *{{ $msgName }}_{{ .Name | ToUpperCamel }} {
+	return pool.Pool.Get().(*{{ $msgName }}_{{ .Name | ToUpperCamel }})
+}
+
+func (pool *{{ $msgName | ToLowerCamel }}_{{ .Name | ToUpperCamel }}Pool) put(p *{{ $msgName }}_{{ .Name | ToUpperCamel }}) {
+  pool.Pool.Put(p)
+}
+
+		{{- end }}
+	{{ end }}
+{{- end }}
 {{- end }}
 `
 

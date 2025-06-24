@@ -29,6 +29,8 @@ func NewDev() life.Module {
 	return &Dev{}
 }
 
+func (o *Dev) IsLifeModule() {}
+
 func (o *Dev) EncodeServer() proto.Message {
 	p := dbv1.UserDevProtoPool.Get()
 

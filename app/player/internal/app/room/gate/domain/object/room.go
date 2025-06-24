@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	ModuleKey = "room"
+	ModuleKey = life.ModuleKey("room")
 )
 
 func init() {
@@ -33,6 +33,8 @@ func NewRoomProto() *dbv1.UserRoomProto {
 	p := &dbv1.UserRoomProto{}
 	return p
 }
+
+func (o *Room) IsLifeModule() {}
 
 func (o *Room) EncodeServer() proto.Message {
 	p := dbv1.UserRoomProtoPool.Get()

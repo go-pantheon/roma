@@ -8,6 +8,8 @@ type NewModuleFunc func() Module
 
 type Module interface {
 	ModuleCodec
+
+	IsLifeModule()
 }
 
 type ModuleCodec interface {

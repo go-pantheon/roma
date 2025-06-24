@@ -32,7 +32,6 @@ func (pool *userProtoPool) Get() *UserProto {
 }
 
 func (pool *userProtoPool) Put(p *UserProto) {
-
 	for _, v := range p.Modules {
 		UserModuleProtoPool.Put(v)
 	}
@@ -64,27 +63,333 @@ func (pool *userModuleProtoPool) Put(p *UserModuleProto) {
 		switch p.Module.(type) {
 		case *UserModuleProto_Basic:
 			UserBasicProtoPool.Put(p.GetBasic())
+			userModuleProtoBasicPool.put(p.Module.(*UserModuleProto_Basic))
 		case *UserModuleProto_Dev:
 			UserDevProtoPool.Put(p.GetDev())
+			userModuleProtoDevPool.put(p.Module.(*UserModuleProto_Dev))
 		case *UserModuleProto_Status:
 			UserStatusProtoPool.Put(p.GetStatus())
+			userModuleProtoStatusPool.put(p.Module.(*UserModuleProto_Status))
 		case *UserModuleProto_System:
 			UserSystemProtoPool.Put(p.GetSystem())
+			userModuleProtoSystemPool.put(p.Module.(*UserModuleProto_System))
 		case *UserModuleProto_PlunderList:
 			UserPlunderListProtoPool.Put(p.GetPlunderList())
+			userModuleProtoPlunderListPool.put(p.Module.(*UserModuleProto_PlunderList))
 		case *UserModuleProto_HeroList:
 			UserHeroListProtoPool.Put(p.GetHeroList())
+			userModuleProtoHeroListPool.put(p.Module.(*UserModuleProto_HeroList))
 		case *UserModuleProto_Storage:
 			UserStorageProtoPool.Put(p.GetStorage())
+			userModuleProtoStoragePool.put(p.Module.(*UserModuleProto_Storage))
 		case *UserModuleProto_Recharge:
 			UserRechargeProtoPool.Put(p.GetRecharge())
+			userModuleProtoRechargePool.put(p.Module.(*UserModuleProto_Recharge))
 		case *UserModuleProto_Room:
 			UserRoomProtoPool.Put(p.GetRoom())
+			userModuleProtoRoomPool.put(p.Module.(*UserModuleProto_Room))
 		default:
 			log.Errorf("UserModuleProto put invalid type: %T", p.Module)
 		}
 	}
 
 	p.Reset()
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoBasicPool = newUserModuleProto_BasicPool()
+
+type userModuleProto_BasicPool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_BasicPool() *userModuleProto_BasicPool {
+	return &userModuleProto_BasicPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_Basic{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetBasic() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoBasicPool.get()
+	ump.Module.(*UserModuleProto_Basic).Basic = UserBasicProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_BasicPool) get() *UserModuleProto_Basic {
+	return pool.Pool.Get().(*UserModuleProto_Basic)
+}
+
+func (pool *userModuleProto_BasicPool) put(p *UserModuleProto_Basic) {
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoDevPool = newUserModuleProto_DevPool()
+
+type userModuleProto_DevPool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_DevPool() *userModuleProto_DevPool {
+	return &userModuleProto_DevPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_Dev{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetDev() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoDevPool.get()
+	ump.Module.(*UserModuleProto_Dev).Dev = UserDevProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_DevPool) get() *UserModuleProto_Dev {
+	return pool.Pool.Get().(*UserModuleProto_Dev)
+}
+
+func (pool *userModuleProto_DevPool) put(p *UserModuleProto_Dev) {
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoStatusPool = newUserModuleProto_StatusPool()
+
+type userModuleProto_StatusPool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_StatusPool() *userModuleProto_StatusPool {
+	return &userModuleProto_StatusPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_Status{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetStatus() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoStatusPool.get()
+	ump.Module.(*UserModuleProto_Status).Status = UserStatusProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_StatusPool) get() *UserModuleProto_Status {
+	return pool.Pool.Get().(*UserModuleProto_Status)
+}
+
+func (pool *userModuleProto_StatusPool) put(p *UserModuleProto_Status) {
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoSystemPool = newUserModuleProto_SystemPool()
+
+type userModuleProto_SystemPool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_SystemPool() *userModuleProto_SystemPool {
+	return &userModuleProto_SystemPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_System{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetSystem() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoSystemPool.get()
+	ump.Module.(*UserModuleProto_System).System = UserSystemProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_SystemPool) get() *UserModuleProto_System {
+	return pool.Pool.Get().(*UserModuleProto_System)
+}
+
+func (pool *userModuleProto_SystemPool) put(p *UserModuleProto_System) {
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoPlunderListPool = newUserModuleProto_PlunderListPool()
+
+type userModuleProto_PlunderListPool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_PlunderListPool() *userModuleProto_PlunderListPool {
+	return &userModuleProto_PlunderListPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_PlunderList{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetPlunderList() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoPlunderListPool.get()
+	ump.Module.(*UserModuleProto_PlunderList).PlunderList = UserPlunderListProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_PlunderListPool) get() *UserModuleProto_PlunderList {
+	return pool.Pool.Get().(*UserModuleProto_PlunderList)
+}
+
+func (pool *userModuleProto_PlunderListPool) put(p *UserModuleProto_PlunderList) {
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoHeroListPool = newUserModuleProto_HeroListPool()
+
+type userModuleProto_HeroListPool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_HeroListPool() *userModuleProto_HeroListPool {
+	return &userModuleProto_HeroListPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_HeroList{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetHeroList() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoHeroListPool.get()
+	ump.Module.(*UserModuleProto_HeroList).HeroList = UserHeroListProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_HeroListPool) get() *UserModuleProto_HeroList {
+	return pool.Pool.Get().(*UserModuleProto_HeroList)
+}
+
+func (pool *userModuleProto_HeroListPool) put(p *UserModuleProto_HeroList) {
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoStoragePool = newUserModuleProto_StoragePool()
+
+type userModuleProto_StoragePool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_StoragePool() *userModuleProto_StoragePool {
+	return &userModuleProto_StoragePool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_Storage{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetStorage() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoStoragePool.get()
+	ump.Module.(*UserModuleProto_Storage).Storage = UserStorageProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_StoragePool) get() *UserModuleProto_Storage {
+	return pool.Pool.Get().(*UserModuleProto_Storage)
+}
+
+func (pool *userModuleProto_StoragePool) put(p *UserModuleProto_Storage) {
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoRechargePool = newUserModuleProto_RechargePool()
+
+type userModuleProto_RechargePool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_RechargePool() *userModuleProto_RechargePool {
+	return &userModuleProto_RechargePool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_Recharge{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetRecharge() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoRechargePool.get()
+	ump.Module.(*UserModuleProto_Recharge).Recharge = UserRechargeProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_RechargePool) get() *UserModuleProto_Recharge {
+	return pool.Pool.Get().(*UserModuleProto_Recharge)
+}
+
+func (pool *userModuleProto_RechargePool) put(p *UserModuleProto_Recharge) {
+	pool.Pool.Put(p)
+}
+
+var userModuleProtoRoomPool = newUserModuleProto_RoomPool()
+
+type userModuleProto_RoomPool struct {
+	sync.Pool
+}
+
+func newUserModuleProto_RoomPool() *userModuleProto_RoomPool {
+	return &userModuleProto_RoomPool{
+		Pool: sync.Pool{
+			New: func() any {
+				return &UserModuleProto_Room{}
+			},
+		},
+	}
+}
+
+func (pool *userModuleProtoPool) GetRoom() *UserModuleProto {
+	ump := pool.Pool.Get().(*UserModuleProto)
+
+	ump.Module = userModuleProtoRoomPool.get()
+	ump.Module.(*UserModuleProto_Room).Room = UserRoomProtoPool.Get()
+
+	return ump
+}
+
+func (pool *userModuleProto_RoomPool) get() *UserModuleProto_Room {
+	return pool.Pool.Get().(*UserModuleProto_Room)
+}
+
+func (pool *userModuleProto_RoomPool) put(p *UserModuleProto_Room) {
 	pool.Pool.Put(p)
 }

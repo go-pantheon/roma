@@ -16,7 +16,6 @@ package {{ .Package }}
 import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/pkg/universe/life"
-	"google.golang.org/protobuf/proto"
 )
 
 {{- range .Messages }}
@@ -27,18 +26,17 @@ import (
 	{{- range .Fields }}
 	  {{- $filedName := .Name | ToUpperCamel }}
 		{{- if .IsOneof }}
-			func Encode{{ $msgName }}(module life.Module) (*{{ $msgName }}, error) {
+			func Encode{{ $msgName }}(module life.Module) *{{ $msgName }} {
 				p := module.EncodeServer()
-				mp := {{ $msgName }}Pool.Get()
-
-				encoder, ok := p.({{ $msgName | ToLowerCamel }}Encoder)
-				if !ok {
-					return nil, errors.Errorf("{{ $msgName }} encode invalid type: %T", module)
-				}
-
-				mp.Module = encoder.Wrap()
-				
-				return mp, nil
+        
+				switch p.(type) {
+				{{- range .OneofElements }}
+				case *{{ .Type }}:
+					return p.(*{{ .Type }}).Wrap()
+				{{- end }}
+				default:
+					return nil
+	      }
 			}
 
 			func Decode{{ $msgName }}(p *{{ $msgName }}, module life.Module) error {
@@ -46,31 +44,22 @@ import (
 					return errors.New("{{ $msgName }}.Module is nil")
 				}
 
-				decoder, ok := p.Module.({{ $msgName | ToLowerCamel }}Decoder)
-				if !ok {
+				switch p.Module.(type) {
+				{{- range .OneofElements }}
+				case *{{ $msgName }}_{{ .Name | ToUpperCamel }}:
+					return module.DecodeServer(p.Get{{ .Name | ToUpperCamel }}())
+				{{- end }}
+				default:
 					return errors.Errorf("{{ $msgName }} decode invalid type: %T", p.Module)
 				}
-
-				return module.DecodeServer(decoder.Unwrap())
 			}
 
-			type {{ $msgName | ToLowerCamel }}Encoder interface {
-				Wrap() is{{ $msgName }}_Module
-			}
+			{{ range .OneofElements }}
+			func (x *{{ .Type }}) Wrap() *{{ $msgName }} {
+				mp := {{ $msgName }}Pool.Get{{ .Name | ToUpperCamel }}()
+				mp.Module.(*{{ $msgName }}_{{ .Name | ToUpperCamel }}).{{ .Name | ToUpperCamel }} = x
 
-			type {{ $msgName | ToLowerCamel }}Decoder interface {
-				Unwrap() proto.Message
-			}
-
-			{{- range .OneofElements }}
-			func (x *{{ .Type }}) Wrap() is{{ $msgName }}_Module {
-				return &{{ $msgName }}_{{ .Name | ToUpperCamel }} {
-				  {{ .Name | ToUpperCamel }}: x,
-				}
-			}
-
-			func (x *{{ $msgName }}_{{ .Name | ToUpperCamel }}) Unwrap() proto.Message {
-				return x.{{ .Name | ToUpperCamel }}
+				return mp
 			}
 			{{ end }}
 		{{- end }}

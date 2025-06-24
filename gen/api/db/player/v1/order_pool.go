@@ -30,7 +30,6 @@ func (pool *orderProtoPool) Get() *OrderProto {
 }
 
 func (pool *orderProtoPool) Put(p *OrderProto) {
-
 	OrderInfoProtoPool.Put(p.Info)
 
 	p.Reset()

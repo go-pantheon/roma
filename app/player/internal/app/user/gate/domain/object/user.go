@@ -70,12 +70,7 @@ func (o *User) EncodeServer(p *dbv1.UserProto, modules []life.ModuleKey) (err er
 
 	for _, key := range modules {
 		if mod := o.modules[key]; mod != nil {
-			mp, err := dbv1.EncodeUserModuleProto(mod)
-			if err != nil {
-				return err
-			}
-
-			p.Modules[string(key)] = mp
+			p.Modules[string(key)] = dbv1.EncodeUserModuleProto(mod)
 		}
 	}
 
