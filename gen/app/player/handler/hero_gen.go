@@ -5,6 +5,7 @@ package handler
 import (
 	"context"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
@@ -29,7 +30,7 @@ func handleHero(ctx context.Context, s *service.PlayerServices, mod, seq int32, 
 		sc, err = s.Hero.HeroLevelUpgrade(ctx, cs.(*climsg.CSHeroLevelUpgrade))
 
 	default:
-		return nil, errors.Errorf("seq not found. mod=%s seq=%d", "Hero", seq)
+		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "Hero", seq)
 	}
 
 	out, err0 := NewPlayerResponse(mod, seq, obj, sc)

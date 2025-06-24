@@ -2,11 +2,13 @@ package logging
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"github.com/go-pantheon/fabrica-net/xnet"
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/gen/app/codec"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -24,12 +26,24 @@ func Req(ctx context.Context, log *log.Helper, p xnet.TunnelMessage, filter func
 		mod = p.GetMod()
 		seq = p.GetSeq()
 		cs  = p.GetData()
+		err error
 	)
 
-	uid, _ := xcontext.UID(ctx)
-	oid, _ := xcontext.OID(ctx)
-	body, _ := codec.UnmarshalCS(mod, seq, cs)
-	str, _ := jsoniter.MarshalToString(body)
+	body, cserr := codec.UnmarshalCS(mod, seq, cs)
+	if cserr != nil {
+		err = errors.Join(err, cserr)
+	}
 
-	log.WithContext(ctx).Debugf("[Req] %d-%d uid=%d oid=%d body=%s", mod, seq, uid, oid, str)
+	str, jsonerr := jsoniter.MarshalToString(body)
+	if jsonerr != nil {
+		err = errors.Join(err, jsonerr)
+	}
+
+	msg := fmt.Sprintf("[REQ] uid=%d i=%d %d-%d oid=%d", xcontext.UIDOrZero(ctx), p.GetIndex(), mod, seq, p.GetObj())
+
+	if err != nil {
+		log.WithContext(ctx).Debugf("%s err=%s", msg, err.Error())
+	} else {
+		log.WithContext(ctx).Debugf("%s body=%s", msg, str)
+	}
 }

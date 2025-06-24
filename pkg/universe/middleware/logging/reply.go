@@ -2,11 +2,13 @@ package logging
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
-	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"github.com/go-pantheon/fabrica-net/xnet"
+	"github.com/go-pantheon/fabrica-util/errors"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
@@ -26,36 +28,53 @@ func DefaultFilter(mod, seq int32) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
-func Reply(ctx context.Context, log *log.Helper, reply xnet.TunnelMessage, filter func(mod, seq int32) bool) {
+func Reply(ctx context.Context, log *log.Helper, uid int64, in xnet.TunnelMessage, out []byte, delay time.Duration, filter func(mod, seq int32) bool) {
 	if !profile.IsDev() {
 		return
 	}
 
-	if !filter(reply.GetMod(), reply.GetSeq()) {
+	if !filter(in.GetMod(), in.GetSeq()) {
 		return
 	}
 
-	uid, _ := xcontext.UID(ctx)
-	oid, _ := xcontext.OID(ctx)
+	var (
+		tag string
+		err error
+	)
 
 	p := &clipkt.Packet{
-		Mod:  reply.GetMod(),
-		Seq:  reply.GetSeq(),
-		Obj:  reply.GetObj(),
-		Data: reply.GetData(),
+		Mod:   in.GetMod(),
+		Seq:   in.GetSeq(),
+		Obj:   in.GetObj(),
+		Index: in.GetIndex(),
+		Data:  out,
 	}
 
-	body, _ := codec.UnmarshalSC(p)
-	str, _ := jsoniter.MarshalToString(body)
+	body, cserr := codec.UnmarshalSC(p)
+	if cserr != nil {
+		err = errors.Join(err, cserr)
+	}
 
-	var tag string
+	str, jsonerr := jsoniter.MarshalToString(body)
+	if jsonerr != nil {
+		err = errors.Join(err, jsonerr)
+	}
+
 	if codec.IsPushSC(climod.ModuleID(p.Mod), p.Seq) {
-		tag = "Push"
+		tag = "PUS"
 	} else {
-		tag = "Reply"
+		tag = "REP"
 	}
-	log.WithContext(ctx).Debugf("[%s] %d-%d uid=%d oid=%d body=%s", tag, p.Mod, p.Seq, uid, oid, str)
+
+	msg := fmt.Sprintf("[%s] uid=%d i=%d %d-%d oid=%d delay=%d", tag, uid, p.Index, p.Mod, p.Seq, p.Obj, delay.Milliseconds())
+
+	if err != nil {
+		log.WithContext(ctx).Debugf("%s err=%s", msg, err.Error())
+	} else {
+		log.WithContext(ctx).Debugf("%s body=%s", msg, str)
+	}
 }

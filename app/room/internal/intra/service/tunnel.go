@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
@@ -58,16 +59,18 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		if !ok {
 			return errors.Wrapf(err, "intrav1.TunnelResponse proto type conversion failed")
 		}
-		logging.Reply(ctx, s.log, msg, logging.DefaultFilter)
-		if err0 := stream.Send(msg); err0 != nil {
-			return err0
+
+		if err := stream.Send(msg); err != nil {
+			return errors.Wrapf(err, "intrav1.TunnelResponse send failed")
 		}
+
 		return nil
 	}
 
 	if w, err = s.mgr.Worker(ctx, oid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
 		return err
 	}
+
 	return s.run(ctx, w, stream)
 
 }
@@ -77,21 +80,23 @@ func (s *TunnelService) run(ctx context.Context, w life.Workable, stream intrav1
 
 	eg, ctx := errgroup.WithContext(ctx)
 	eg.Go(func() error {
-		<-ctx.Done()
-		return ctx.Err()
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-w.StopTriggered():
+			return xsync.ErrStopByTrigger
+		}
 	})
 	eg.Go(func() error {
 		return xsync.Run(func() error {
 			for {
-				var in *intrav1.TunnelRequest
-				if in, err = stream.Recv(); err != nil {
-					return err
-				}
-				logging.Req(ctx, s.log, in, logging.DefaultFilter)
-				if err = w.ProductFuncEvent(func(wctx life.Context) error {
-					return s.handle(wctx.(core.Context), in)
-				}); err != nil {
-					return err
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				default:
+					if err = s.recv(w, stream); err != nil {
+						return err
+					}
 				}
 			}
 		})
@@ -104,19 +109,47 @@ func (s *TunnelService) run(ctx context.Context, w life.Workable, stream intrav1
 	return nil
 }
 
+func (s *TunnelService) recv(w life.Workable, stream intrav1.TunnelService_TunnelServer) (err error) {
+	var in *intrav1.TunnelRequest
+
+	if in, err = stream.Recv(); err != nil {
+		return errors.Wrapf(err, "intrav1.TunnelRequest recv failed")
+	}
+
+	if in == nil {
+		return nil
+	}
+
+	return w.ProductFuncEvent(func(wctx life.Context) error {
+		return s.handle(wctx.(core.Context), in)
+	})
+}
+
 func (s *TunnelService) handle(wctx core.Context, in *intrav1.TunnelRequest) error {
+	st := time.Now()
+	logging.Req(wctx, s.log, in, logging.DefaultFilter)
+
 	out, err := handler.RoomHandle(wctx, s.svc, in)
 	if err != nil {
-		s.log.WithContext(wctx).Errorf("handle failed. %d-%d uid=%d %v", in.Mod, in.Seq, wctx.UID(), err)
+		// only log the handle error for keep the worker running
+		s.log.WithContext(wctx).Errorf("room handle failed. uid=%d in=%d-%d obj=%d color=%d status=%d %+v", wctx.UID(), in.Mod, in.Seq, in.Obj, xcontext.Color(wctx), xcontext.Status(wctx), err)
 	}
+
 	if out == nil {
-		sc := &climsg.SCServerUnexpectedErr{
-			Mod: in.Mod,
-			Seq: in.Seq,
-		}
-		if out, err = handler.NewRoomResponse(int32(climod.ModuleID_System), int32(cliseq.SystemSeq_ServerUnexpectedErr), in.Obj, sc); err != nil {
+		if out, err = handler.NewRoomResponse(
+			int32(climod.ModuleID_System),
+			int32(cliseq.SystemSeq_ServerUnexpectedErr),
+			in.Obj,
+			&climsg.SCServerUnexpectedErr{
+				Mod: in.Mod,
+				Seq: in.Seq,
+			},
+		); err != nil {
 			return errors.Wrapf(err, "TunnelResponse marshal failed. out=SCServerUnexpectedErr uid=%d", wctx.UID())
 		}
 	}
+
+	logging.Reply(wctx, s.log, wctx.UID(), in, out, time.Since(st), logging.DefaultFilter)
+
 	return wctx.ReplyBytes(climod.ModuleID(in.Mod), in.Seq, in.Obj, out)
 }

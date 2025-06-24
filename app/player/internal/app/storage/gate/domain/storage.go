@@ -9,7 +9,7 @@ import (
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
 	adv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/storage/v1"
-	"github.com/go-pantheon/roma/pkg/errs"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
 func NewStorageDomain(logger log.Logger) *StorageDomain {
@@ -73,10 +73,10 @@ func (do *StorageDomain) UsePack(ctx core.Context, packData *gamedata.ResourcePa
 
 	pack := storage.Packs[packData.Id()]
 	if pack == nil {
-		return nil, errs.ErrStoragePackNotFound
+		return nil, zerrors.ErrStoragePackNotFound
 	}
 	if pack.Amount() == 0 {
-		return nil, errs.ErrStoragePackNotFound
+		return nil, zerrors.ErrStoragePackNotFound
 	}
 
 	if err := storage.SubPack(packData, pack.Amount()); err != nil {

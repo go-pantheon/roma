@@ -7,7 +7,7 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	"github.com/go-pantheon/roma/gamedata"
 	adv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/storage/v1"
-	"github.com/go-pantheon/roma/pkg/errs"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 	"github.com/pkg/errors"
 )
 
@@ -131,15 +131,15 @@ func (do *StorageDomain) addItems(ctx core.Context, prizes ...*gamedata.ItemPriz
 
 func (do *StorageDomain) CanAddItemPrizes(items ...*gamedata.ItemPrize) (err error) {
 	if len(items) == 0 {
-		return errors.Wrapf(errs.ErrEmptyPrize, "Data=ResourceItemData")
+		return errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourceItemData")
 	}
 
 	for _, item := range items {
 		if item.Data() == nil {
-			return errors.Wrapf(errs.ErrGameDataNotFound, "Data=ResourceItemData")
+			return errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData")
 		}
 		if item.Amount() == 0 {
-			return errors.Wrapf(errs.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", item.Data().Id(), item.Amount())
+			return errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", item.Data().Id(), item.Amount())
 		}
 	}
 	return nil
@@ -165,15 +165,15 @@ func (do *StorageDomain) addPacks(ctx core.Context, packs ...*gamedata.PackPrize
 
 func (do *StorageDomain) CanAddPackPrizes(packs ...*gamedata.PackPrize) error {
 	if len(packs) == 0 {
-		return errors.Wrapf(errs.ErrEmptyPrize, "Data=ResourcePackData")
+		return errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourcePackData")
 	}
 
 	for _, pack := range packs {
 		if pack.Data() == nil {
-			return errors.Wrapf(errs.ErrGameDataNotFound, "Data=ResourcePackData")
+			return errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourcePackData")
 		}
 		if pack.Amount() == 0 {
-			return errors.Wrapf(errs.ErrEmptyPrize, "Data=ResourcePackData id=%d, amount=%d", pack.Data().Id(), pack.Amount())
+			return errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourcePackData id=%d, amount=%d", pack.Data().Id(), pack.Amount())
 		}
 	}
 	return nil

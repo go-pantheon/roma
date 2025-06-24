@@ -1,7 +1,15 @@
-package errs
+package zerrors
 
 import (
 	"github.com/go-pantheon/fabrica-util/errors"
+	kerrors "github.com/go-kratos/kratos/v2/errors"
+)
+
+var (
+	ErrProfileIllegal = kerrors.New(403, "request forbidden", "request status error")
+)
+var (
+	ErrAPIHandlerNotFound = errors.New("api handler not found")
 )
 
 var (

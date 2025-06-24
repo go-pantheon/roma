@@ -21,6 +21,7 @@ import (
 
 	"{{.Org}}/fabrica-net/xnet"
 	"{{.Org}}/fabrica-util/errors"
+	"{{.Org}}/fabrica-kit/xerrors"
 	climod "{{.Project}}/gen/api/client/module"
 	"{{.Project}}/gen/app/{{.LowerCamelGroup}}/service"
 )
@@ -37,8 +38,9 @@ func {{.UpperCamelGroup}}Handle(ctx context.Context, s *service.{{.UpperCamelGro
 		out, err = handle{{.UpperCamel}}(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	{{- end }}
 	default:
-		err = errors.Errorf("mod not found. mod=%d", in.GetMod())
+		err = errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid mod. mod=%d", in.GetMod())
 	}
+
 	return out, err
 }
 

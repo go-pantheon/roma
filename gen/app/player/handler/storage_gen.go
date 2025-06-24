@@ -5,6 +5,7 @@ package handler
 import (
 	"context"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
@@ -29,7 +30,7 @@ func handleStorage(ctx context.Context, s *service.PlayerServices, mod, seq int3
 		sc, err = s.Storage.UsePack(ctx, cs.(*climsg.CSUsePack))
 
 	default:
-		return nil, errors.Errorf("seq not found. mod=%s seq=%d", "Storage", seq)
+		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "Storage", seq)
 	}
 
 	out, err0 := NewPlayerResponse(mod, seq, obj, sc)

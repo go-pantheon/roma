@@ -5,6 +5,7 @@ package handler
 import (
 	"context"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-net/xnet"
 	"github.com/go-pantheon/fabrica-util/errors"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
@@ -30,7 +31,8 @@ func PlayerHandle(ctx context.Context, s *service.PlayerServices, in xnet.Tunnel
 	case climod.ModuleID_User:
 		out, err = handleUser(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	default:
-		err = errors.Errorf("mod not found. mod=%d", in.GetMod())
+		err = errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid mod. mod=%d", in.GetMod())
 	}
+
 	return out, err
 }

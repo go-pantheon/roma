@@ -14,13 +14,12 @@ import (
 
 func Server() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return func(ctx context.Context, req any) (any, error) {
 			if !profile.IsDev() {
 				return handler(ctx, req)
 			}
-			ctx = TransformContext(ctx)
-			reply, err := handler(ctx, req)
-			return reply, err
+
+			return handler(TransformContext(ctx), req)
 		}
 	}
 }
@@ -32,10 +31,12 @@ func TransformContext(ctx context.Context) context.Context {
 
 	if info, ok := transport.FromServerContext(ctx); ok {
 		pairs := make([]string, 0, len(xcontext.Keys))
+
 		for _, k := range xcontext.Keys {
 			v := info.RequestHeader().Get(k)
 			pairs = append(pairs, k, v)
 		}
+
 		ctx = metadata.NewIncomingContext(ctx, metadata.Pairs(pairs...))
 	}
 
@@ -47,9 +48,11 @@ func IsAdminPath(ctx context.Context) bool {
 	if !ok {
 		return false
 	}
+
 	info, ok := tp.(*http.Transport)
 	if !ok {
 		return false
 	}
+
 	return strings.Index(info.Request().RequestURI, "/admin") == 0
 }

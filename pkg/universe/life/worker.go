@@ -19,7 +19,6 @@ import (
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
 	intrav1 "github.com/go-pantheon/roma/gen/api/server/gate/intra/v1"
-	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
 	"golang.org/x/sync/errgroup"
 )
@@ -103,7 +102,7 @@ func newWorker(
 func (w *Worker) start(ctx context.Context) {
 	xsync.Go(fmt.Sprintf("worker-%d", w.ID()), func() error {
 		return w.run(ctx)
-	}, errs.IsUnloggableErr)
+	}, xerrors.IsUnlogErr)
 }
 
 func (w *Worker) run(ctx context.Context) error {
@@ -208,7 +207,7 @@ func (w *Worker) setDisconnectErr(err error) {
 }
 
 func (w *Worker) sendLogoutMsg(_ context.Context, err error) {
-	if errs.IsEOFError(err) || errs.IsCancelError(err) {
+	if xerrors.IsUnlogErr(err) {
 		return
 	}
 
@@ -274,7 +273,7 @@ func (w *Worker) Stop(ctx context.Context) (err error) {
 
 func (w *Worker) ProductFuncEvent(f EventFunc) error {
 	if w.OnStopping() {
-		return errs.ErrLifeWorkerStopped
+		return xerrors.ErrLifeStopped
 	}
 
 	w.events <- f
@@ -283,7 +282,7 @@ func (w *Worker) ProductFuncEvent(f EventFunc) error {
 
 func (w *Worker) ProductPreparedEvent(t WorkerEventType, args ...int64) error {
 	if w.OnStopping() {
-		return errs.ErrLifeWorkerStopped
+		return xerrors.ErrLifeStopped
 	}
 
 	f, err := w.preparedEventFunc(t, args...)

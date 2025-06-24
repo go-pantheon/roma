@@ -5,6 +5,7 @@ package handler
 import (
 	"context"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
@@ -65,7 +66,7 @@ func handleRoom(ctx context.Context, s *service.RoomServices, mod, seq int32, ob
 		sc, err = s.Room.LeaveRoom(ctx, cs.(*climsg.CSLeaveRoom))
 
 	default:
-		return nil, errors.Errorf("seq not found. mod=%s seq=%d", "Room", seq)
+		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "Room", seq)
 	}
 
 	out, err0 := NewRoomResponse(mod, seq, obj, sc)

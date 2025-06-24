@@ -1,8 +1,8 @@
 package gamedata
 
 import (
-	"github.com/go-pantheon/roma/pkg/errs"
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/fabrica-util/errors"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
 // Costs is a map of item id to item cost. It is built from game data and is immutable.
@@ -99,12 +99,12 @@ type ItemCost struct {
 
 func TryNewItemCost(itemId int64, amount uint64) (*ItemCost, error) {
 	if amount == 0 {
-		return nil, errors.Wrapf(errs.ErrEmptyCost, "itemId=%d", itemId)
+		return nil, errors.Wrapf(zerrors.ErrEmptyCost, "itemId=%d", itemId)
 	}
 
 	itemData := GetResourceItemData(itemId)
 	if itemData == nil {
-		return nil, errors.Wrapf(errs.ErrGameDataNotFound, "id=%d", itemId)
+		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", itemId)
 	}
 	return NewItemCost(itemData, amount), nil
 }

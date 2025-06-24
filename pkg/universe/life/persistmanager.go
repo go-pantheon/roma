@@ -8,7 +8,6 @@ import (
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
-	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
 )
 
@@ -115,7 +114,7 @@ func (s *PersistManager) PrepareToPersist(ctx context.Context) error {
 	}
 
 	if proto == nil {
-		return errs.ErrPersistNilProto
+		return errors.New("persist nil proto")
 	}
 
 	s.saveChan <- proto

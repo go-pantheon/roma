@@ -3,8 +3,8 @@ package server
 import (
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/conf"
-	"github.com/pkg/errors"
 	etcdclient "go.etcd.io/etcd/client/v3"
 )
 

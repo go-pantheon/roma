@@ -5,6 +5,7 @@ package handler
 import (
 	"context"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
@@ -37,7 +38,7 @@ func handleUser(ctx context.Context, s *service.PlayerServices, mod, seq int32, 
 		sc, err = s.User.SetGender(ctx, cs.(*climsg.CSSetGender))
 
 	default:
-		return nil, errors.Errorf("seq not found. mod=%s seq=%d", "User", seq)
+		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "User", seq)
 	}
 
 	out, err0 := NewPlayerResponse(mod, seq, obj, sc)

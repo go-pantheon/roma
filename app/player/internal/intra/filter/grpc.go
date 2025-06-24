@@ -34,6 +34,7 @@ func (md *GrpcFilter) Server() middleware.Middleware {
 				reply, err = handler(wctx, req)
 				return
 			})
+			
 			return reply, err
 		}
 	}

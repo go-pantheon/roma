@@ -3,8 +3,8 @@ package gamedata
 import (
 	"slices"
 
-	"github.com/go-pantheon/roma/pkg/errs"
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/fabrica-util/errors"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
 // PackPrizes is a map of pack id to pack prize. It is built from game data and is immutable.
@@ -92,12 +92,12 @@ type PackPrize struct {
 
 func TryNewPackPrize(packId int64, amount uint64) (*PackPrize, error) {
 	if amount == 0 {
-		return nil, errors.Wrapf(errs.ErrEmptyPrize, "id=%d", packId)
+		return nil, errors.Wrapf(zerrors.ErrEmptyPrize, "id=%d", packId)
 	}
 
 	packData := GetResourcePackData(packId)
 	if packData == nil {
-		return nil, errors.Wrapf(errs.ErrGameDataNotFound, "id=%d", packId)
+		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", packId)
 	}
 	return NewPackPrize(packData, amount), nil
 }

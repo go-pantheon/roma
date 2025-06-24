@@ -3,8 +3,8 @@ package gamedata
 import (
 	"slices"
 
-	"github.com/go-pantheon/roma/pkg/errs"
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/fabrica-util/errors"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
 var (
@@ -19,7 +19,7 @@ func TryNewItemPrizesList(itemSlice []map[int64]uint64) ([]*ItemPrizes, error) {
 		}
 		itemPrizes, err := TryNewItemPrizes(items)
 		if err != nil {
-			if errors.Is(err, errs.ErrEmptyPrize) {
+			if errors.Is(err, zerrors.ErrEmptyPrize) {
 				itemPrizes = EmptyItemPrizes
 			} else {
 				return nil, err
@@ -122,12 +122,12 @@ type ItemPrize struct {
 
 func TryNewItemPrize(itemId int64, amount uint64) (*ItemPrize, error) {
 	if amount == 0 {
-		return nil, errors.Wrapf(errs.ErrEmptyPrize, "id=%d", itemId)
+		return nil, errors.Wrapf(zerrors.ErrEmptyPrize, "id=%d", itemId)
 	}
 
 	itemData := GetResourceItemData(itemId)
 	if itemData == nil {
-		return nil, errors.Wrapf(errs.ErrGameDataNotFound, "id=%d", itemId)
+		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", itemId)
 	}
 	return NewItemPrize(itemData, amount), nil
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	"github.com/go-pantheon/roma/gamedata"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
-	"github.com/go-pantheon/roma/pkg/errs"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
 type StorageUseCase struct {
@@ -59,7 +59,7 @@ func (uc *StorageUseCase) UsePack(ctx core.Context, cs *climsg.CSUsePack) (sc *c
 
 	prizes, err := uc.do.UsePack(ctx, packData)
 	if err != nil {
-		if errors.Is(err, errs.ErrStoragePackNotFound) {
+		if errors.Is(err, zerrors.ErrStoragePackNotFound) {
 			sc.Code = climsg.SCUsePack_ErrPackNotExist
 		} else {
 			uc.log.WithContext(ctx).Errorf("use pack failed. uid=%d %+v", ctx.UID(), err)

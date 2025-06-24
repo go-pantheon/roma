@@ -3,8 +3,8 @@ package gamedata
 import (
 	"slices"
 
-	"github.com/go-pantheon/roma/pkg/errs"
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/fabrica-util/errors"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
 var (
@@ -19,7 +19,7 @@ func TryNewRadioPrizesList(radioSlice []map[int64]uint64) ([]*RadioPrizes, error
 		}
 		radioPrizes, err := TryNewRadioPrizes(radios)
 		if err != nil {
-			if errors.Is(err, errs.ErrEmptyPrize) {
+			if errors.Is(err, zerrors.ErrEmptyPrize) {
 				radioPrizes = EmptyRadioPrizes
 			} else {
 				return nil, err
@@ -135,12 +135,12 @@ type RadioPrize struct {
 
 func TryNewRadioPrize(radioId int64, amount uint64) (*RadioPrize, error) {
 	if amount == 0 {
-		return nil, errors.Wrapf(errs.ErrEmptyPrize, "id=%d", radioId)
+		return nil, errors.Wrapf(zerrors.ErrEmptyPrize, "id=%d", radioId)
 	}
 
 	radioData := GetResourceRadioData(radioId)
 	if radioData == nil {
-		return nil, errors.Wrapf(errs.ErrGameDataNotFound, "id=%d", radioId)
+		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", radioId)
 	}
 	return NewRadioPrize(radioData, amount), nil
 }

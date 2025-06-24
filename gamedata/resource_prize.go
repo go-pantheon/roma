@@ -1,9 +1,6 @@
 package gamedata
 
-import (
-	"github.com/go-pantheon/roma/pkg/errs"
-	"github.com/pkg/errors"
-)
+import "github.com/go-pantheon/roma/pkg/zerrors"
 
 // Prizes is a combination of item prizes and pack prizes. It is used to calculate the total prize. It is mutable.
 type Prizes struct {
@@ -13,7 +10,7 @@ type Prizes struct {
 
 func TryNewPrizes(items *ItemPrizes, packs *PackPrizes) (*Prizes, error) {
 	if items == nil && packs == nil {
-		return nil, errors.WithStack(errs.ErrEmptyPrize)
+		return nil, zerrors.ErrEmptyPrize
 	}
 
 	return &Prizes{

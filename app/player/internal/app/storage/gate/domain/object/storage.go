@@ -4,13 +4,13 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	"github.com/go-pantheon/roma/gamedata"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
-	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/go-pantheon/roma/pkg/universe/life"
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -125,12 +125,12 @@ func (o *Storage) EncodeClient() *climsg.UserStorageProto {
 
 func (o *Storage) AddItem(d *gamedata.ResourceItemData, amount uint64) (err error) {
 	if d == nil {
-		err = errors.Wrapf(errs.ErrGameDataNotFound, "Data=ResourceItemData")
+		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData")
 		return
 	}
 
 	if amount == 0 {
-		err = errors.Wrapf(errs.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
+		err = errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
 		return
 	}
 
@@ -148,22 +148,22 @@ func (o *Storage) AddItem(d *gamedata.ResourceItemData, amount uint64) (err erro
 
 func (o *Storage) SubItem(d *gamedata.ResourceItemData, amount uint64) (err error) {
 	if d == nil {
-		err = errors.Wrapf(errs.ErrGameDataNotFound, "Data=ResourceItemData")
+		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData")
 		return
 	}
 
 	if amount == 0 {
-		err = errors.Wrapf(errs.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
+		err = errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
 		return
 	}
 
 	item := o.Items[d.Id()]
 	if item == nil {
-		err = errors.Wrapf(errs.ErrGameDataNotFound, "Data=ResourceItemData id=%d", d.Id())
+		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData id=%d", d.Id())
 		return
 	}
 	if item.Amount() < amount {
-		err = errors.Wrapf(errs.ErrCostInsufficient, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
+		err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
 		return
 	}
 
@@ -181,12 +181,12 @@ func (o *Storage) SubItem(d *gamedata.ResourceItemData, amount uint64) (err erro
 
 func (o *Storage) AddPack(d *gamedata.ResourcePackData, amount uint64) (err error) {
 	if d == nil {
-		err = errors.Wrapf(errs.ErrGameDataNotFound, "Data=ResourcePackData")
+		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourcePackData")
 		return
 	}
 
 	if amount == 0 {
-		err = errors.Wrapf(errs.ErrEmptyPrize, "Data=ResourcePackData id=%d, amount=%d", d.Id(), amount)
+		err = errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourcePackData id=%d, amount=%d", d.Id(), amount)
 		return
 	}
 
@@ -200,22 +200,22 @@ func (o *Storage) AddPack(d *gamedata.ResourcePackData, amount uint64) (err erro
 
 func (o *Storage) SubPack(d *gamedata.ResourcePackData, amount uint64) (err error) {
 	if d == nil {
-		err = errors.Wrapf(errs.ErrGameDataNotFound, "Data=ResourcePackData")
+		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourcePackData")
 		return
 	}
 
 	if amount == 0 {
-		err = errors.Wrapf(errs.ErrEmptyPrize, "Data=ResourcePackData id=%d, amount=%d", d.Id(), amount)
+		err = errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourcePackData id=%d, amount=%d", d.Id(), amount)
 		return
 	}
 
 	pack := o.Packs[d.Id()]
 	if pack == nil {
-		err = errors.Wrapf(errs.ErrGameDataNotFound, "Data=ResourcePackData id=%d", d.Id())
+		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourcePackData id=%d", d.Id())
 		return
 	}
 	if pack.Amount() < amount {
-		err = errors.Wrapf(errs.ErrCostInsufficient, "Data=ResourcePackData id=%d, amount=%d", d.Id(), amount)
+		err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourcePackData id=%d, amount=%d", d.Id(), amount)
 		return
 	}
 

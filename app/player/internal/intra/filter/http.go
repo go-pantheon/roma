@@ -7,9 +7,8 @@ import (
 	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"github.com/go-pantheon/roma/app/player/internal/core"
-	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/go-pantheon/roma/pkg/universe/life"
-	unimd "github.com/go-pantheon/roma/pkg/universe/middleware/dev"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
 type HttpFilter struct {
@@ -27,10 +26,8 @@ func (md *HttpFilter) Server() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (reply any, err error) {
 			if !profile.IsDev() {
-				return nil, errs.ErrProfileIllegal
+				return nil, zerrors.ErrProfileIllegal
 			}
-
-			ctx = unimd.TransformContext(ctx)
 
 			oid, err := xcontext.OID(ctx)
 			if err != nil {

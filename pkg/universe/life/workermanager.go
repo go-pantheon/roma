@@ -13,7 +13,6 @@ import (
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/fabrica-util/xsync"
-	"github.com/go-pantheon/roma/pkg/errs"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/singleflight"
@@ -58,7 +57,7 @@ func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, newContext n
 		return m.run()
 	}, func() error {
 		return m.Stop(context.Background())
-	}, errs.IsUnloggableErr)
+	}, xerrors.IsUnlogErr)
 
 	return m, func() error {
 		return m.Stop(context.Background())

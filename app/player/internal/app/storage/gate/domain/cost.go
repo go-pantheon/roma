@@ -4,7 +4,7 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/app/storage/gate/domain/object"
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	"github.com/go-pantheon/roma/gamedata"
-	"github.com/go-pantheon/roma/pkg/errs"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 	"github.com/pkg/errors"
 )
 
@@ -23,7 +23,7 @@ func (do *StorageDomain) Cost(ctx core.Context, toCosts *gamedata.Costs) (err er
 	toCosts.Walk(func(itemCost *gamedata.ItemCost) bool {
 		item := storage.Items[itemCost.Data().Id()]
 		if item == nil {
-			err = errors.Wrapf(errs.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
+			err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
 			return false
 		}
 		item.Sub(itemCost.Amount())
@@ -47,11 +47,11 @@ func (do *StorageDomain) CanCost(ctx core.Context, toCosts *gamedata.Costs) (err
 	toCosts.Walk(func(itemCost *gamedata.ItemCost) bool {
 		item, ok := storage.Items[itemCost.Data().Id()]
 		if !ok {
-			err = errors.Wrapf(errs.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
+			err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
 			return false
 		}
 		if item.Amount() < itemCost.Amount() {
-			err = errors.Wrapf(errs.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
+			err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
 			return false
 		}
 		return true

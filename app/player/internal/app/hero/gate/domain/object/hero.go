@@ -8,7 +8,7 @@ import (
 	"github.com/go-pantheon/roma/gamedata"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
-	"github.com/go-pantheon/roma/pkg/errs"
+	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
 type Hero struct {
@@ -21,7 +21,7 @@ type Hero struct {
 func NewHero(dataId int64) (*Hero, error) {
 	d := gamedata.GetHeroBaseData(dataId)
 	if d == nil {
-		return nil, errors.Wrapf(errs.ErrGameDataNotFound, "id=%d", dataId)
+		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", dataId)
 	}
 
 	r := &Hero{

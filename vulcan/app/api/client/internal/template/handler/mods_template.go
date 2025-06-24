@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"{{.Org}}/fabrica-util/errors"
+	"{{.Org}}/fabrica-kit/xerrors"
 	climsg "{{.Project}}/gen/api/client/message"
 	cliseq "{{.Project}}/gen/api/client/sequence"
 	"{{.Project}}/gen/app/codec"
@@ -49,7 +50,7 @@ func handle{{.UpperCamelMod}}(ctx context.Context, s *service.{{.Group}}Services
 	{{- end }}
 
 	default:
-		return nil, errors.Errorf("seq not found. mod=%s seq=%d", "{{.UpperCamelMod}}", seq)
+		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "{{.UpperCamelMod}}", seq)
 	}
 
 	out, err0 := New{{.Group}}Response(mod, seq, obj, sc)
