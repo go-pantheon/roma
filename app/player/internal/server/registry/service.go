@@ -15,7 +15,9 @@ func NewServiceRegistrars(
 	infra *intra.IntraRegistrar,
 ) *ServiceRegistrars {
 	return &ServiceRegistrars{
-		Rgs: []Registrar{infra},
+		Rgs: []Registrar{
+			infra,
+		},
 	}
 }
 

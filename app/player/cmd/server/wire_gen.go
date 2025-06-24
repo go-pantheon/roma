@@ -15,7 +15,7 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/storage"
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/system"
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds/user"
-	registry5 "github.com/go-pantheon/roma/app/player/internal/app/dev/gate/registry"
+	registry4 "github.com/go-pantheon/roma/app/player/internal/app/dev/gate/registry"
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/service"
 	biz7 "github.com/go-pantheon/roma/app/player/internal/app/gamedata/admin/biz"
 	registry9 "github.com/go-pantheon/roma/app/player/internal/app/gamedata/admin/registry"
@@ -38,7 +38,7 @@ import (
 	registry6 "github.com/go-pantheon/roma/app/player/internal/app/storage/gate/registry"
 	service3 "github.com/go-pantheon/roma/app/player/internal/app/storage/gate/service"
 	biz4 "github.com/go-pantheon/roma/app/player/internal/app/system/gate/biz"
-	registry3 "github.com/go-pantheon/roma/app/player/internal/app/system/gate/registry"
+	registry5 "github.com/go-pantheon/roma/app/player/internal/app/system/gate/registry"
 	service4 "github.com/go-pantheon/roma/app/player/internal/app/system/gate/service"
 	biz6 "github.com/go-pantheon/roma/app/player/internal/app/user/admin/biz"
 	data4 "github.com/go-pantheon/roma/app/player/internal/app/user/admin/data"
@@ -48,7 +48,7 @@ import (
 	biz5 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/biz"
 	data2 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/data"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
-	registry4 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/registry"
+	registry3 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/registry"
 	service5 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/service"
 	"github.com/go-pantheon/roma/app/player/internal/client"
 	"github.com/go-pantheon/roma/app/player/internal/client/gate"
@@ -129,12 +129,12 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	tunnelServiceServer := service7.NewTunnelService(logger, manager, playerServices)
 	intraRegistrar := registry2.NewIntraRegistrar(tunnelServiceServer)
 	serviceRegistrars := registry.NewServiceRegistrars(servicelessUseCase, intraRegistrar)
-	systemRegistrar := registry3.NewSystemRegistrar(systemServiceServer)
-	userRegistrar := registry4.NewUserRegistrar(userServiceServer)
-	devRegistrar := registry5.NewDevRegistrar(devServiceServer)
+	userRegistrar := registry3.NewUserRegistrar(userServiceServer)
+	devRegistrar := registry4.NewDevRegistrar(devServiceServer)
+	systemRegistrar := registry5.NewSystemRegistrar(systemServiceServer)
 	storageRegistrar := registry6.NewStorageRegistrar(storageServiceServer)
 	heroRegistrar := registry7.NewHeroRegistrar(heroServiceServer)
-	gateRegistrars := registry.NewGateRegistrars(systemRegistrar, userRegistrar, devRegistrar, storageRegistrar, heroRegistrar)
+	gateRegistrars := registry.NewGateRegistrars(userRegistrar, devRegistrar, systemRegistrar, storageRegistrar, heroRegistrar)
 	domainUserRepo, err := data4.NewUserPostgresRepo(dataData, logger)
 	if err != nil {
 		cleanup2()

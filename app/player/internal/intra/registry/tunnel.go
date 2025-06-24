@@ -23,5 +23,5 @@ func (r *IntraRegistrar) GrpcRegister(s *grpc.Server) {
 }
 
 func (r *IntraRegistrar) HttpRegister(s *http.Server) {
-	log.Infof("Register infra HTTP service")
+	log.Infof("Ignore register infra HTTP service")
 }

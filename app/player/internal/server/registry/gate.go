@@ -13,17 +13,17 @@ type GateRegistrars struct {
 }
 
 func NewGateRegistrars(
-	system *system.SystemRegistrar,
 	user *user.UserRegistrar,
 	dev *dev.DevRegistrar,
+	system *system.SystemRegistrar,
 	storage *storage.StorageRegistrar,
 	hero *hero.HeroRegistrar,
 ) *GateRegistrars {
 	return &GateRegistrars{
 		Rgs: []Registrar{
-			system,
 			user,
 			dev,
+			system,
 			storage,
 			hero,
 		},
