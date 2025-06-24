@@ -50,7 +50,7 @@ func (uc *HeroUseCase) onCreated(ctx core.Context) error {
 }
 
 func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, arg *life.EventArg) error {
-	itemIds := arg.I64s()
+	itemIds := life.GetArg[[]int64](arg, core.ArgKeyStorageItemIDs)
 
 	var needUnlock bool
 	for _, itemId := range itemIds {

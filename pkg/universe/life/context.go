@@ -20,7 +20,7 @@ type Context interface {
 	ClientIP() string
 
 	OID() int64
-	UnsafeObject() interface{}
+	UnsafeObject() any
 	ShowProto() proto.Message
 
 	ChangedModules() (modules []ModuleKey, immediately bool)
@@ -44,8 +44,6 @@ type workerContext struct {
 	changedModules     map[ModuleKey]struct{}
 	changedImmediately bool
 }
-
-const defaultChangedModulesSize = 16
 
 func NewContext(ctx context.Context, w *Worker) Context {
 	c := &workerContext{

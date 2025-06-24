@@ -58,84 +58,47 @@ func (m *eventFuncMap) get(t WorkerEventType) ([]eventFunc, bool) {
 	return fs, ok
 }
 
+type EventArgValue interface {
+	int64 | string | float64 | []int64 | []string | []float64
+}
+
 type WithArg func(arg *EventArg)
 
-func WithI64(i64 int64) WithArg {
+func With[T EventArgValue](key any, value T) WithArg {
 	return func(arg *EventArg) {
-		arg.i64 = i64
-	}
-}
-
-func WithStr(str string) WithArg {
-	return func(arg *EventArg) {
-		arg.str = str
-	}
-}
-
-func WithF64(f64 float64) WithArg {
-	return func(arg *EventArg) {
-		arg.f64 = f64
-	}
-}
-
-func WithI64s(i64s ...int64) WithArg {
-	return func(arg *EventArg) {
-		arg.i64s = i64s
-	}
-}
-
-func WithStrs(strs ...string) WithArg {
-	return func(arg *EventArg) {
-		arg.strs = strs
-	}
-}
-
-func WithF64s(f64s ...float64) WithArg {
-	return func(arg *EventArg) {
-		arg.f64s = f64s
+		arg.set(key, value)
 	}
 }
 
 type EventArg struct {
-	i64  int64
-	str  string
-	f64  float64
-	i64s []int64
-	strs []string
-	f64s []float64
+	data map[any]any
+}
+
+func (e *EventArg) set(key any, value any) {
+	if e.data == nil {
+		e.data = make(map[any]any)
+	}
+
+	e.data[key] = value
+}
+
+func GetArg[T EventArgValue](arg *EventArg, key any) T {
+	if arg.data == nil {
+		var zero T
+		return zero
+	}
+
+	v, ok := arg.data[key].(T)
+	if !ok {
+		var zero T
+		return zero
+	}
+
+	return v
 }
 
 func (e *EventArg) Reset() {
-	e.i64 = 0
-	e.str = ""
-	e.f64 = 0
-	e.i64s = nil
-	e.strs = nil
-	e.f64s = nil
-}
-
-func (e *EventArg) I64() int64 {
-	return e.i64
-}
-
-func (e *EventArg) Str() string {
-	return e.str
-}
-
-func (e *EventArg) F64() float64 {
-	return e.f64
-}
-
-func (e *EventArg) I64s() []int64 {
-	return e.i64s
-}
-
-func (e *EventArg) Strs() []string {
-	return e.strs
-}
-
-func (e *EventArg) F64s() []float64 {
-	return e.f64s
+	clear(e.data)
 }
 
 var eventArgPool = sync.Pool{
