@@ -21,9 +21,9 @@ type UserRepo interface {
 }
 
 type UserCache interface {
-	Put(ctx context.Context, uid int64, user *dbv1.UserProto, ctime time.Time)
-	Get(ctx context.Context, uid int64, ctime time.Time) (ret *dbv1.UserProto)
-	Remove(ctx context.Context, uid int64)
+	CachePut(ctx context.Context, uid int64, user *dbv1.UserProto, ctime time.Time)
+	CacheGet(ctx context.Context, uid int64, ctime time.Time) (ret *dbv1.UserProto)
+	CacheRemove(ctx context.Context, uid int64)
 }
 
 type UserDomain struct {
@@ -40,8 +40,8 @@ func NewUserDomain(pr UserRepo, logger log.Logger, cache UserCache) *UserDomain 
 	}
 }
 
-func (do *UserDomain) Create(ctx context.Context, uid int64, sid int64, ctime time.Time, p *dbv1.UserProto) (err error) {
-	defaultUser := do.initDefaultUser(uid, sid)
+func (do *UserDomain) Create(ctx context.Context, uid int64, ctime time.Time, p *dbv1.UserProto) (err error) {
+	defaultUser := do.initDefaultUser(uid)
 	defaultUser.EncodeServer(p, userregister.AllModuleKeys())
 
 	err = do.repo.Create(ctx, uid, p, ctime)
@@ -51,8 +51,8 @@ func (do *UserDomain) Create(ctx context.Context, uid int64, sid int64, ctime ti
 	return nil
 }
 
-func (do *UserDomain) initDefaultUser(id int64, sid int64) *userobj.User {
-	u := userobj.NewUser(id, sid, profile.Version())
+func (do *UserDomain) initDefaultUser(id int64) *userobj.User {
+	u := userobj.NewUser(id, profile.Version())
 	return u
 }
 
@@ -74,14 +74,14 @@ func (do *UserDomain) IncVersion(ctx context.Context, uid int64, newVersion int6
 	return do.repo.IncVersion(ctx, uid, newVersion)
 }
 
-func (do *UserDomain) Cache(ctx context.Context, uid int64, proto *dbv1.UserProto, ctime time.Time) {
-	do.protoCache.Put(ctx, uid, proto, ctime)
+func (do *UserDomain) CachePut(ctx context.Context, uid int64, proto *dbv1.UserProto, ctime time.Time) {
+	do.protoCache.CachePut(ctx, uid, proto, ctime)
 }
 
-func (do *UserDomain) Get(ctx context.Context, uid int64, ctime time.Time) (ret *dbv1.UserProto) {
-	return do.protoCache.Get(ctx, uid, ctime)
+func (do *UserDomain) CacheGet(ctx context.Context, uid int64, ctime time.Time) (ret *dbv1.UserProto) {
+	return do.protoCache.CacheGet(ctx, uid, ctime)
 }
 
-func (do *UserDomain) Remove(ctx context.Context, uid int64) {
-	do.protoCache.Remove(ctx, uid)
+func (do *UserDomain) CacheRemove(ctx context.Context, uid int64) {
+	do.protoCache.CacheRemove(ctx, uid)
 }
