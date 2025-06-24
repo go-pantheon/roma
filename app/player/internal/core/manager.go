@@ -23,6 +23,7 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, userDo *domain.UserD
 	}
 
 	lifeMgr, stopFunc := life.NewManager(logger, rt, newContext, newPersister)
+
 	m := &Manager{
 		Manager: lifeMgr,
 		pusher:  pusher,
@@ -33,11 +34,11 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, userDo *domain.UserD
 	}
 }
 
-type eventFunc func(wctx Context, args ...int64) (err error)
+type eventFunc func(wctx Context, arg *life.EventArg) (err error)
 
 func (m *Manager) EventRegister(et life.WorkerEventType, f eventFunc) {
-	m.Manager.CustomEventRegister(et, func(wctx life.Context, args ...int64) (err error) {
-		return f(wctx.(Context), args...)
+	m.Manager.CustomEventRegister(et, func(wctx life.Context, arg *life.EventArg) (err error) {
+		return f(wctx.(Context), arg)
 	})
 }
 

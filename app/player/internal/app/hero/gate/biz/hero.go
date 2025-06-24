@@ -10,6 +10,7 @@ import (
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
 )
 
@@ -48,7 +49,9 @@ func (uc *HeroUseCase) onCreated(ctx core.Context) error {
 	return nil
 }
 
-func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, itemIds ...int64) error {
+func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, arg *life.EventArg) error {
+	itemIds := arg.I64s()
+
 	var needUnlock bool
 	for _, itemId := range itemIds {
 		if itemData := gamedata.GetResourceItemData(itemId); itemData != nil {
@@ -131,7 +134,7 @@ func (uc *HeroUseCase) HeroLevelUpgrade(ctx core.Context, cs *climsg.CSHeroLevel
 		}
 	}
 	hero.Level = levelData.Level
-	
+
 	ctx.Changed(object.ModuleKey)
 
 	sc.Code = climsg.SCHeroLevelUpgrade_Succeeded

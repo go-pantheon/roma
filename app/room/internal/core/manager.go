@@ -32,7 +32,7 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, roomDo *domain.RoomD
 	}
 }
 
-type eventFunc func(wctx Context, args ...int64) (err error)
+type eventFunc func(wctx Context, arg *life.EventArg) (err error)
 
 func (m *Manager) SecondTickRegister(f func(ctx Context) error) {
 	m.Manager.SecondTickRegister(func(ctx life.Context) error {
@@ -47,8 +47,8 @@ func (m *Manager) MinuteTickRegister(f func(ctx Context) error) {
 }
 
 func (m *Manager) CustomEventRegister(e life.WorkerEventType, f eventFunc) {
-	m.Manager.CustomEventRegister(e, func(wctx life.Context, args ...int64) (err error) {
-		return f(wctx.(Context), args...)
+	m.Manager.CustomEventRegister(e, func(wctx life.Context, arg *life.EventArg) (err error) {
+		return f(wctx.(Context), arg)
 	})
 }
 

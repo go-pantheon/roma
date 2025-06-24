@@ -280,7 +280,7 @@ func (w *Worker) ProductFuncEvent(f EventFunc) error {
 	return nil
 }
 
-func (w *Worker) ProductPreparedEvent(t WorkerEventType, args ...int64) error {
+func (w *Worker) ProductPreparedEvent(t WorkerEventType, args ...WithArg) error {
 	if w.OnStopping() {
 		return xerrors.ErrLifeStopped
 	}
@@ -294,17 +294,24 @@ func (w *Worker) ProductPreparedEvent(t WorkerEventType, args ...int64) error {
 	return nil
 }
 
-func (w *Worker) preparedEventFunc(t WorkerEventType, args ...int64) (f EventFunc, e error) {
+func (w *Worker) preparedEventFunc(t WorkerEventType, args ...WithArg) (f EventFunc, e error) {
 	switch t {
 	case EventTypeSecondTick:
 		f = w.secondTick
 	case EventTypeMinuteTick:
 		f = w.minuteTick
 	default:
+		arg := GetEventArg()
+		defer PutEventArg(arg)
+
+		for _, a := range args {
+			a(arg)
+		}
+
 		if ffs, ok := preparedEventFuncMap.get(t); ok {
 			f = func(wctx Context) (err error) {
 				for _, ff := range ffs {
-					if err := ff(wctx, args...); err != nil {
+					if err := ff(wctx, arg); err != nil {
 						w.log.WithContext(wctx).Errorf("worker execute event failed. id=%d type=%d %+v", wctx.OID(), t, err)
 					}
 				}

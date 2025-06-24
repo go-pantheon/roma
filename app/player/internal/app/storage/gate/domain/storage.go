@@ -9,6 +9,7 @@ import (
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
 	adv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/storage/v1"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/go-pantheon/roma/pkg/zerrors"
 )
 
@@ -58,8 +59,8 @@ func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.Update
 		}
 	})
 
-	_ = ctx.ProductPreparedEvent(core.WorkerEventTypeStorageItemUpdated, itemIds...)
-	_ = ctx.ProductPreparedEvent(core.WorkerEventTypeStoragePackUpdated, packIds...)
+	_ = ctx.ProductPreparedEvent(core.WorkerEventTypeStorageItemUpdated, life.WithI64s(itemIds...))
+	_ = ctx.ProductPreparedEvent(core.WorkerEventTypeStoragePackUpdated, life.WithI64s(packIds...))
 
 	ctx.Changed(object.ModuleKey)
 
