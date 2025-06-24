@@ -5,21 +5,25 @@ GOBUILD=${GOCMD} build
 # Initialize environment
 init:
 	pre-commit install
+	go install github.com/google/go-licenses@latest
 	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
 	go install github.com/google/wire/cmd/wire@latest
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 	go install github.com/envoyproxy/protoc-gen-validate@latest
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
-	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
 	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2@latest
+	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
 	go install github.com/favadi/protoc-go-inject-tag@latest
+
+.PHONY: generate
+# Generate all
+generate: proto api wire
 
 .PHONY: version
 # Show the generated version
 version:
-	@find app -type d -depth 1 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) version'
-
+	@find app -type d -depth 1 -print | xargs -L 1 bash -c 'echo "version: $$0" && cd "$$0" && $(MAKE) version'
 
 .PHONY: wire
 # Generate wire
@@ -28,19 +32,19 @@ wire:
 	cd mercury/cmd && wire
 
 .PHONY: proto
-# Generate internal proto struct
+# Generate internal proto pb.go files.
 proto:
 	buf generate --template=buf/buf.gen.app.yaml
 	buf generate --template=buf/buf.gen.mercury.yaml
 
 .PHONY: api
-# Generate API
+# Generate api/client and api/server pb.go files.
 api:
 	buf generate --template=buf/buf.gen.client.yaml
 	buf generate --template=buf/buf.gen.server.yaml
 
 .PHONY: db
-# Generate API
+# Generate api/db pb.go files and inject proto tag
 db:
 	@buf generate --template=buf/buf.gen.db.yaml && \
 	cd gen/api/db/ && find . -type d -print0 | while IFS= read -r -d '' dir; do \
@@ -54,126 +58,131 @@ db:
 	bin/tools/gen-api-db
 
 .PHONY: build
-# build execute file
+# Build app execute file. Use app=app_name to build specific service.
 build:
 	@if [ -z "$(app)" ]; then \
-		find app -type d -depth 1 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) build'; \
+		find app -type d -depth 1 -print | xargs -L 1 bash -c 'echo "build: $$0" && cd "$$0" && $(MAKE) build'; \
 	else \
-		cd app/$(app) && pwd && $(MAKE) build; \
+		echo "build: app/$(app)" && cd app/$(app) && $(MAKE) build; \
 	fi
 
-.PHONY: run
-# start all project services
-run: start log
+.PHONY: start
+# Start all app services. Use app=app_name to start specific service.
+start: stop build
+	@if [ -z "$(app)" ]; then \
+		find app -type d -depth 1 -print | xargs -L 1 bash -c 'echo "start: $$0" && cd "$$0" && $(MAKE) start'; \
+	else \
+		echo "start: app/$(app)" && cd app/$(app) && $(MAKE) start; \
+	fi
+
+.PHONY: stop
+# Stop all app services. Use app=app_name to stop specific service.
+stop:
+	@if [ -z "$(app)" ]; then \
+		find app -type d -depth 1 -print | xargs -L 1 bash -c 'echo "stop: $$0" && cd "$$0" && $(MAKE) stop'; \
+	else \
+		echo "stop: app/$(app)" && cd app/$(app) && $(MAKE) stop; \
+	fi
 
 .PHONY: log
-# tail -f app/gate/bin/debug.log
+# Tail app service log file. Must use app=app_name to tail specific service.
 log:
 	@if [ -z "$(app)" ]; then \
   	    echo "error: app must exist. ex: app=player"; \
 	else \
-		cd app/$(app) && pwd && $(MAKE) log; \
+		echo "log: app/$(app)" && cd app/$(app) && $(MAKE) log; \
 	fi
-
-.PHONY: start
-# start all project services
-start: stop build
-	@if [ -z "$(app)" ]; then \
-		find app -type d -depth 1 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) start'; \
-	else \
-		cd app/$(app) && pwd && $(MAKE) start; \
-	fi
-
-.PHONY: stop
-# stop all project services
-stop:
-	@if [ -z "$(app)" ]; then \
-		find app -type d -depth 1 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) stop'; \
-	else \
-		cd app/$(app) && pwd && $(MAKE) stop; \
-	fi
-
-.PHONY: docker
-# build docker image
-docker:
-	@if [ -z "$(app)" ]; then \
-		find app -type d -depth 1 -print | xargs -L 1 bash -c 'cd "$$0" && pwd && $(MAKE) docker'; \
-	else \
-		cd app/$(app) && pwd && $(MAKE) docker; \
-	fi
-
-.PHONY: test
-# test
-test:
-	go test -v ./... -cover
-
-.PHONY: tools
-# build all tools to bin/tools directory
-tools:
-	rm -rf bin/tools
-	mkdir -p bin/tools
-	$(GOBUILD) -o bin/tools/gen-api-db -ldflags "-X main.Version=0.0.1"  ./vulcan/app/api/db/cmd
-	$(GOBUILD) -o bin/tools/gen-api-client -ldflags "-X main.Version=0.0.1"  ./vulcan/app/api/client/cmd
-	$(GOBUILD) -o bin/tools/gen-mercury -ldflags "-X main.Version=0.0.1"  ./vulcan/app/mercury/cmd
-	$(GOBUILD) -o bin/tools/gen-data-json -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/json
-	$(GOBUILD) -o bin/tools/gen-data-base -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/base
-	$(GOBUILD) -o bin/tools/gen-datas -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/data
 
 .PHONY: mercury
-# start mercury client
-mercury:
-	-pkill -f mercury/bin/mercury
-	cd mercury \
-	  && rm -rf bin/mercury && mkdir -p bin/mercury && $(GOBUILD) -ldflags "-X main.Version=0.0.1" -o bin/mercury/client ./cmd
-	cd mercury \
-	  && nohup bin/mercury/client -conf=configs -gamedata gen/gamedata/json > bin/mercury/debug.log &
-	tail -f mercury/bin/mercury/debug.log
+# Run mercury client
+mercury: mercury-build mercury-start mercury-log
 
-.PHONY: mercury-log
-mercury-log:
-	tail -f mercury/bin/mercury/debug.log
+.PHONY: mercury-build
+mercury-build:
+	cd mercury && echo "build: mercury" \
+	  && rm -rf bin/mercury && mkdir -p bin/mercury && $(GOBUILD) -ldflags "-X main.Version=0.0.1" -o bin/mercury/client ./cmd
+
+.PHONY: mercury-start
+# Start mercury client
+mercury-start:
+	cd mercury && echo "start: mercury" \
+	  && nohup bin/mercury/client -conf=configs -gamedata gen/gamedata/json > bin/mercury/debug.log &
 
 .PHONY: mercury-stop
+# Kill mercury process
 mercury-stop:
 	-pkill -f mercury/bin/mercury
 
+.PHONY: mercury-log
+# tail -f mercury/bin/mercury/debug.log
+mercury-log:
+	cd mercury && echo "log: mercury" && tail -f bin/mercury/debug.log
+
+.PHONY: tools
+# Build all tools to directory:bin/tools 
+tools:
+	@rm -rf bin/tools
+	@mkdir -p bin/tools
+	@echo "build: gen-api-db" && $(GOBUILD) -o bin/tools/gen-api-db -ldflags "-X main.Version=0.0.1"  ./vulcan/app/api/db/cmd
+	@echo "build: gen-api-client" && $(GOBUILD) -o bin/tools/gen-api-client -ldflags "-X main.Version=0.0.1"  ./vulcan/app/api/client/cmd
+	@echo "build: gen-mercury" && $(GOBUILD) -o bin/tools/gen-mercury -ldflags "-X main.Version=0.0.1"  ./vulcan/app/mercury/cmd
+	@echo "build: gen-data-json" && $(GOBUILD) -o bin/tools/gen-data-json -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/json
+	@echo "build: gen-data-base" && $(GOBUILD) -o bin/tools/gen-data-base -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/base
+	@echo "build: gen-datas" && $(GOBUILD) -o bin/tools/gen-datas -ldflags "-X main.Version=0.0.1"  ./vulcan/app/gamedata/cmd/data
+
 .PHONY: gen-api-client
-# generate api code
+# Generate api/client code
 gen-api-client:
-	bin/tools/gen-api-client
+	@echo "run: gen-api-client" && bin/tools/gen-api-client
 
 .PHONY: gen-api-db
-# generate api code
+# Generate api/db code
 gen-api-db:
-	bin/tools/gen-api-db
+	@echo "run: gen-api-db" && bin/tools/gen-api-db
 
 .PHONY: gen-mercury
-# generate mercury client code
+# Generate mercury client code
 gen-mercury:
-	bin/tools/gen-mercury
+	@echo "run: gen-mercury" && bin/tools/gen-mercury
 
 .PHONY: gen-data-json
-# generate data json file
+# Generate data json file
 gen-data-json:
-	bin/tools/gen-data-json
+	@echo "run: gen-data-json" && bin/tools/gen-data-json
 
 .PHONY: gen-data-base
-# generate data base code
+# Generate data base code
 gen-data-base:
-	bin/tools/gen-data-base
+	@echo "run: gen-data-base" && bin/tools/gen-data-base
 
 .PHONY: gen-datas
-# generate data code
+# Generate data code
 gen-datas: 
-	bin/tools/gen-datas
+	@echo "run: gen-datas" && bin/tools/gen-datas
 
 .PHONY: gen-all-data
-# generate all data code
+# Generate all data code
 gen-all-data: gen-data-json gen-data-base gen-datas
 
+.PHONY: test
+# Run test and show coverage
+test:
+	go test -v ./... -cover
+
 .PHONY: vet
+# Run vet
 vet:
 	go vet ./...
+
+.PHONY: license-check
+# Run license check
+license-check:
+	go-licenses check ./...
+
+.PHONY: lint
+# Run lint
+lint:
+	golangci-lint run ./...
 
 # show help
 help:
