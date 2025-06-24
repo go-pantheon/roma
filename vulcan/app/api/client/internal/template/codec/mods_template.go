@@ -19,8 +19,8 @@ import (
 
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-	climsg "{{.Project}}/roma/gen/api/client/message"
-	cliseq "{{.Project}}/roma/gen/api/client/sequence"
+	climsg "{{.Project}}/gen/api/client/message"
+	cliseq "{{.Project}}/gen/api/client/sequence"
 )
 {{- $lowerCamelMod := .LowerCamelMod}}
 {{- $upperCamelMod := .UpperCamelMod}}

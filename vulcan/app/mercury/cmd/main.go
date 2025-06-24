@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 	"path"
 	"strings"
@@ -26,6 +26,8 @@ const (
 )
 
 func main() {
+	filewriter.Init(destPath, destTmpPath)
+
 	baseDir := filewriter.BasePath()
 	modPath := path.Join(baseDir, apiPathPrefix, apiModFile)
 	seqDirPath := path.Join(baseDir, apiPathPrefix, apiSeqDir)
@@ -44,7 +46,7 @@ func main() {
 				scs = append(scs, sc)
 			}
 		}
-		fmt.Printf("准备生成的 API 模块: %+v\n", mc.Mods)
+		slog.Info("=== prepare to generate api:", "modules", mc.Mods)
 	}
 
 	if err := gen(baseDir, scs); err != nil {
@@ -52,20 +54,20 @@ func main() {
 	}
 }
 
-func gen(base string, scs []*compilers.SeqCompiler) error {
-	// 处理临时文件夹
+func gen(_ string, scs []*compilers.SeqCompiler) error {
+	// handle temp directory
 	if _, err := os.Stat(destTmpPath); err == nil {
 		if err = os.RemoveAll(destTmpPath); err != nil {
 			return err
 		}
 	} else if !os.IsNotExist(err) {
-		return errors.Wrapf(err, "请手动删除文件夹：%s", destTmpPath)
+		return errors.Wrapf(err, "please manually delete the directory: %s", destTmpPath)
 	}
 	if err := os.Mkdir(destTmpPath, 0755); err != nil {
-		return errors.Wrapf(err, "创建临时文件夹失败。路径：%s", destTmpPath)
+		return errors.Wrapf(err, "failed to create temp directory: %s", destTmpPath)
 	}
 
-	// 生成到临时文件夹
+	// generate to temp directory
 	if err := genTask(destTmpPath, scs); err != nil {
 		return err
 	}
@@ -76,7 +78,7 @@ func gen(base string, scs []*compilers.SeqCompiler) error {
 	if err := os.Rename(destTmpPath, destPath); err != nil {
 		return err
 	}
-	fmt.Println("生成api文件完成。")
+	slog.Info("=== api files generated.", "dir", destPath)
 	return nil
 }
 
@@ -84,7 +86,7 @@ func genTask(base string, cs []*compilers.SeqCompiler) error {
 	for _, c := range cs {
 		dir := base + "/" + string(c.Mod())
 		if err := os.Mkdir(dir, 0755); err != nil {
-			return errors.Wrapf(err, "创建临时文件夹失败。路径：%s", dir)
+			return errors.Wrapf(err, "failed to create temp directory: %s", dir)
 		}
 
 		for _, api := range c.Apis {
@@ -97,7 +99,7 @@ func genTask(base string, cs []*compilers.SeqCompiler) error {
 			if err := filewriter.GenFile(to, s); err != nil {
 				return err
 			}
-			fmt.Println(to)
+			slog.Info("generated task", "file", filewriter.SprintGenPath(to))
 		}
 	}
 	return nil

@@ -36,7 +36,7 @@ func genHandler(project, dir string, mc *compilers.ModsCompiler) error {
 	if err := filewriter.GenFile(to, ms); err != nil {
 		return err
 	}
-	slog.Info("generate handlers files completed", "to", to)
+	slog.Info("generate handlers", "file", filewriter.SprintGenPath(to))
 	return nil
 }
 
@@ -46,7 +46,7 @@ func genCodecHandler(project, dir string, mc *compilers.ModsCompiler) error {
 	if err := filewriter.GenFile(to, ms); err != nil {
 		return err
 	}
-	slog.Info("generate reply files completed", "to", to)
+	slog.Info("generate reply handler", "file", filewriter.SprintGenPath(to))
 	return nil
 }
 
@@ -60,7 +60,7 @@ func genModsHandler(project, dir string, mc *compilers.ModsCompiler, cs []*compi
 		if err := filewriter.GenFile(to, s); err != nil {
 			return err
 		}
-		slog.Info("generate mod handler files completed", "to", to)
+		slog.Info("generate mod handler", "file", filewriter.SprintGenPath(to))
 	}
 	return nil
 }

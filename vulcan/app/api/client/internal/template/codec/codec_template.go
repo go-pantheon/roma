@@ -18,8 +18,8 @@ package codec
 import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
-	climod "{{.Project}}/roma/gen/api/client/module"
-	clipkt "{{.Project}}/roma/gen/api/client/packet"
+	climod "{{.Project}}/gen/api/client/module"
+	clipkt "{{.Project}}/gen/api/client/packet"
 )
 
 func UnmarshalCS(mod, seq int32, bytes []byte) (cs proto.Message, err error) {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -20,6 +20,8 @@ const (
 )
 
 func main() {
+	filewriter.Init(destPath, destPath)
+
 	baseDir := filewriter.BasePath()
 	destDir := filepath.Join(baseDir, destPath)
 
@@ -31,8 +33,6 @@ func main() {
 	if err := os.MkdirAll(destDir, 0755); err != nil {
 		panic(err)
 	}
-
-	log.Printf("dir: %s", destDir)
 
 	service := tmpl.NewService()
 
@@ -58,6 +58,8 @@ func main() {
 			panic(err)
 		}
 
+		slog.Info("generate db module pool", "file", filewriter.SprintGenPath(destFilePath))
+
 		if file.HasOneof {
 			formatted, err = service.Execute(file, codecTemplate)
 			if err != nil {
@@ -69,6 +71,10 @@ func main() {
 			if err := os.WriteFile(destFilePath, formatted, 0644); err != nil {
 				panic(err)
 			}
+
+			slog.Info("generate db module codec", "file", filewriter.SprintGenPath(destFilePath))
 		}
 	}
+
+	slog.Info("=== db module generated.", "dir", destPath)
 }

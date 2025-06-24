@@ -26,12 +26,12 @@ const (
 )
 
 func main() {
+	filewriter.Init(destPath, destTmpPath)
+
 	baseDir := filewriter.BasePath()
 
-	slog.Info("project directory", "dir", baseDir)
-	slog.Info("excel directory", "dir", excelPath)
-	slog.Info("dest directory", "dir", destPath)
-	slog.Info("dest tmp directory", "dir", destTmpPath)
+	slog.Info("=== from excel directory:", "path", excelPath)
+	slog.Info("=== to base directory:", "path", destPath)
 
 	destDir := path.Join(baseDir, destPath)
 	tmpDir := path.Join(baseDir, destTmpPath)
@@ -67,7 +67,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	slog.Info("Base directory generated.", "dir", destDir)
+	slog.Info("=== Base directory generated.", "dir", destPath)
 }
 
 func genBase(dir string, sh sheet.Sheet) (err error) {
@@ -95,7 +95,7 @@ func genBase(dir string, sh sheet.Sheet) (err error) {
 		return
 	}
 
-	slog.Info("Base file generated.", "file", to)
+	slog.Info("generated base", "file", filewriter.SprintGenPath(to))
 	return
 }
 
@@ -106,6 +106,6 @@ func genLoader(dir string, excelDir *parser.Sheets) (err error) {
 		return
 	}
 
-	slog.Info("Loader file generated.", "file", to)
+	slog.Info("generated base loader", "file", filewriter.SprintGenPath(to))
 	return
 }

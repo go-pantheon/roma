@@ -24,19 +24,21 @@ func init() {
 func main() {
 	flag.Parse()
 
+	filewriter.Init(jsonBaseDir, jsonBaseDir)
+
 	baseDir := filewriter.BasePath()
 
-	xlsxBaseDir = filepath.FromSlash(path.Join(baseDir, xlsxBaseDir))
-	jsonBaseDir = filepath.FromSlash(path.Join(baseDir, jsonBaseDir))
+	xlsxBasePath := filepath.FromSlash(path.Join(baseDir, xlsxBaseDir))
+	jsonBasePath := filepath.FromSlash(path.Join(baseDir, jsonBaseDir))
 
-	slog.Info("excel directory", "path", xlsxBaseDir)
-	slog.Info("json directory", "path", jsonBaseDir)
+	slog.Info("=== from excel directory:", "path", xlsxBaseDir)
+	slog.Info("=== to json directory:", "path", jsonBaseDir)
 
-	if err := filewriter.RebuildDir(jsonBaseDir); err != nil {
+	if err := filewriter.RebuildDir(jsonBasePath); err != nil {
 		panic(err)
 	}
 
-	sheets, err := parser.Parse(xlsxBaseDir)
+	sheets, err := parser.Parse(xlsxBasePath)
 	if err != nil {
 		panic(err)
 	}
@@ -47,11 +49,13 @@ func main() {
 			panic(err)
 		}
 
-		jsonFilePath := filepath.FromSlash(path.Join(jsonBaseDir, sh.FullName()+".json"))
+		jsonFilePath := filepath.FromSlash(path.Join(jsonBasePath, sh.FullName()+".json"))
 		if err = filewriter.WriteFile(jsonFilePath, []byte(content)); err != nil {
 			panic(err)
 		}
-		slog.Info("json file generated", "path", jsonFilePath)
+		slog.Info("generated json", "path", filewriter.SprintGenPath(jsonFilePath))
 		return true
 	})
+
+	slog.Info("=== json files generated.", "dir", jsonBaseDir)
 }

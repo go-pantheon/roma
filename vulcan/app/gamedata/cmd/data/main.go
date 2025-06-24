@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"path"
@@ -26,11 +25,12 @@ const (
 )
 
 func main() {
+	filewriter.Init(destPath, destPath)
+
 	baseDir := filewriter.BasePath()
 
-	slog.Info("project directory", "dir", baseDir)
-	slog.Info("excel directory", "dir", excelPath)
-	slog.Info("dest directory", "dir", destPath)
+	slog.Info("=== from excel directory:", "path", excelPath)
+	slog.Info("=== to gamedata directory:", "path", destPath)
 
 	destDir := path.Join(baseDir, destPath)
 
@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	slog.Info("gamedata directory generated.", "dir", destDir)
+	slog.Info("=== gamedata directory generated.", "dir", destPath)
 }
 
 func genData(dir string, sh sheet.Sheet) (err error) {
@@ -73,7 +73,7 @@ func genData(dir string, sh sheet.Sheet) (err error) {
 	if err = filewriter.GenFile(to, s); err != nil {
 		return
 	}
-	fmt.Printf("gen %s\n", to)
+	slog.Info("generated data", "file", filewriter.SprintGenPath(to))
 	return
 }
 
@@ -91,17 +91,17 @@ func genSpecialFormula(dir string, sh sheet.Sheet) (err error) {
 	if err = filewriter.GenFile(to, s); err != nil {
 		return
 	}
-	fmt.Printf("gen %s\n", to)
+	slog.Info("generated data special formula", "file", filewriter.SprintGenPath(to))
 	return
 }
 
 func removeFile(filePath string) (err error) {
 	if _, err = os.Stat(filePath); err == nil {
 		if err = os.Remove(filePath); err != nil {
-			return errors.Wrapf(err, "删除文件失败：%s", filePath)
+			return errors.Wrapf(err, "failed to remove file: %s", filePath)
 		}
 	} else if !os.IsNotExist(err) {
-		return errors.Wrapf(err, "请手动删除文件<%s>", filePath)
+		return errors.Wrapf(err, "please manually delete the file: %s", filePath)
 	}
 	return nil
 }
@@ -115,6 +115,6 @@ func genLoader(dir string, shs []sheet.Sheet) (err error) {
 	if err = filewriter.GenFile(to, s); err != nil {
 		return
 	}
-	fmt.Println(to)
+	slog.Info("generated data loader", "file", filewriter.SprintGenPath(to))
 	return
 }

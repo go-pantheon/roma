@@ -16,8 +16,8 @@ package handler
 
 import (
 	"context"
-	"{{.Project}}/roma/gen/api/client/module"
-	"{{.Project}}/roma/gen/app/{{.LowerCamelGroup}}/service"
+	"{{.Project}}/gen/api/client/module"
+	"{{.Project}}/gen/app/{{.LowerCamelGroup}}/service"
 	"{{.Project}}/fabrica-net/xnet"
 	"github.com/pkg/errors"
 )

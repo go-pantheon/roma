@@ -23,7 +23,7 @@ const (
 
 // TCP packet structure definition
 // For public network access
-// The complete message format: 4(4 + len(data), bigEndian) + data(encrypt(byte[](Marshal(Packet)))). The client and server send messages in this format.
+// The complete frame format: 4(4 + len(data), bigEndian) + data(encrypt(byte[](Marshal(Packet)))). The client and server send frames in this format.
 // After the handshake protocol, all protocols use AES encryption and decryption
 // The message index number is incremented by 1 each time, and the message index number is unique within the same module
 // mod + seq + obj forms the unique ID of data
@@ -34,7 +34,7 @@ type Packet struct {
 	Obj           int64                  `protobuf:"varint,3,opt,name=obj,proto3" json:"obj,omitempty"`                                    // Module object ID, according to the business agreement to pass the corresponding object ID
 	Mod           int32                  `protobuf:"varint,4,opt,name=mod,proto3" json:"mod,omitempty"`                                    // Module ID, globally unique
 	Seq           int32                  `protobuf:"varint,5,opt,name=seq,proto3" json:"seq,omitempty"`                                    // Message ID within the module, unique within the module
-	Ver           int32                  `protobuf:"varint,6,opt,name=ver,proto3" json:"ver,omitempty"`                                    // Version
+	Ver           int32                  `protobuf:"varint,6,opt,name=ver,proto3" json:"ver,omitempty"`                                    // Packet Version, default 0 means no version
 	Index         int32                  `protobuf:"varint,7,opt,name=index,proto3" json:"index,omitempty"`                                // Message index number, increment
 	Compress      bool                   `protobuf:"varint,8,opt,name=compress,proto3" json:"compress,omitempty"`                          // Whether the data in the body is compressed. The default compression method is zlib
 	unknownFields protoimpl.UnknownFields

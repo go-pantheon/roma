@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	project = "github.com/go-pantheon"
+	project = "github.com/go-pantheon/roma"
 )
 
 const (
@@ -27,6 +27,8 @@ const (
 )
 
 func main() {
+	filewriter.Init(destPath, destTmpPath)
+
 	baseDir := filewriter.BasePath()
 	modPath := path.Join(baseDir, apiPathPrefix, apiModFile)
 	seqDirPath := path.Join(baseDir, apiPathPrefix, apiSeqDir)
@@ -46,7 +48,7 @@ func main() {
 				scs = append(scs, sc)
 			}
 		}
-		slog.Info("mod that will be generated", "mods", mc.Mods)
+		slog.Info("=== prepare to generate api:", "mods", mc.Mods)
 	}
 
 	if err = gen(baseDir, mcs, scs); err != nil {
@@ -96,6 +98,6 @@ func gen(base string, mcs []*compilers.ModsCompiler, scs []*compilers.SeqCompile
 	if err := os.Rename(tmpDir, dir); err != nil {
 		return err
 	}
-	slog.Info("generate api files completed")
+	slog.Info("=== api files generated.", "dir", destPath)
 	return nil
 }

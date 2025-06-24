@@ -28,7 +28,7 @@ func init() {
 func main() {
 	defer func() {
 		if p := recover(); p != nil {
-			_, _ = fmt.Fprint(os.Stderr, fmt.Sprintf("%+v", xsync.CatchErr(p)))
+			_, _ = fmt.Fprintf(os.Stderr, "%+v\n", xsync.CatchErr(p))
 			os.Exit(1)
 		}
 	}()

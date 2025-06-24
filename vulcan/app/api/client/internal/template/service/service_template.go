@@ -16,7 +16,7 @@ package service
 
 import (
 	"github.com/google/wire"
-	"{{.Project}}/roma/gen/api/client/message"
+	"{{.Project}}/gen/api/client/message"
 )
 
 var {{.Group}}ServicesProviderSet = wire.NewSet(

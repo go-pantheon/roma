@@ -6,7 +6,7 @@ import (
 	"context"
 	"github.com/go-pantheon/roma/gen/api/client/module"
 	"github.com/go-pantheon/roma/gen/app/player/service"
-	"github.com/go-pantheon/fabrica-net/xnet"
+	"github.com/go-pantheon/roma/fabrica-net/xnet"
 	"github.com/pkg/errors"
 )
 

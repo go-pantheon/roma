@@ -3,7 +3,6 @@ package pkg
 import (
 	"bytes"
 	"io"
-	"log/slog"
 	"os"
 	"os/exec"
 
@@ -56,6 +55,6 @@ func CmdExecute(dir, name string, arg ...string) (string, error) {
 	if errStr != "" {
 		return "", errors.Wrapf(err, "command output failed. name:%s, args:%v %s", name, arg, errStr)
 	}
-	slog.Info("Command executed.", "name", name, "args", arg, "out", outStr)
+	// slog.Info("Command executed.", "name", name, "args", arg, "out", outStr)
 	return outStr, nil
 }

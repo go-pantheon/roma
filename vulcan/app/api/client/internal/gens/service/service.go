@@ -29,6 +29,6 @@ func genModService(project, dir string, c *compilers.ModsCompiler) error {
 	if err := filewriter.GenFile(to, s); err != nil {
 		return err
 	}
-	slog.Info("generate mod services files completed", "to", to)
+	slog.Info("generate service", "file", filewriter.SprintGenPath(to))
 	return nil
 }

@@ -16,7 +16,7 @@ package handler
 
 import (
 	"google.golang.org/protobuf/proto"
-	"{{.Project}}/roma/gen/api/server/{{.LowerGroup}}/intra/v1"
+	"{{.Project}}/gen/api/server/{{.LowerGroup}}/intra/v1"
 	"github.com/pkg/errors"
 )
 

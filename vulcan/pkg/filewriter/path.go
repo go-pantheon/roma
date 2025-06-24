@@ -10,6 +10,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	destDir string
+	tmpDir  string
+)
+
+func Init(dest, sep string) {
+	destDir = dest
+	tmpDir = sep
+}
+
 func WriteFile(filename string, content []byte) error {
 	if _, err := os.Stat(filename); err == nil || !os.IsNotExist(err) {
 		return errors.Wrapf(err, "%s already exists", filename)
@@ -96,4 +106,17 @@ func getCurrentAbPathByCaller() string {
 		abPath = filepath.Dir(filename)
 	}
 	return abPath
+}
+
+func SprintGenPath(path string) string {
+	if tmpDir == "" {
+		return path
+	}
+
+	parts := strings.Split(path, filepath.Clean(tmpDir))
+	if len(parts) == 2 {
+		return filepath.Join(destDir, parts[1])
+	}
+
+	return path
 }

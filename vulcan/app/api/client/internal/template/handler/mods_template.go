@@ -17,10 +17,10 @@ package handler
 import (
 	"context"
 	"google.golang.org/protobuf/proto"
-	"{{.Project}}/roma/gen/api/client/message"
-	"{{.Project}}/roma/gen/api/client/sequence"
-	"{{.Project}}/roma/gen/app/codec"
-	"{{.Project}}/roma/gen/app/{{.LowerGroup}}/service"
+	"{{.Project}}/gen/api/client/message"
+	"{{.Project}}/gen/api/client/sequence"
+	"{{.Project}}/gen/app/codec"
+	"{{.Project}}/gen/app/{{.LowerGroup}}/service"
 	"github.com/pkg/errors"
 )
 

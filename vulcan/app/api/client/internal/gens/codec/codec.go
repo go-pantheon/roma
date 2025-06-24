@@ -2,6 +2,7 @@ package codec
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path"
 
@@ -35,7 +36,7 @@ func genCodec(project, dir string, mcs []*compilers.ModsCompiler) error {
 	if err := filewriter.GenFile(to, s); err != nil {
 		return err
 	}
-	fmt.Println(to)
+	slog.Info("generate codec", "file", filewriter.SprintGenPath(to))
 	return nil
 }
 
@@ -45,6 +46,6 @@ func genModsCodec(project, dir string, c *compilers.SeqCompiler) error {
 	if err := filewriter.GenFile(to, s); err != nil {
 		return err
 	}
-	fmt.Println(to)
+	slog.Info("generate mod codec", "file", filewriter.SprintGenPath(to))
 	return nil
 }

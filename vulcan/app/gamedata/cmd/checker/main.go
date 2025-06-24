@@ -33,7 +33,7 @@ func main() {
 					msg = lines[0]
 				}
 			}
-			_, _ = fmt.Fprint(os.Stderr, fmt.Sprintf("%s", msg))
+			_, _ = fmt.Fprintf(os.Stderr, "%s\n", msg)
 			os.Exit(1)
 		}
 	}()
@@ -41,7 +41,7 @@ func main() {
 	flag.Parse()
 
 	jsonBaseDir = path.Join(filewriter.BasePath(), jsonBaseDir)
-	slog.Info("json directory", "dir", jsonBaseDir)
+	slog.Info("json directory", "dir", filewriter.SprintGenPath(jsonBaseDir))
 
 	gamedata.Load(jsonBaseDir)
 }
