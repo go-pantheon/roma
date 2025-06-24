@@ -30,15 +30,11 @@ func (md *GrpcFilter) Server() middleware.Middleware {
 				return nil, err
 			}
 
-			sid, err := xcontext.SID(ctx)
-			if err != nil {
-				return nil, err
-			}
-
-			err = md.mgr.ExecuteAppEvent(ctx, oid, sid, func(wctx life.Context) (err error) {
+			err = md.mgr.ExecuteAppEvent(ctx, oid, func(wctx life.Context) (err error) {
 				reply, err = handler(wctx, req)
 				return
 			})
+
 			return reply, err
 		}
 	}

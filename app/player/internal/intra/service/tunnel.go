@@ -46,15 +46,10 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 	var (
 		w   life.Workable
 		oid int64
-		sid int64
 		err error
 	)
 
 	if oid, err = xcontext.OID(ctx); err != nil {
-		return err
-	}
-
-	if sid, err = xcontext.SID(ctx); err != nil {
 		return err
 	}
 
@@ -70,7 +65,7 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return nil
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, sid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
+	if w, err = s.mgr.Worker(ctx, oid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
 		return err
 	}
 	return s.run(ctx, w, stream)

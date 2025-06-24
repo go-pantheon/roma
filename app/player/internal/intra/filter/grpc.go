@@ -20,7 +20,7 @@ func NewGrpcFilter(mgr *core.Manager) *GrpcFilter {
 
 func (md *GrpcFilter) Server() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			if !life.IsInnerContext(ctx) {
 				return handler(ctx, req)
 			}
@@ -30,16 +30,10 @@ func (md *GrpcFilter) Server() middleware.Middleware {
 				return nil, err
 			}
 
-			sid, err := xcontext.SID(ctx)
-			if err != nil {
-				return nil, err
-			}
-
-			err = md.mgr.ExecuteAppEvent(ctx, oid, sid,
-				func(wctx life.Context) (err error) {
-					reply, err = handler(wctx, req)
-					return
-				})
+			err = md.mgr.ExecuteAppEvent(ctx, oid, func(wctx life.Context) (err error) {
+				reply, err = handler(wctx, req)
+				return
+			})
 			return reply, err
 		}
 	}

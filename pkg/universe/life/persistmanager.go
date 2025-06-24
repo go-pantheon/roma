@@ -38,9 +38,7 @@ func (c *ChangedModules) Add(modules []ModuleKey) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	for _, mod := range modules {
-		c.modules = append(c.modules, mod)
-	}
+	c.modules = append(c.modules, modules...)
 }
 
 func (c *ChangedModules) Move() []ModuleKey {

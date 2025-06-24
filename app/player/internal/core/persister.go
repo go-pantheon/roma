@@ -28,10 +28,10 @@ type UserPersister struct {
 	do *domain.UserDomain
 }
 
-func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, sid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
-	p := do.Get(ctx, uid, time.Now())
+func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
+	p := do.CacheGet(ctx, uid, time.Now())
 	if p != nil {
-		do.Remove(ctx, uid)
+		do.CacheRemove(ctx, uid)
 	} else {
 		p = dbv1.UserProtoPool.Get()
 		defer dbv1.UserProtoPool.Put(p)
@@ -40,7 +40,7 @@ func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, sid
 		if err = do.Load(ctx, uid, p); err != nil {
 			if errors.Is(err, xerrors.ErrDBRecordNotFound) {
 				if allowCreate {
-					err = do.Create(ctx, uid, sid, time.Now(), p)
+					err = do.Create(ctx, uid, time.Now(), p)
 					newborn = true
 				}
 			}
@@ -50,7 +50,7 @@ func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, sid
 		}
 	}
 
-	user := userobj.NewUser(p.Id, sid, p.ServerVersion)
+	user := userobj.NewUser(p.Id, p.ServerVersion)
 	if err = user.DecodeServer(p); err != nil {
 		return
 	}
@@ -104,7 +104,7 @@ func (s *UserPersister) IncVersion(ctx context.Context, uid int64, newVersion in
 }
 
 func (s *UserPersister) OnStop(ctx context.Context, id int64, p life.VersionProto) (err error) {
-	s.do.Cache(ctx, s.uid, p.(*dbv1.UserProto), time.Now())
+	s.do.CachePut(ctx, s.uid, p.(*dbv1.UserProto), time.Now())
 	return nil
 }
 

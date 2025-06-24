@@ -25,27 +25,23 @@ func NewHttpFilter(mgr *core.Manager) *HttpFilter {
 
 func (md *HttpFilter) Server() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			if !profile.IsDev() {
 				return nil, errs.ErrProfileIllegal
 			}
 
 			ctx = unimd.TransformContext(ctx)
+
 			oid, err := xcontext.OID(ctx)
 			if err != nil {
 				return nil, err
 			}
 
-			sid, err := xcontext.SID(ctx)
-			if err != nil {
-				return nil, err
-			}
+			err = md.mgr.ExecuteAppEvent(ctx, oid, func(wctx life.Context) (err error) {
+				reply, err = handler(wctx, req)
+				return
+			})
 
-			err = md.mgr.ExecuteAppEvent(ctx, oid, sid,
-				func(wctx life.Context) (err error) {
-					reply, err = handler(wctx, req)
-					return
-				})
 			return reply, err
 		}
 	}

@@ -53,11 +53,6 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return err
 	}
 
-	sid, err := xcontext.SID(ctx)
-	if err != nil {
-		return err
-	}
-
 	replyFunc := func(p proto.Message) error {
 		msg, ok := p.(*intrav1.TunnelResponse)
 		if !ok {
@@ -70,7 +65,7 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return nil
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, sid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
+	if w, err = s.mgr.Worker(ctx, oid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
 		return err
 	}
 	return s.run(ctx, w, stream)

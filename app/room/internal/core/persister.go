@@ -27,7 +27,7 @@ type RoomPersister struct {
 	do *domain.RoomDomain
 }
 
-func newRoomPersister(ctx context.Context, do *domain.RoomDomain, oid, sid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
+func newRoomPersister(ctx context.Context, do *domain.RoomDomain, oid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
 	p := do.OfflineCache(ctx, oid, time.Now())
 	if p == nil {
 		p := do.GetProtoFromPool()

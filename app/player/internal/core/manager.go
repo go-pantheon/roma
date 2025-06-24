@@ -18,8 +18,8 @@ type Manager struct {
 }
 
 func NewManager(logger log.Logger, rt *self.SelfRouteTable, userDo *domain.UserDomain, pusher *data.PushRepo) (*Manager, func()) {
-	newPersister := func(ctx context.Context, uid int64, sid int64, allowBorn bool) (persister life.Persistent, born bool, err error) {
-		return newUserPersister(ctx, userDo, uid, sid, allowBorn)
+	newPersister := func(ctx context.Context, uid int64, allowBorn bool) (persister life.Persistent, born bool, err error) {
+		return newUserPersister(ctx, userDo, uid, allowBorn)
 	}
 
 	lifeMgr, stopFunc := life.NewManager(logger, rt, newContext, newPersister)
@@ -69,8 +69,8 @@ func (m *Manager) Pusher() *data.PushRepo {
 	return m.pusher
 }
 
-func (m *Manager) ExecuteAppEvent(ctx context.Context, uid int64, sid int64, f life.EventFunc) (err error) {
-	w, err := m.Worker(ctx, uid, sid, NewReplier(EmptyReplyFunc), life.NewBroadcaster(m.Pusher()))
+func (m *Manager) ExecuteAppEvent(ctx context.Context, uid int64, f life.EventFunc) (err error) {
+	w, err := m.Worker(ctx, uid, NewReplier(EmptyReplyFunc), life.NewBroadcaster(m.Pusher()))
 	if err != nil {
 		return err
 	}

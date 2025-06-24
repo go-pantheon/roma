@@ -9,7 +9,7 @@ import (
 type Persistent interface {
 	ID() int64
 	Version() int64
-	UnsafeObject() interface{}
+	UnsafeObject() any
 	ShowProto() proto.Message
 	Lock(f func() error) error
 	Refresh(ctx context.Context) (err error)

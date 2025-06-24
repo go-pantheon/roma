@@ -25,10 +25,9 @@ type User struct {
 	modules map[life.ModuleKey]life.Module
 }
 
-func NewUser(id int64, sid int64, serverVersion string) *User {
+func NewUser(id int64, serverVersion string) *User {
 	u := &User{
 		ID:            id,
-		SID:           sid,
 		ServerVersion: serverVersion,
 		modules:       make(map[life.ModuleKey]life.Module, 16),
 	}
