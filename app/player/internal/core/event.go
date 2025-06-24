@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	WorkerEventTypeStorageItemUpdated = life.WorkerEventType(iota + 1) // storage updated. args: item IDs
-	WorkerEventTypeStoragePackUpdated                                  // storage updated. args: pack IDs
+	EventStorageItemUpdated           = life.WorkerEventType(iota + 1) // storage updated. args: item IDs
+	EventStoragePackUpdated                                            // storage updated. args: pack IDs
 	WorkerEventTypeHeroUpdated                                         // hero updated. args: none
 	WorkerEventTypeEffectParamUpdated                                  // effect param updated. args: none
 )

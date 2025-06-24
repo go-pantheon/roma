@@ -59,8 +59,8 @@ func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.Update
 		}
 	})
 
-	_ = ctx.ProductPreparedEvent(core.WorkerEventTypeStorageItemUpdated, life.With(core.ArgKeyStorageItemIDs, itemIds))
-	_ = ctx.ProductPreparedEvent(core.WorkerEventTypeStoragePackUpdated, life.With(core.ArgKeyStoragePackIDs, packIds))
+	_ = ctx.EmitEvent(core.EventStorageItemUpdated, life.With(core.ArgKeyStorageItemIDs, itemIds))
+	_ = ctx.EmitEvent(core.EventStoragePackUpdated, life.With(core.ArgKeyStoragePackIDs, packIds))
 
 	ctx.Changed(object.ModuleKey)
 

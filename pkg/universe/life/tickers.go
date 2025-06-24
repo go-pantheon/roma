@@ -44,23 +44,23 @@ func (t *Tickers) stop() {
 	t.minuteTicker.Stop()
 }
 
-func (tf *PreparedTickFuncs) SecondTickRegister(f func(ctx Context) error) {
+func (tf *PreparedTickFuncs) RegisterSecondTick(f func(ctx Context) error) {
 	tf.secondTickFuncs = append(tf.secondTickFuncs, f)
 }
 
-func (tf *PreparedTickFuncs) MinuteTickRegister(f func(ctx Context) error) {
+func (tf *PreparedTickFuncs) RegisterMinuteTick(f func(ctx Context) error) {
 	tf.minuteTickFuncs = append(tf.minuteTickFuncs, f)
 }
 
-func (tf *PreparedTickFuncs) OnLoadEventRegister(f func(ctx Context) error) {
+func (tf *PreparedTickFuncs) RegisterOnLoadEvent(f func(ctx Context) error) {
 	tf.onLoadEventFuncs = append(tf.onLoadEventFuncs, f)
 }
 
-func (tf *PreparedTickFuncs) OnCreatedEventRegister(f func(ctx Context) error) {
+func (tf *PreparedTickFuncs) RegisterOnCreatedEvent(f func(ctx Context) error) {
 	tf.onCreatedEventFuncs = append(tf.onCreatedEventFuncs, f)
 }
 
-func (tf *PreparedTickFuncs) CustomEventRegister(e WorkerEventType, f eventFunc) {
+func (tf *PreparedTickFuncs) RegisterCustomEvent(e WorkerEventType, f eventFunc) {
 	preparedEventFuncMap.put(e, f)
 }
 

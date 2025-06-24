@@ -22,8 +22,8 @@ const (
 )
 
 type EventManageable interface {
-	ProductPreparedEvent(t WorkerEventType, args ...WithArg) error
-	ProductFuncEvent(f EventFunc) error
+	EmitEvent(t WorkerEventType, args ...WithArg) error
+	EmitFuncEvent(f EventFunc) error
 	ConsumeEvent() <-chan EventFunc
 }
 

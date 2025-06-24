@@ -120,7 +120,7 @@ func (s *TunnelService) recv(w life.Workable, stream intrav1.TunnelService_Tunne
 		return nil
 	}
 
-	return w.ProductFuncEvent(func(wctx life.Context) error {
+	return w.EmitFuncEvent(func(wctx life.Context) error {
 		return s.handle(wctx.(core.Context), in)
 	})
 }

@@ -24,9 +24,9 @@ func NewRoomUseCase(mgr *core.Manager,
 		do:  do,
 	}
 
-	mgr.OnCreatedEventRegister(uc.onCreated)
-	mgr.MinuteTickRegister(uc.onMinuteTick)
-	mgr.SecondTickRegister(uc.onSecondTick)
+	mgr.RegisterOnCreatedEvent(uc.onCreated)
+	mgr.RegisterMinuteTick(uc.onMinuteTick)
+	mgr.RegisterSecondTick(uc.onSecondTick)
 	return uc
 }
 

@@ -36,9 +36,9 @@ func NewUserUseCase(mgr *core.Manager, do *domain.UserDomain, storageDo *storage
 		storageDo: storageDo,
 	}
 
-	mgr.OnCreatedEventRegister(uc.onCreated)
-	mgr.OnLoadEventRegister(uc.onLoad)
-	mgr.SecondTickRegister(uc.secondTick)
+	mgr.RegisterOnCreatedEvent(uc.onCreated)
+	mgr.RegisterOnLoadEvent(uc.onLoad)
+	mgr.RegisterSecondTick(uc.secondTick)
 
 	return uc
 }
@@ -134,7 +134,6 @@ func (uc *UserUseCase) UpdateName(ctx core.Context, cs *climsg.CSUpdateName) (sc
 	basic.Name = name
 
 	ctx.Changed(object.ModuleKey)
-	
 
 	sc.Code = climsg.SCUpdateName_Succeeded
 	return

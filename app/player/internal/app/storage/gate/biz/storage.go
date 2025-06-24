@@ -26,8 +26,8 @@ func NewStorageUseCase(mgr *core.Manager, logger log.Logger, storageDo *domain.S
 		plunderDo: plunderDo,
 	}
 
-	mgr.OnCreatedEventRegister(uc.onCreated)
-	mgr.SecondTickRegister(uc.onSecondTick)
+	mgr.RegisterOnCreatedEvent(uc.onCreated)
+	mgr.RegisterSecondTick(uc.onSecondTick)
 	return uc
 }
 

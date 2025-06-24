@@ -25,8 +25,8 @@ func NewHeroUseCase(mgr *core.Manager, logger log.Logger,
 		storageDo: storageDo,
 	}
 
-	mgr.OnCreatedEventRegister(uc.onCreated)
-	mgr.EventRegister(core.WorkerEventTypeStorageItemUpdated, uc.OnStorageUpdated)
+	mgr.RegisterOnCreatedEvent(uc.onCreated)
+	mgr.RegisterEvent(core.EventStorageItemUpdated, uc.OnStorageUpdated)
 	return uc
 }
 

@@ -34,32 +34,32 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, roomDo *domain.RoomD
 
 type eventFunc func(wctx Context, arg *life.EventArg) (err error)
 
-func (m *Manager) SecondTickRegister(f func(ctx Context) error) {
-	m.Manager.SecondTickRegister(func(ctx life.Context) error {
+func (m *Manager) RegisterSecondTick(f func(ctx Context) error) {
+	m.Manager.RegisterSecondTick(func(ctx life.Context) error {
 		return f(ctx.(Context))
 	})
 }
 
-func (m *Manager) MinuteTickRegister(f func(ctx Context) error) {
-	m.Manager.MinuteTickRegister(func(ctx life.Context) error {
+func (m *Manager) RegisterMinuteTick(f func(ctx Context) error) {
+	m.Manager.RegisterMinuteTick(func(ctx life.Context) error {
 		return f(ctx.(Context))
 	})
 }
 
-func (m *Manager) CustomEventRegister(e life.WorkerEventType, f eventFunc) {
-	m.Manager.CustomEventRegister(e, func(wctx life.Context, arg *life.EventArg) (err error) {
+func (m *Manager) RegisterEvent(e life.WorkerEventType, f eventFunc) {
+	m.Manager.RegisterCustomEvent(e, func(wctx life.Context, arg *life.EventArg) (err error) {
 		return f(wctx.(Context), arg)
 	})
 }
 
-func (m *Manager) OnLoadEventRegister(f func(ctx Context) error) {
-	m.Manager.OnLoadEventRegister(func(ctx life.Context) error {
+func (m *Manager) RegisterOnLoadEvent(f func(ctx Context) error) {
+	m.Manager.RegisterOnLoadEvent(func(ctx life.Context) error {
 		return f(ctx.(Context))
 	})
 }
 
-func (m *Manager) OnCreatedEventRegister(f func(ctx Context) error) {
-	m.Manager.OnCreatedEventRegister(func(ctx life.Context) error {
+func (m *Manager) RegisterOnCreatedEvent(f func(ctx Context) error) {
+	m.Manager.RegisterOnCreatedEvent(func(ctx life.Context) error {
 		return f(ctx.(Context))
 	})
 }
@@ -68,7 +68,7 @@ func (m *Manager) Pusher() *data.PushRepo {
 	return m.pusher
 }
 
-func (m *Manager) ExecuteAppEvent(ctx context.Context, oid int64, f life.EventFunc) error {
+func (m *Manager) ExecuteEvent(ctx context.Context, oid int64, f life.EventFunc) error {
 	w, err := m.Worker(ctx, oid, NewReplier(adminReplyFunc), life.NewBroadcaster(m.Pusher()))
 	if err != nil {
 		return err

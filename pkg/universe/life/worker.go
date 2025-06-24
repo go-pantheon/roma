@@ -123,13 +123,13 @@ func (w *Worker) run(ctx context.Context) error {
 					return ctx.Err()
 				case <-w.secondTicker.C:
 					if IsGateStatus(w.Status()) {
-						if err := w.ProductPreparedEvent(EventTypeSecondTick); err != nil {
+						if err := w.EmitEvent(EventTypeSecondTick); err != nil {
 							return err
 						}
 					}
 				case <-w.minuteTicker.C:
 					if IsGateStatus(w.Status()) {
-						if err := w.ProductPreparedEvent(EventTypeMinuteTick); err != nil {
+						if err := w.EmitEvent(EventTypeMinuteTick); err != nil {
 							return err
 						}
 					}
@@ -271,7 +271,7 @@ func (w *Worker) Stop(ctx context.Context) (err error) {
 	})
 }
 
-func (w *Worker) ProductFuncEvent(f EventFunc) error {
+func (w *Worker) EmitFuncEvent(f EventFunc) error {
 	if w.OnStopping() {
 		return xerrors.ErrLifeStopped
 	}
@@ -280,7 +280,7 @@ func (w *Worker) ProductFuncEvent(f EventFunc) error {
 	return nil
 }
 
-func (w *Worker) ProductPreparedEvent(t WorkerEventType, args ...WithArg) error {
+func (w *Worker) EmitEvent(t WorkerEventType, args ...WithArg) error {
 	if w.OnStopping() {
 		return xerrors.ErrLifeStopped
 	}
