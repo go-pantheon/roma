@@ -4,10 +4,11 @@ package handler
 
 import (
 	"context"
-	"github.com/go-pantheon/roma/gen/api/client/module"
+
+	"github.com/go-pantheon/fabrica-net/xnet"
+	"github.com/go-pantheon/fabrica-util/errors"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	"github.com/go-pantheon/roma/gen/app/room/service"
-	"github.com/go-pantheon/roma/fabrica-net/xnet"
-	"github.com/pkg/errors"
 )
 
 func RoomHandle(ctx context.Context, s *service.RoomServices, in xnet.TunnelMessage) ([]byte, error) {

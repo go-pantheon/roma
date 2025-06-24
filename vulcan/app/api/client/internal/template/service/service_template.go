@@ -15,8 +15,8 @@ var serviceTemplate = `
 package service
 
 import (
+	climsg "{{.Project}}/gen/api/client/message"
 	"github.com/google/wire"
-	"{{.Project}}/gen/api/client/message"
 )
 
 var {{.Group}}ServicesProviderSet = wire.NewSet(
@@ -78,8 +78,10 @@ func (s *SvcService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }

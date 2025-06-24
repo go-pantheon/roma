@@ -3,9 +3,9 @@
 package handler
 
 import (
+	"github.com/go-pantheon/fabrica-util/errors"
+	intrav1 "github.com/go-pantheon/roma/gen/api/server/player/intra/v1"
 	"google.golang.org/protobuf/proto"
-	"github.com/go-pantheon/roma/gen/api/server/player/intra/v1"
-	"github.com/pkg/errors"
 )
 
 func NewPlayerResponse(mod, seq int32, Obj int64, in proto.Message) (ret []byte, err error) {

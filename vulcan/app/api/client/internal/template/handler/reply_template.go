@@ -2,10 +2,12 @@ package handler
 
 import (
 	"bytes"
+	"path/filepath"
+	"strings"
 	"text/template"
 
-	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 	"github.com/go-pantheon/fabrica-util/camelcase"
+	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 )
 
 var replyTemplate = `
@@ -15,9 +17,9 @@ var replyTemplate = `
 package handler
 
 import (
+	"{{.Org}}/fabrica-util/errors"
+	intrav1 "{{.Project}}/gen/api/server/{{.LowerGroup}}/intra/v1"
 	"google.golang.org/protobuf/proto"
-	"{{.Project}}/gen/api/server/{{.LowerGroup}}/intra/v1"
-	"github.com/pkg/errors"
 )
 
 func New{{.UpperGroup}}Response(mod, seq int32, Obj int64, in proto.Message) (ret []byte, err error) {
@@ -61,6 +63,7 @@ func New{{.UpperGroup}}ResponseProtoByData(mod, seq int32, Obj int64, data []byt
 `
 
 type ReplyService struct {
+	Org        string
 	Project    string
 	UpperGroup string
 	LowerGroup string
@@ -72,6 +75,9 @@ func NewReplyService(project string, c *compilers.ModsCompiler) *ReplyService {
 		UpperGroup: camelcase.ToUpperCamel(string(c.Group)),
 		LowerGroup: camelcase.ToLowerCamel(string(c.Group)),
 	}
+
+	s.Org = filepath.Clean(strings.Replace(s.Project, filepath.Base(s.Project), "", 1))
+
 	return s
 }
 
@@ -82,8 +88,10 @@ func (s *ReplyService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }

@@ -2,6 +2,8 @@ package handler
 
 import (
 	"bytes"
+	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/go-pantheon/fabrica-util/camelcase"
@@ -16,10 +18,11 @@ package handler
 
 import (
 	"context"
-	"{{.Project}}/gen/api/client/module"
+
+	"{{.Org}}/fabrica-net/xnet"
+	"{{.Org}}/fabrica-util/errors"
+	climod "{{.Project}}/gen/api/client/module"
 	"{{.Project}}/gen/app/{{.LowerCamelGroup}}/service"
-	"{{.Project}}/fabrica-net/xnet"
-	"github.com/pkg/errors"
 )
 
 func {{.UpperCamelGroup}}Handle(ctx context.Context, s *service.{{.UpperCamelGroup}}Services, in xnet.TunnelMessage) ([]byte, error) {
@@ -42,6 +45,7 @@ func {{.UpperCamelGroup}}Handle(ctx context.Context, s *service.{{.UpperCamelGro
 `
 
 type HandlersService struct {
+	Org             string
 	Project         string
 	UpperCamelGroup string
 	LowerCamelGroup string
@@ -59,12 +63,16 @@ func NewHandlersService(project string, c *compilers.ModsCompiler) *HandlersServ
 		UpperCamelGroup: camelcase.ToUpperCamel(string(c.Group)),
 		LowerCamelGroup: camelcase.ToLowerCamel(string(c.Group)),
 	}
+
+	s.Org = filepath.Clean(strings.Replace(s.Project, filepath.Base(s.Project), "", 1))
+
 	for _, mod := range c.Mods {
 		s.Mods = append(s.Mods, &Mod{
 			LowerCamel: camelcase.ToLowerCamel(string(mod)),
 			UpperCamel: camelcase.ToUpperCamel(string(mod)),
 		})
 	}
+
 	return s
 }
 
@@ -75,8 +83,10 @@ func (s *HandlersService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }

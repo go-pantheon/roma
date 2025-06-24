@@ -4,10 +4,11 @@ package handler
 
 import (
 	"context"
-	"github.com/go-pantheon/roma/gen/api/client/module"
+
+	"github.com/go-pantheon/fabrica-net/xnet"
+	"github.com/go-pantheon/fabrica-util/errors"
+	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	"github.com/go-pantheon/roma/gen/app/player/service"
-	"github.com/go-pantheon/roma/fabrica-net/xnet"
-	"github.com/pkg/errors"
 )
 
 func PlayerHandle(ctx context.Context, s *service.PlayerServices, in xnet.TunnelMessage) ([]byte, error) {
@@ -17,7 +18,7 @@ func PlayerHandle(ctx context.Context, s *service.PlayerServices, in xnet.Tunnel
 	)
 
 	switch climod.ModuleID(in.GetMod()) {
-	
+
 	case climod.ModuleID_Dev:
 		out, err = handleDev(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	case climod.ModuleID_Hero:
@@ -33,4 +34,3 @@ func PlayerHandle(ctx context.Context, s *service.PlayerServices, in xnet.Tunnel
 	}
 	return out, err
 }
-

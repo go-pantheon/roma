@@ -2,11 +2,11 @@
 
 package codec
 
-import (
-	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
+import (	
+	"github.com/go-pantheon/fabrica-util/errors"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
+	"google.golang.org/protobuf/proto"
 )
 
 func UnmarshalCS(mod, seq int32, bytes []byte) (cs proto.Message, err error) {

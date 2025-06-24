@@ -4,12 +4,13 @@ package handler
 
 import (
 	"context"
-	"google.golang.org/protobuf/proto"
-	"github.com/go-pantheon/roma/gen/api/client/message"
-	"github.com/go-pantheon/roma/gen/api/client/sequence"
+
+	"github.com/go-pantheon/fabrica-util/errors"
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
 	"github.com/go-pantheon/roma/gen/app/codec"
 	"github.com/go-pantheon/roma/gen/app/player/service"
-	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 func handleSystem(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) ([]byte, error) {

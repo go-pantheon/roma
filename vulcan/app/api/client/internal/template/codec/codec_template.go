@@ -2,11 +2,12 @@ package codec
 
 import (
 	"bytes"
+	"path/filepath"
 	"strings"
 	"text/template"
 
-	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 	"github.com/go-pantheon/fabrica-util/camelcase"
+	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 )
 
 var codecTemplate = `
@@ -15,11 +16,11 @@ var codecTemplate = `
 
 package codec
 
-import (
-	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
+import (	
+	"{{.Org}}/fabrica-util/errors"
 	climod "{{.Project}}/gen/api/client/module"
 	clipkt "{{.Project}}/gen/api/client/packet"
+	"google.golang.org/protobuf/proto"
 )
 
 func UnmarshalCS(mod, seq int32, bytes []byte) (cs proto.Message, err error) {
@@ -64,6 +65,7 @@ func IsPushSC(mod climod.ModuleID, seq int32) bool {
 `
 
 type Service struct {
+	Org     string
 	Project string
 	Mods    []*Mod
 }
@@ -88,6 +90,9 @@ func NewService(project string, mcs []*compilers.ModsCompiler) *Service {
 			})
 		}
 	}
+
+	s.Org = filepath.Clean(strings.Replace(s.Project, filepath.Base(s.Project), "", 1))
+
 	return s
 }
 
@@ -98,8 +103,10 @@ func (s *Service) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }

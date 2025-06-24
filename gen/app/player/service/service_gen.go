@@ -3,8 +3,8 @@
 package service
 
 import (
+	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	"github.com/google/wire"
-	"github.com/go-pantheon/roma/gen/api/client/message"
 )
 
 var PlayerServicesProviderSet = wire.NewSet(
@@ -12,11 +12,11 @@ var PlayerServicesProviderSet = wire.NewSet(
 )
 
 type PlayerServices struct {
-	Dev climsg.DevServiceServer
-	Hero climsg.HeroServiceServer
+	Dev     climsg.DevServiceServer
+	Hero    climsg.HeroServiceServer
 	Storage climsg.StorageServiceServer
-	System climsg.SystemServiceServer
-	User climsg.UserServiceServer
+	System  climsg.SystemServiceServer
+	User    climsg.UserServiceServer
 }
 
 func NewPlayerServices(

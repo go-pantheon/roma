@@ -5,10 +5,10 @@ package codec
 import (
 	"strings"
 
-	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
+	"github.com/go-pantheon/fabrica-util/errors"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
-	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
+	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"	
+	"google.golang.org/protobuf/proto"
 )
 
 func UnmarshalCSDev(seq int32, data []byte) (p proto.Message, err error) {

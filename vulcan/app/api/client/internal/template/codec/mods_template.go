@@ -2,10 +2,12 @@ package codec
 
 import (
 	"bytes"
+	"path/filepath"
+	"strings"
 	"text/template"
 
-	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 	"github.com/go-pantheon/fabrica-util/camelcase"
+	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 )
 
 var modTemplate = `
@@ -17,10 +19,10 @@ package codec
 import (
 	"strings"
 
-	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
+	"{{.Org}}/fabrica-util/errors"
 	climsg "{{.Project}}/gen/api/client/message"
-	cliseq "{{.Project}}/gen/api/client/sequence"
+	cliseq "{{.Project}}/gen/api/client/sequence"	
+	"google.golang.org/protobuf/proto"
 )
 {{- $lowerCamelMod := .LowerCamelMod}}
 {{- $upperCamelMod := .UpperCamelMod}}
@@ -79,6 +81,7 @@ func IsPushSC{{$upperCamelMod}}(seq int32) bool {
 `
 
 type ModService struct {
+	Org     string
 	Project string
 
 	UpperCamelMod string
@@ -91,9 +94,12 @@ func NewModService(project string, mod compilers.ModType, c *compilers.SeqCompil
 	s := &ModService{
 		Project: project,
 	}
+
+	s.Org = filepath.Clean(strings.Replace(s.Project, filepath.Base(s.Project), "", 1))
 	s.LowerCamelMod = string(mod)
 	s.UpperCamelMod = camelcase.ToUpperCamel(string(mod))
 	s.Apis = c.Apis
+
 	return s
 }
 
@@ -104,8 +110,10 @@ func (s *ModService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }

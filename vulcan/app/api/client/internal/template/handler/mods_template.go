@@ -2,10 +2,12 @@ package handler
 
 import (
 	"bytes"
+	"path/filepath"
+	"strings"
 	"text/template"
 
-	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 	"github.com/go-pantheon/fabrica-util/camelcase"
+	"github.com/go-pantheon/roma/vulcan/pkg/compilers"
 )
 
 var modTemplate = `
@@ -16,12 +18,13 @@ package handler
 
 import (
 	"context"
-	"google.golang.org/protobuf/proto"
-	"{{.Project}}/gen/api/client/message"
-	"{{.Project}}/gen/api/client/sequence"
+
+	"{{.Org}}/fabrica-util/errors"
+	climsg "{{.Project}}/gen/api/client/message"
+	cliseq "{{.Project}}/gen/api/client/sequence"
 	"{{.Project}}/gen/app/codec"
 	"{{.Project}}/gen/app/{{.LowerGroup}}/service"
-	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 func handle{{.UpperCamelMod}}(ctx context.Context, s *service.{{.Group}}Services, mod, seq int32, obj int64, in []byte) ([]byte, error) {
@@ -58,6 +61,7 @@ func handle{{.UpperCamelMod}}(ctx context.Context, s *service.{{.Group}}Services
 `
 
 type ModService struct {
+	Org           string
 	Project       string
 	UpperCamelMod string
 
@@ -72,10 +76,12 @@ func NewModService(project string, mod compilers.ModType, c *compilers.SeqCompil
 		Project: project,
 	}
 
+	s.Org = filepath.Clean(strings.Replace(s.Project, filepath.Base(s.Project), "", 1))
 	s.UpperCamelMod = camelcase.ToUpperCamel(string(mod))
 	s.Group = camelcase.ToUpperCamel(string(c.Group))
 	s.LowerGroup = camelcase.ToLowerCamel(string(c.Group))
 	s.Apis = c.Apis
+
 	return s
 }
 
@@ -86,8 +92,10 @@ func (s *ModService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }
