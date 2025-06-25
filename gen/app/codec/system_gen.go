@@ -20,14 +20,14 @@ func UnmarshalCSSystem(seq int32, data []byte) (p proto.Message, err error) {
 		p = pp
 
 	default:
-		err = errors.Errorf("Unmarshal CSSystem faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal CSSystem faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal CSSystem faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func UnmarshalSCSystem(seq int32, data []byte) (p proto.Message, err error) {
@@ -47,16 +47,15 @@ func UnmarshalSCSystem(seq int32, data []byte) (p proto.Message, err error) {
 		pp := &climsg.SCServerLogout{}
 		err = proto.Unmarshal(data, pp)
 		p = pp
-
 	default:
-		err = errors.Errorf("Unmarshal SCSystem faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal SCSystem faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal SCSystem faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func IsPushSCSystem(seq int32) bool {

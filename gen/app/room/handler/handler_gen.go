@@ -10,21 +10,25 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	"github.com/go-pantheon/roma/gen/app/room/service"
+	"google.golang.org/protobuf/proto"
 )
 
-func RoomHandle(ctx context.Context, s *service.RoomServices, in xnet.TunnelMessage) ([]byte, error) {
+func RoomHandle(ctx context.Context, s *service.RoomServices, in xnet.TunnelMessage) (xnet.TunnelMessage, error) {
 	var (
-		out []byte
+		sc  proto.Message
 		err error
 	)
 
 	switch climod.ModuleID(in.GetMod()) {
-
 	case climod.ModuleID_Room:
-		out, err = handleRoom(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
+		sc, err = handleRoom(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	default:
-		err = errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid mod. mod=%d", in.GetMod())
+		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid mod. mod=%d", in.GetMod())
 	}
 
-	return out, err
+	if err != nil {
+		return nil, err
+	}
+
+	return TakeProtoRoomTunnelResponse(in.GetMod(), in.GetSeq(), in.GetObj(), sc)
 }

@@ -14,28 +14,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func handleStorage(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) ([]byte, error) {
+func handleStorage(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) (proto.Message, error) {
 	cs, err := codec.UnmarshalCSStorage(seq, in)
 	if err != nil {
 		return nil, err
 	}
-
-	var (
-		sc proto.Message
-	)
 	switch cliseq.StorageSeq(seq) {
-
 	// Use pack
 	case cliseq.StorageSeq_UsePack:
-		sc, err = s.Storage.UsePack(ctx, cs.(*climsg.CSUsePack))
-
+		return s.Storage.UsePack(ctx, cs.(*climsg.CSUsePack))
 	default:
 		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "Storage", seq)
 	}
-
-	out, err0 := NewPlayerResponse(mod, seq, obj, sc)
-	if err0 != nil {
-		return nil, errors.Wrapf(err0, "proto marshal failed. mod=%s seq=%d", "Storage", seq)
-	}
-	return out, err
 }

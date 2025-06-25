@@ -3,41 +3,39 @@ package life
 import (
 	"sync/atomic"
 
+	"github.com/go-pantheon/fabrica-net/xnet"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
 	"google.golang.org/protobuf/proto"
 )
 
-type ReplyFunc = func(msg proto.Message) error
+type ReplyFunc = func(msg xnet.TunnelMessage) error
 
 type Responsive interface {
 	Reply(mod int32, seq int32, obj int64, sc proto.Message) error
 	ReplyImmediately(mod int32, seq int32, obj int64, sc proto.Message) error
-	ReplyBytes(mod int32, seq int32, obj int64, body []byte)
-	ConsumeReplyMessage() <-chan proto.Message
-	ExecuteReply(msg proto.Message) error
+	ReplyTunnelMessage(msg xnet.TunnelMessage)
+	ConsumeTunnelResponse() <-chan xnet.TunnelMessage
+	ExecuteReply(msg xnet.TunnelMessage) error
 	ReplyFunc() ReplyFunc
 	UpdateReplyFunc(replyFunc ReplyFunc)
 }
 
-type BuildMsgByProtoFunc = func(mod int32, seq int32, obj int64, sc proto.Message) (proto.Message, error)
-type BuildMsgByBytesFunc = func(mod int32, seq int32, obj int64, body []byte) proto.Message
+type BuildTunnelResponseFunc = func(mod int32, seq int32, obj int64, msg proto.Message) (xnet.TunnelMessage, error)
 
 var _ Responsive = (*Responser)(nil)
 
 type Responser struct {
-	msgs      chan proto.Message
+	msgs      chan xnet.TunnelMessage
 	replyFunc atomic.Value
 
-	buildMsgByProtoFunc BuildMsgByProtoFunc
-	buildMsgByBytesFunc BuildMsgByBytesFunc
+	buildTunnelResponseFunc BuildTunnelResponseFunc
 }
 
-func NewResponser(replyFunc ReplyFunc, buildMsgByProtoFunc BuildMsgByProtoFunc, buildMsgByBytesFunc BuildMsgByBytesFunc) *Responser {
+func NewResponser(replyFunc ReplyFunc, buildRespFunc BuildTunnelResponseFunc) *Responser {
 	o := &Responser{
-		msgs:                make(chan proto.Message, constants.WorkerReplySize),
-		replyFunc:           atomic.Value{},
-		buildMsgByProtoFunc: buildMsgByProtoFunc,
-		buildMsgByBytesFunc: buildMsgByBytesFunc,
+		msgs:                 make(chan xnet.TunnelMessage, constants.WorkerReplySize),
+		replyFunc:            atomic.Value{},
+		buildTunnelResponseFunc: buildRespFunc,
 	}
 
 	o.replyFunc.Store(replyFunc)
@@ -46,7 +44,7 @@ func NewResponser(replyFunc ReplyFunc, buildMsgByProtoFunc BuildMsgByProtoFunc, 
 }
 
 func (w *Responser) Reply(mod int32, seq int32, obj int64, sc proto.Message) error {
-	msg, err := w.buildMsgByProtoFunc(mod, seq, obj, sc)
+	msg, err := w.buildTunnelResponseFunc(mod, seq, obj, sc)
 	if err != nil {
 		return err
 	}
@@ -56,8 +54,12 @@ func (w *Responser) Reply(mod int32, seq int32, obj int64, sc proto.Message) err
 	return nil
 }
 
+func (w *Responser) ReplyTunnelMessage(msg xnet.TunnelMessage) {
+	w.msgs <- msg
+}
+
 func (w *Responser) ReplyImmediately(mod int32, seq int32, obj int64, sc proto.Message) error {
-	msg, err := w.buildMsgByProtoFunc(mod, seq, obj, sc)
+	msg, err := w.buildTunnelResponseFunc(mod, seq, obj, sc)
 	if err != nil {
 		return err
 	}
@@ -65,15 +67,11 @@ func (w *Responser) ReplyImmediately(mod int32, seq int32, obj int64, sc proto.M
 	return w.replyFunc.Load().(ReplyFunc)(msg)
 }
 
-func (w *Responser) ReplyBytes(mod int32, seq int32, obj int64, body []byte) {
-	w.msgs <- w.buildMsgByBytesFunc(mod, seq, obj, body)
-}
-
-func (w *Responser) ExecuteReply(out proto.Message) error {
+func (w *Responser) ExecuteReply(out xnet.TunnelMessage) error {
 	return w.replyFunc.Load().(ReplyFunc)(out)
 }
 
-func (w *Responser) ConsumeReplyMessage() <-chan proto.Message {
+func (w *Responser) ConsumeTunnelResponse() <-chan xnet.TunnelMessage {
 	return w.msgs
 }
 

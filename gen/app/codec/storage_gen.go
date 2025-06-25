@@ -20,14 +20,14 @@ func UnmarshalCSStorage(seq int32, data []byte) (p proto.Message, err error) {
 		p = pp
 
 	default:
-		err = errors.Errorf("Unmarshal CSStorage faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal CSStorage faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal CSStorage faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func UnmarshalSCStorage(seq int32, data []byte) (p proto.Message, err error) {
@@ -42,16 +42,15 @@ func UnmarshalSCStorage(seq int32, data []byte) (p proto.Message, err error) {
 		pp := &climsg.SCUsePack{}
 		err = proto.Unmarshal(data, pp)
 		p = pp
-
 	default:
-		err = errors.Errorf("Unmarshal SCStorage faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal SCStorage faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal SCStorage faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func IsPushSCStorage(seq int32) bool {

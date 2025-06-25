@@ -24,33 +24,34 @@ func UnmarshalCS(mod, seq int32, bytes []byte) (cs proto.Message, err error) {
 	case climod.ModuleID_Room:
 		return UnmarshalCSRoom(seq, bytes)
 	default:
-		err = errors.Errorf("module not found. mod=%d", mod)
-		return
+		return nil, errors.Errorf("module not found. mod=%d", mod)
 	}
 }
 
-func UnmarshalSC(in *clipkt.Packet) (sc proto.Message, err error) {
-	if in == nil {
-		err = errors.Errorf("packet is nil")
-		return
+func UnmarshalSCPacket(p *clipkt.Packet) (sc proto.Message, err error) {
+	if p == nil {
+		return nil, errors.Errorf("packet is nil")
 	}
 
-	switch climod.ModuleID(in.Mod) {
+	return UnmarshalSC(p.Mod, p.Seq, p.Data)
+}
+
+func UnmarshalSC(mod, seq int32, bytes []byte) (sc proto.Message, err error) {
+	switch climod.ModuleID(mod) {
 	case climod.ModuleID_Dev:
-		return UnmarshalSCDev(in.Seq, in.Data)
+		return UnmarshalSCDev(seq, bytes)
 	case climod.ModuleID_Hero:
-		return UnmarshalSCHero(in.Seq, in.Data)
+		return UnmarshalSCHero(seq, bytes)
 	case climod.ModuleID_Storage:
-		return UnmarshalSCStorage(in.Seq, in.Data)
+		return UnmarshalSCStorage(seq, bytes)
 	case climod.ModuleID_System:
-		return UnmarshalSCSystem(in.Seq, in.Data)
+		return UnmarshalSCSystem(seq, bytes)
 	case climod.ModuleID_User:
-		return UnmarshalSCUser(in.Seq, in.Data)
+		return UnmarshalSCUser(seq, bytes)
 	case climod.ModuleID_Room:
-		return UnmarshalSCRoom(in.Seq, in.Data)
+		return UnmarshalSCRoom(seq, bytes)
 	default:
-		err = errors.Errorf("module not found. mod=%d", in.Mod)
-		return
+		return nil, errors.Errorf("mod not found. mod=%d", mod)
 	}
 }
 

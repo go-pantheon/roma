@@ -20,14 +20,14 @@ func UnmarshalCSHero(seq int32, data []byte) (p proto.Message, err error) {
 		p = pp
 
 	default:
-		err = errors.Errorf("Unmarshal CSHero faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal CSHero faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal CSHero faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func UnmarshalSCHero(seq int32, data []byte) (p proto.Message, err error) {
@@ -42,16 +42,15 @@ func UnmarshalSCHero(seq int32, data []byte) (p proto.Message, err error) {
 		pp := &climsg.SCHeroLevelUpgrade{}
 		err = proto.Unmarshal(data, pp)
 		p = pp
-
 	default:
-		err = errors.Errorf("Unmarshal SCHero faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal SCHero faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal SCHero faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func IsPushSCHero(seq int32) bool {

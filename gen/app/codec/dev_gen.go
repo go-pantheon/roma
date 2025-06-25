@@ -25,14 +25,14 @@ func UnmarshalCSDev(seq int32, data []byte) (p proto.Message, err error) {
 		p = pp
 
 	default:
-		err = errors.Errorf("Unmarshal CSDev faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal CSDev faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal CSDev faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func UnmarshalSCDev(seq int32, data []byte) (p proto.Message, err error) {
@@ -47,16 +47,15 @@ func UnmarshalSCDev(seq int32, data []byte) (p proto.Message, err error) {
 		pp := &climsg.SCDevExecute{}
 		err = proto.Unmarshal(data, pp)
 		p = pp
-
 	default:
-		err = errors.Errorf("Unmarshal SCDev faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal SCDev faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal SCDev faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func IsPushSCDev(seq int32) bool {

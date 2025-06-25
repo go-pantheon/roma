@@ -14,28 +14,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func handleHero(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) ([]byte, error) {
+func handleHero(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) (proto.Message, error) {
 	cs, err := codec.UnmarshalCSHero(seq, in)
 	if err != nil {
 		return nil, err
 	}
-
-	var (
-		sc proto.Message
-	)
 	switch cliseq.HeroSeq(seq) {
-
 	// Hero level upgrade
 	case cliseq.HeroSeq_HeroLevelUpgrade:
-		sc, err = s.Hero.HeroLevelUpgrade(ctx, cs.(*climsg.CSHeroLevelUpgrade))
-
+		return s.Hero.HeroLevelUpgrade(ctx, cs.(*climsg.CSHeroLevelUpgrade))
 	default:
 		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "Hero", seq)
 	}
-
-	out, err0 := NewPlayerResponse(mod, seq, obj, sc)
-	if err0 != nil {
-		return nil, errors.Wrapf(err0, "proto marshal failed. mod=%s seq=%d", "Hero", seq)
-	}
-	return out, err
 }

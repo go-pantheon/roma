@@ -27,25 +27,32 @@ func Gen(project, base string, mcs []*compilers.ModsCompiler, scs []*compilers.S
 			return errors.Wrapf(err, "gen mod codec failed. mod: %s", c.Mod())
 		}
 	}
+
 	return nil
 }
 
 func genCodec(project, dir string, mcs []*compilers.ModsCompiler) error {
 	s := codec.NewService(project, mcs)
 	to := path.Join(dir, "codec_gen.go")
+
 	if err := filewriter.GenFile(to, s); err != nil {
 		return err
 	}
+
 	slog.Info("generate codec", "file", filewriter.SprintGenPath(to))
+
 	return nil
 }
 
 func genModsCodec(project, dir string, c *compilers.SeqCompiler) error {
 	s := codec.NewModService(project, c.Mod(), c)
 	to := path.Join(dir, fmt.Sprintf("%s_gen.go", c.Mod()))
+
 	if err := filewriter.GenFile(to, s); err != nil {
 		return err
 	}
+
 	slog.Info("generate mod codec", "file", filewriter.SprintGenPath(to))
+
 	return nil
 }

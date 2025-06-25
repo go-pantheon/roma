@@ -28,36 +28,24 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func handle{{.UpperCamelMod}}(ctx context.Context, s *service.{{.Group}}Services, mod, seq int32, obj int64, in []byte) ([]byte, error) {
+func handle{{.UpperCamelMod}}(ctx context.Context, s *service.{{.Group}}Services, mod, seq int32, obj int64, in []byte) (proto.Message, error) {
 	cs, err := codec.UnmarshalCS{{.UpperCamelMod}}(seq, in)
 	if err != nil {
 		return nil, err
 	}
 
-	var (
-		sc  proto.Message
-	)
-
 	{{- $upperMod := .UpperCamelMod}}
 	switch cliseq.{{$upperMod}}Seq(seq) {
 	{{- range .Apis }}
 	{{- if .CS }}
-
 	// {{.Comment}}
 	case cliseq.{{$upperMod}}Seq_{{.UpperCamelName}}:
-		sc, err = s.{{$upperMod}}.{{.UpperCamelName}}(ctx, cs.(*climsg.{{.CS}}))
+		return s.{{$upperMod}}.{{.UpperCamelName}}(ctx, cs.(*climsg.{{.CS}}))
 	{{- end }}
 	{{- end }}
-
 	default:
 		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "{{.UpperCamelMod}}", seq)
 	}
-
-	out, err0 := New{{.Group}}Response(mod, seq, obj, sc)
-	if err0 != nil {
-		return nil, errors.Wrapf(err0, "proto marshal failed. mod=%s seq=%d", "{{.UpperCamelMod}}", seq)
-	}
-	return out, err
 }
 `
 

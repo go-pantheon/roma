@@ -14,64 +14,43 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func handleRoom(ctx context.Context, s *service.RoomServices, mod, seq int32, obj int64, in []byte) ([]byte, error) {
+func handleRoom(ctx context.Context, s *service.RoomServices, mod, seq int32, obj int64, in []byte) (proto.Message, error) {
 	cs, err := codec.UnmarshalCSRoom(seq, in)
 	if err != nil {
 		return nil, err
 	}
-
-	var (
-		sc proto.Message
-	)
 	switch cliseq.RoomSeq(seq) {
-
 	// Room list
 	case cliseq.RoomSeq_RoomList:
-		sc, err = s.Room.RoomList(ctx, cs.(*climsg.CSRoomList))
-
+		return s.Room.RoomList(ctx, cs.(*climsg.CSRoomList))
 	// Room detail
 	case cliseq.RoomSeq_RoomDetail:
-		sc, err = s.Room.RoomDetail(ctx, cs.(*climsg.CSRoomDetail))
-
+		return s.Room.RoomDetail(ctx, cs.(*climsg.CSRoomDetail))
 	// Create room
 	case cliseq.RoomSeq_CreateRoom:
-		sc, err = s.Room.CreateRoom(ctx, cs.(*climsg.CSCreateRoom))
-
+		return s.Room.CreateRoom(ctx, cs.(*climsg.CSCreateRoom))
 	// Invite to join room
 	case cliseq.RoomSeq_InviteToJoinRoom:
-		sc, err = s.Room.InviteToJoinRoom(ctx, cs.(*climsg.CSInviteToJoinRoom))
-
+		return s.Room.InviteToJoinRoom(ctx, cs.(*climsg.CSInviteToJoinRoom))
 	// Agree to invite to join room
 	case cliseq.RoomSeq_AgreeToInviteJoinRoom:
-		sc, err = s.Room.AgreeToInviteJoinRoom(ctx, cs.(*climsg.CSAgreeToInviteJoinRoom))
-
+		return s.Room.AgreeToInviteJoinRoom(ctx, cs.(*climsg.CSAgreeToInviteJoinRoom))
 	// Request to join room
 	case cliseq.RoomSeq_RequestToJoinRoom:
-		sc, err = s.Room.RequestToJoinRoom(ctx, cs.(*climsg.CSRequestToJoinRoom))
-
+		return s.Room.RequestToJoinRoom(ctx, cs.(*climsg.CSRequestToJoinRoom))
 	// Approve request to join room
 	case cliseq.RoomSeq_ApproveRequestToJoinRoom:
-		sc, err = s.Room.ApproveRequestToJoinRoom(ctx, cs.(*climsg.CSApproveRequestToJoinRoom))
-
+		return s.Room.ApproveRequestToJoinRoom(ctx, cs.(*climsg.CSApproveRequestToJoinRoom))
 	// Kick user from room
 	case cliseq.RoomSeq_KickUserFromRoom:
-		sc, err = s.Room.KickUserFromRoom(ctx, cs.(*climsg.CSKickUserFromRoom))
-
+		return s.Room.KickUserFromRoom(ctx, cs.(*climsg.CSKickUserFromRoom))
 	// Close room
 	case cliseq.RoomSeq_CloseRoom:
-		sc, err = s.Room.CloseRoom(ctx, cs.(*climsg.CSCloseRoom))
-
+		return s.Room.CloseRoom(ctx, cs.(*climsg.CSCloseRoom))
 	// Leave room
 	case cliseq.RoomSeq_LeaveRoom:
-		sc, err = s.Room.LeaveRoom(ctx, cs.(*climsg.CSLeaveRoom))
-
+		return s.Room.LeaveRoom(ctx, cs.(*climsg.CSLeaveRoom))
 	default:
 		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "Room", seq)
 	}
-
-	out, err0 := NewRoomResponse(mod, seq, obj, sc)
-	if err0 != nil {
-		return nil, errors.Wrapf(err0, "proto marshal failed. mod=%s seq=%d", "Room", seq)
-	}
-	return out, err
 }

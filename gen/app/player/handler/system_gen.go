@@ -14,28 +14,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func handleSystem(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) ([]byte, error) {
+func handleSystem(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) (proto.Message, error) {
 	cs, err := codec.UnmarshalCSSystem(seq, in)
 	if err != nil {
 		return nil, err
 	}
-
-	var (
-		sc proto.Message
-	)
 	switch cliseq.SystemSeq(seq) {
-
 	// Heartbeat
 	case cliseq.SystemSeq_Heartbeat:
-		sc, err = s.System.Heartbeat(ctx, cs.(*climsg.CSHeartbeat))
-
+		return s.System.Heartbeat(ctx, cs.(*climsg.CSHeartbeat))
 	default:
 		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "System", seq)
 	}
-
-	out, err0 := NewPlayerResponse(mod, seq, obj, sc)
-	if err0 != nil {
-		return nil, errors.Wrapf(err0, "proto marshal failed. mod=%s seq=%d", "System", seq)
-	}
-	return out, err
 }

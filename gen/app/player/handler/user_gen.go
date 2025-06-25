@@ -14,36 +14,22 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func handleUser(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) ([]byte, error) {
+func handleUser(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) (proto.Message, error) {
 	cs, err := codec.UnmarshalCSUser(seq, in)
 	if err != nil {
 		return nil, err
 	}
-
-	var (
-		sc proto.Message
-	)
 	switch cliseq.UserSeq(seq) {
-
 	// Login
 	case cliseq.UserSeq_Login:
-		sc, err = s.User.Login(ctx, cs.(*climsg.CSLogin))
-
+		return s.User.Login(ctx, cs.(*climsg.CSLogin))
 	// Update name
 	case cliseq.UserSeq_UpdateName:
-		sc, err = s.User.UpdateName(ctx, cs.(*climsg.CSUpdateName))
-
+		return s.User.UpdateName(ctx, cs.(*climsg.CSUpdateName))
 	// Set gender
 	case cliseq.UserSeq_SetGender:
-		sc, err = s.User.SetGender(ctx, cs.(*climsg.CSSetGender))
-
+		return s.User.SetGender(ctx, cs.(*climsg.CSSetGender))
 	default:
 		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "User", seq)
 	}
-
-	out, err0 := NewPlayerResponse(mod, seq, obj, sc)
-	if err0 != nil {
-		return nil, errors.Wrapf(err0, "proto marshal failed. mod=%s seq=%d", "User", seq)
-	}
-	return out, err
 }

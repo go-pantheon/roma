@@ -17,18 +17,18 @@ func Gen(project, base string, modCompiler *compilers.ModsCompiler) error {
 		return errors.Wrapf(err, "failed to create tmp dir: %s", dir)
 	}
 
-	if err := genModService(project, dir, modCompiler); err != nil {
-		return err
-	}
-	return nil
+	return genModService(project, dir, modCompiler)
 }
 
 func genModService(project, dir string, c *compilers.ModsCompiler) error {
 	s := service.NewSvcService(project, c)
 	to := path.Join(dir, "service_gen.go")
+
 	if err := filewriter.GenFile(to, s); err != nil {
 		return err
 	}
+
 	slog.Info("generate service", "file", filewriter.SprintGenPath(to))
+
 	return nil
 }

@@ -30,14 +30,14 @@ func UnmarshalCSUser(seq int32, data []byte) (p proto.Message, err error) {
 		p = pp
 
 	default:
-		err = errors.Errorf("Unmarshal CSUser faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal CSUser faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal CSUser faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func UnmarshalSCUser(seq int32, data []byte) (p proto.Message, err error) {
@@ -62,16 +62,15 @@ func UnmarshalSCUser(seq int32, data []byte) (p proto.Message, err error) {
 		pp := &climsg.SCSetGender{}
 		err = proto.Unmarshal(data, pp)
 		p = pp
-
 	default:
-		err = errors.Errorf("Unmarshal SCUser faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal SCUser faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal SCUser faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func IsPushSCUser(seq int32) bool {

@@ -10,29 +10,33 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	"github.com/go-pantheon/roma/gen/app/player/service"
+	"google.golang.org/protobuf/proto"
 )
 
-func PlayerHandle(ctx context.Context, s *service.PlayerServices, in xnet.TunnelMessage) ([]byte, error) {
+func PlayerHandle(ctx context.Context, s *service.PlayerServices, in xnet.TunnelMessage) (xnet.TunnelMessage, error) {
 	var (
-		out []byte
+		sc  proto.Message
 		err error
 	)
 
 	switch climod.ModuleID(in.GetMod()) {
-
 	case climod.ModuleID_Dev:
-		out, err = handleDev(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
+		sc, err = handleDev(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	case climod.ModuleID_Hero:
-		out, err = handleHero(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
+		sc, err = handleHero(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	case climod.ModuleID_Storage:
-		out, err = handleStorage(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
+		sc, err = handleStorage(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	case climod.ModuleID_System:
-		out, err = handleSystem(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
+		sc, err = handleSystem(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	case climod.ModuleID_User:
-		out, err = handleUser(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
+		sc, err = handleUser(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	default:
-		err = errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid mod. mod=%d", in.GetMod())
+		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid mod. mod=%d", in.GetMod())
 	}
 
-	return out, err
+	if err != nil {
+		return nil, err
+	}
+
+	return TakeProtoPlayerTunnelResponse(in.GetMod(), in.GetSeq(), in.GetObj(), sc)
 }

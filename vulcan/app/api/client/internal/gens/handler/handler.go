@@ -21,32 +21,37 @@ func Gen(project, base string, mc *compilers.ModsCompiler, scs []*compilers.SeqC
 	if err := genCodecHandler(project, dir, mc); err != nil {
 		return err
 	}
+
 	if err := genModsHandler(project, dir, mc, scs); err != nil {
 		return err
 	}
-	if err := genHandler(project, dir, mc); err != nil {
-		return err
-	}
-	return nil
+
+	return genHandler(project, dir, mc)
 }
 
 func genHandler(project, dir string, mc *compilers.ModsCompiler) error {
 	ms := handler.NewHandlersService(project, mc)
 	to := path.Join(dir, "handler_gen.go")
+
 	if err := filewriter.GenFile(to, ms); err != nil {
 		return err
 	}
+
 	slog.Info("generate handlers", "file", filewriter.SprintGenPath(to))
+
 	return nil
 }
 
 func genCodecHandler(project, dir string, mc *compilers.ModsCompiler) error {
-	ms := handler.NewReplyService(project, mc)
-	to := path.Join(dir, "reply_gen.go")
+	ms := handler.NewRespService(project, mc)
+	to := path.Join(dir, "resp_gen.go")
+
 	if err := filewriter.GenFile(to, ms); err != nil {
 		return err
 	}
-	slog.Info("generate reply handler", "file", filewriter.SprintGenPath(to))
+
+	slog.Info("generate resp handler", "file", filewriter.SprintGenPath(to))
+
 	return nil
 }
 
@@ -55,12 +60,16 @@ func genModsHandler(project, dir string, mc *compilers.ModsCompiler, cs []*compi
 		if mc.Group != c.Group {
 			continue
 		}
+
 		s := handler.NewModService(project, c.Mod(), c)
 		to := path.Join(dir, fmt.Sprintf("%s_gen.go", c.Mod()))
+
 		if err := filewriter.GenFile(to, s); err != nil {
 			return err
 		}
+
 		slog.Info("generate mod handler", "file", filewriter.SprintGenPath(to))
 	}
+
 	return nil
 }

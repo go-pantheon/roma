@@ -14,32 +14,19 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func handleDev(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) ([]byte, error) {
+func handleDev(ctx context.Context, s *service.PlayerServices, mod, seq int32, obj int64, in []byte) (proto.Message, error) {
 	cs, err := codec.UnmarshalCSDev(seq, in)
 	if err != nil {
 		return nil, err
 	}
-
-	var (
-		sc proto.Message
-	)
 	switch cliseq.DevSeq(seq) {
-
 	// Dev command list
 	case cliseq.DevSeq_DevList:
-		sc, err = s.Dev.DevList(ctx, cs.(*climsg.CSDevList))
-
+		return s.Dev.DevList(ctx, cs.(*climsg.CSDevList))
 	// Execute Dev command
 	case cliseq.DevSeq_DevExecute:
-		sc, err = s.Dev.DevExecute(ctx, cs.(*climsg.CSDevExecute))
-
+		return s.Dev.DevExecute(ctx, cs.(*climsg.CSDevExecute))
 	default:
 		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid seq. mod=%s seq=%d", "Dev", seq)
 	}
-
-	out, err0 := NewPlayerResponse(mod, seq, obj, sc)
-	if err0 != nil {
-		return nil, errors.Wrapf(err0, "proto marshal failed. mod=%s seq=%d", "Dev", seq)
-	}
-	return out, err
 }

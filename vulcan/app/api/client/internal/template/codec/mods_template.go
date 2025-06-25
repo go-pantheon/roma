@@ -40,14 +40,14 @@ func UnmarshalCS{{$upperCamelMod}}(seq int32, data []byte) (p proto.Message, err
 	{{- end }}
 
 	default:
-		err = errors.Errorf("Unmarshal CS{{$upperCamelMod}} faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal CS{{$upperCamelMod}} faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal CS{{$upperCamelMod}} faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func UnmarshalSC{{$upperCamelMod}}(seq int32, data []byte) (p proto.Message, err error) {
@@ -62,16 +62,15 @@ func UnmarshalSC{{$upperCamelMod}}(seq int32, data []byte) (p proto.Message, err
 		p = pp
 	{{- end }}
 	{{- end }}
-
 	default:
-		err = errors.Errorf("Unmarshal SC{{$upperCamelMod}} faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal SC{{$upperCamelMod}} faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal SC{{$upperCamelMod}} faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func IsPushSC{{$upperCamelMod}}(seq int32) bool {

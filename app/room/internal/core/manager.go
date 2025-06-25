@@ -69,7 +69,7 @@ func (m *Manager) Pusher() *data.PushRepo {
 }
 
 func (m *Manager) ExecuteEvent(ctx context.Context, oid int64, f life.EventFunc) error {
-	w, err := m.Worker(ctx, oid, m.NewResponser(mockResponseFunc), m.NewBroadcaster())
+	w, err := m.Worker(ctx, oid, NewResponser(mockResponseFunc), NewBroadcaster(m.Pusher()))
 	if err != nil {
 		return err
 	}

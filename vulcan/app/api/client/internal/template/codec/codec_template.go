@@ -30,25 +30,26 @@ func UnmarshalCS(mod, seq int32, bytes []byte) (cs proto.Message, err error) {
 		return UnmarshalCS{{.UpperCamel}}(seq, bytes)
 	{{- end }}
 	default:
-		err = errors.Errorf("module not found. mod=%d", mod)
-		return
+		return nil, errors.Errorf("module not found. mod=%d", mod)
 	}
 }
 
-func UnmarshalSC(in *clipkt.Packet) (sc proto.Message, err error) {
-    if in == nil {
-		err = errors.Errorf("packet is nil")
-		return
+func UnmarshalSCPacket(p *clipkt.Packet) (sc proto.Message, err error) {
+	if p == nil {
+		return nil, errors.Errorf("packet is nil")
 	}
 
-	switch climod.ModuleID(in.Mod) {
+	return UnmarshalSC(p.Mod, p.Seq, p.Data)
+}
+
+func UnmarshalSC(mod, seq int32, bytes []byte) (sc proto.Message, err error) {
+	switch climod.ModuleID(mod) {
 	{{- range .Mods }}
 	case climod.ModuleID_{{.UpperCamel}}:
-		return UnmarshalSC{{.UpperCamel}}(in.Seq, in.Data)
+		return UnmarshalSC{{.UpperCamel}}(seq, bytes)
 	{{- end }}
 	default:
-		err = errors.Errorf("module not found. mod=%d", in.Mod)
-		return
+		return nil, errors.Errorf("mod not found. mod=%d", mod)
 	}
 }
 
@@ -80,6 +81,7 @@ func NewService(project string, mcs []*compilers.ModsCompiler) *Service {
 	s := &Service{
 		Project: project,
 	}
+
 	for _, c := range mcs {
 		for _, mod := range c.Mods {
 			modStr := string(mod)

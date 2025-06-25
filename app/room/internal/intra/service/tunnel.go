@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
+	"github.com/go-pantheon/fabrica-net/xnet"
 	"github.com/go-pantheon/fabrica-util/xsync"
 	"github.com/go-pantheon/roma/app/room/internal/core"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
@@ -18,7 +19,6 @@ import (
 	"github.com/go-pantheon/roma/pkg/universe/middleware/logging"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/protobuf/proto"
 )
 
 type TunnelService struct {
@@ -54,25 +54,15 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return err
 	}
 
-	replyFunc := func(p proto.Message) error {
-		msg, ok := p.(*intrav1.TunnelResponse)
-		if !ok {
-			return errors.Wrapf(err, "intrav1.TunnelResponse proto type conversion failed")
-		}
-
-		if err := stream.Send(msg); err != nil {
-			return errors.Wrapf(err, "intrav1.TunnelResponse send failed")
-		}
-
-		return nil
+	replyFunc := func(p xnet.TunnelMessage) error {
+		return core.ReplyFunc(stream, p)
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, s.mgr.NewResponser(replyFunc), s.mgr.NewBroadcaster()); err != nil {
+	if w, err = s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc), core.NewBroadcaster(s.mgr.Pusher())); err != nil {
 		return err
 	}
 
 	return s.run(ctx, w, stream)
-
 }
 
 func (s *TunnelService) run(ctx context.Context, w life.Workable, stream intrav1.TunnelService_TunnelServer) error {
@@ -126,8 +116,9 @@ func (s *TunnelService) recv(w life.Workable, stream intrav1.TunnelService_Tunne
 }
 
 func (s *TunnelService) handle(wctx core.Context, in *intrav1.TunnelRequest) error {
-	st := time.Now()
 	logging.Req(wctx, s.log, in, logging.DefaultFilter)
+
+	st := time.Now()
 
 	out, err := handler.RoomHandle(wctx, s.svc, in)
 	if err != nil {
@@ -136,22 +127,27 @@ func (s *TunnelService) handle(wctx core.Context, in *intrav1.TunnelRequest) err
 	}
 
 	if out == nil {
-		if out, err = handler.NewRoomResponse(
-			int32(climod.ModuleID_System),
-			int32(cliseq.SystemSeq_ServerUnexpectedErr),
-			in.Obj,
-			&climsg.SCServerUnexpectedErr{
-				Mod: in.Mod,
-				Seq: in.Seq,
-			},
-		); err != nil {
-			return errors.Wrapf(err, "TunnelResponse marshal failed. out=SCServerUnexpectedErr uid=%d", wctx.UID())
+		out, err = s.handleError(in)
+		if err != nil {
+			return err
 		}
 	}
 
-	logging.Resp(wctx, s.log, wctx.UID(), in, out, time.Since(st), logging.DefaultFilter)
+	wctx.ReplyTunnelMessage(out)
 
-	wctx.ReplyBytes(in.Mod, in.Seq, in.Obj, out)
+	logging.Resp(wctx, s.log, wctx.UID(), out, time.Since(st), logging.DefaultFilter)
 
 	return nil
+}
+
+func (s *TunnelService) handleError(in *intrav1.TunnelRequest) (xnet.TunnelMessage, error) {
+	return handler.TakeProtoRoomTunnelResponse(
+		int32(climod.ModuleID_System),
+		int32(cliseq.SystemSeq_ServerUnexpectedErr),
+		in.Obj,
+		&climsg.SCServerUnexpectedErr{
+			Mod: in.Mod,
+			Seq: in.Seq,
+		},
+	)
 }

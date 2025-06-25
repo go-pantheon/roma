@@ -52,9 +52,9 @@ type SvcService struct {
 func NewSvcService(project string, c *compilers.ModsCompiler) *SvcService {
 	s := &SvcService{
 		Project: project,
+		Group:   camelcase.ToUpperCamel(string(c.Group)),
+		Mods:    make([]*Mod, 0, len(c.Mods)),
 	}
-	s.Group = camelcase.ToUpperCamel(string(c.Group))
-	s.Mods = make([]*Mod, 0, len(s.Mods))
 
 	for _, mod := range c.Mods {
 		modStr := string(mod)
@@ -63,6 +63,7 @@ func NewSvcService(project string, c *compilers.ModsCompiler) *SvcService {
 			UpperCamel: camelcase.ToUpperCamel(modStr),
 		})
 	}
+
 	return s
 }
 

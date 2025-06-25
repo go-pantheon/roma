@@ -24,24 +24,29 @@ import (
 	"{{.Org}}/fabrica-kit/xerrors"
 	climod "{{.Project}}/gen/api/client/module"
 	"{{.Project}}/gen/app/{{.LowerCamelGroup}}/service"
+	"google.golang.org/protobuf/proto"
 )
 
-func {{.UpperCamelGroup}}Handle(ctx context.Context, s *service.{{.UpperCamelGroup}}Services, in xnet.TunnelMessage) ([]byte, error) {
+func {{.UpperCamelGroup}}Handle(ctx context.Context, s *service.{{.UpperCamelGroup}}Services, in xnet.TunnelMessage) (xnet.TunnelMessage, error) {
 	var (
-		out []byte
+		sc  proto.Message
 		err error
 	)
 
-	switch climod.ModuleID(in.GetMod()) {
-	{{ range .Mods }}
+  switch climod.ModuleID(in.GetMod()) {
+	{{- range .Mods }}
 	case climod.ModuleID_{{.UpperCamel}}:
-		out, err = handle{{.UpperCamel}}(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
+		sc, err = handle{{.UpperCamel}}(ctx, s, in.GetMod(), in.GetSeq(), in.GetObj(), in.GetData())
 	{{- end }}
 	default:
-		err = errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid mod. mod=%d", in.GetMod())
+		return nil, errors.WithMessagef(xerrors.ErrHandlerNotFound, "invalid mod. mod=%d", in.GetMod())
 	}
 
-	return out, err
+	if err != nil {
+		return nil, err
+	}
+
+	return TakeProto{{.UpperCamelGroup}}TunnelResponse(in.GetMod(), in.GetSeq(), in.GetObj(), sc)
 }
 
 `

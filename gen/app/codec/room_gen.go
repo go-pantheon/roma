@@ -65,14 +65,14 @@ func UnmarshalCSRoom(seq int32, data []byte) (p proto.Message, err error) {
 		p = pp
 
 	default:
-		err = errors.Errorf("Unmarshal CSRoom faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal CSRoom faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal CSRoom faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func UnmarshalSCRoom(seq int32, data []byte) (p proto.Message, err error) {
@@ -137,16 +137,15 @@ func UnmarshalSCRoom(seq int32, data []byte) (p proto.Message, err error) {
 		pp := &climsg.SCPushRemovedFromRoom{}
 		err = proto.Unmarshal(data, pp)
 		p = pp
-
 	default:
-		err = errors.Errorf("Unmarshal SCRoom faild. sequence not found. seq=%d", seq)
-		return
+		return nil, errors.Errorf("Unmarshal SCRoom faild. seq not found. seq=%d", seq)
 	}
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "Unmarshal SCRoom faild. seq=%d", seq)
 	}
-	return
+
+	return p, nil
 }
 
 func IsPushSCRoom(seq int32) bool {

@@ -155,7 +155,7 @@ func (w *Worker) run(ctx context.Context) error {
 				select {
 				case <-ctx.Done():
 					return ctx.Err()
-				case msg := <-w.ConsumeReplyMessage():
+				case msg := <-w.ConsumeTunnelResponse():
 					if err := w.ExecuteReply(msg); err != nil {
 						w.log.WithContext(ctx).Errorf("worker execute reply failed. id=%d %+v", w.ID(), err)
 					}
