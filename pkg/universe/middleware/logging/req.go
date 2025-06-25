@@ -39,7 +39,7 @@ func Req(ctx context.Context, log *log.Helper, p xnet.TunnelMessage, filter func
 		err = errors.Join(err, jsonerr)
 	}
 
-	msg := fmt.Sprintf("[REQ] uid=%d i=%d %d-%d oid=%d", xcontext.UIDOrZero(ctx), p.GetIndex(), mod, seq, p.GetObj())
+	msg := fmt.Sprintf("[REQU] uid=%d i=%d %d-%d oid=%d", xcontext.UIDOrZero(ctx), p.GetIndex(), mod, seq, p.GetObj())
 
 	if err != nil {
 		log.WithContext(ctx).Debugf("%s err=%s", msg, err.Error())

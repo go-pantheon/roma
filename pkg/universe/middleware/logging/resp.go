@@ -32,7 +32,7 @@ func DefaultFilter(mod, seq int32) bool {
 	return true
 }
 
-func Reply(ctx context.Context, log *log.Helper, uid int64, in xnet.TunnelMessage, out []byte, delay time.Duration, filter func(mod, seq int32) bool) {
+func Resp(ctx context.Context, log *log.Helper, uid int64, in xnet.TunnelMessage, out []byte, delay time.Duration, filter func(mod, seq int32) bool) {
 	if !profile.IsDev() {
 		return
 	}
@@ -65,9 +65,9 @@ func Reply(ctx context.Context, log *log.Helper, uid int64, in xnet.TunnelMessag
 	}
 
 	if codec.IsPushSC(climod.ModuleID(p.Mod), p.Seq) {
-		tag = "PUS"
+		tag = "PUSH"
 	} else {
-		tag = "REP"
+		tag = "RESP"
 	}
 
 	msg := fmt.Sprintf("[%s] uid=%d i=%d %d-%d oid=%d delay=%d", tag, uid, p.Index, p.Mod, p.Seq, p.Obj, delay.Milliseconds())

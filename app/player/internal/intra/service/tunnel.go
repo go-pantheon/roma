@@ -67,7 +67,7 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return nil
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, core.NewReplier(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
+	if w, err = s.mgr.Worker(ctx, oid, s.mgr.NewResponser(replyFunc), s.mgr.NewBroadcaster()); err != nil {
 		return err
 	}
 
@@ -146,7 +146,9 @@ func (s *TunnelService) handle(wctx core.Context, in *intrav1.TunnelRequest) err
 		}
 	}
 
-	logging.Reply(wctx, s.log, wctx.UID(), in, out, time.Since(st), logging.DefaultFilter)
+	logging.Resp(wctx, s.log, wctx.UID(), in, out, time.Since(st), logging.DefaultFilter)
 
-	return wctx.ReplyBytes(climod.ModuleID(in.Mod), in.Seq, in.Obj, out)
+	wctx.ReplyBytes(in.Mod, in.Seq, in.Obj, out)
+
+	return nil
 }

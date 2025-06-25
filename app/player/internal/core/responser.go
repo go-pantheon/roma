@@ -1,17 +1,17 @@
 package core
 
 import (
-	"github.com/go-pantheon/roma/gen/app/room/handler"
+	"github.com/go-pantheon/roma/gen/app/player/handler"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"google.golang.org/protobuf/proto"
 )
 
-func (m *Manager) NewResponser(respFunc life.ReplyFunc) life.Responsive {
-	return life.NewResponser(respFunc,
+func (m *Manager) NewResponser(replyFunc life.ReplyFunc) life.Responsive {
+	return life.NewResponser(replyFunc,
 		func(mod int32, seq int32, obj int64, sc proto.Message) (proto.Message, error) {
-			return handler.NewRoomResponseProto(mod, seq, obj, sc)
+			return handler.NewPlayerResponseProto(mod, seq, obj, sc)
 		}, func(mod int32, seq int32, obj int64, body []byte) proto.Message {
-			return handler.NewRoomResponseProtoByData(mod, seq, obj, body)
+			return handler.NewPlayerResponseProtoByData(mod, seq, obj, body)
 		},
 	)
 }

@@ -13,8 +13,6 @@ import (
 
 type Manager struct {
 	*life.Manager
-
-	pusher *data.PushRepo
 }
 
 func NewManager(logger log.Logger, rt *self.SelfRouteTable, userDo *domain.UserDomain, pusher *data.PushRepo) (*Manager, func()) {
@@ -22,11 +20,10 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, userDo *domain.UserD
 		return newUserPersister(ctx, userDo, uid, allowBorn)
 	}
 
-	lifeMgr, stopFunc := life.NewManager(logger, rt, newContext, newPersister)
+	lifeMgr, stopFunc := life.NewManager(logger, rt, pusher, newContext, newPersister)
 
 	m := &Manager{
 		Manager: lifeMgr,
-		pusher:  pusher,
 	}
 
 	return m, func() {
@@ -66,12 +63,8 @@ func (m *Manager) RegisterOnCreatedEvent(f func(ctx Context) error) {
 	})
 }
 
-func (m *Manager) Pusher() *data.PushRepo {
-	return m.pusher
-}
-
 func (m *Manager) ExecuteEvent(ctx context.Context, uid int64, f life.EventFunc) (err error) {
-	w, err := m.Worker(ctx, uid, NewReplier(EmptyReplyFunc), life.NewBroadcaster(m.Pusher()))
+	w, err := m.Worker(ctx, uid, m.NewResponser(mockResponseFunc), m.NewBroadcaster())
 	if err != nil {
 		return err
 	}

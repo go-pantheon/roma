@@ -12,7 +12,7 @@ import (
 type Context interface {
 	context.Context
 	EventManageable
-	Replier
+	Responsive
 
 	UID() int64
 	SetUID(uid int64)
@@ -34,7 +34,7 @@ type workerContext struct {
 	sync.Once
 	context.Context
 	EventManageable
-	Replier
+	Responsive
 
 	persister Persistent
 	ctime     time.Time
@@ -49,7 +49,7 @@ func NewContext(ctx context.Context, w *Worker) Context {
 	c := &workerContext{
 		Context:         ctx,
 		EventManageable: w,
-		Replier:         w.Replier,
+		Responsive:      w.Responsive,
 		persister:       w.persistManager.Persister(),
 		clientIP:        w.ClientIP(),
 	}

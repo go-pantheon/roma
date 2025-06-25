@@ -68,7 +68,7 @@ func (c *CreateAdminPlayerCommander) Func(ctx core.Context, args map[string]stri
 
 	ctx.Changed()
 
-	_ = ctx.Reply(climod.ModuleID_System, int32(cliseq.SystemSeq_ServerLogout), ctx.UID(), &climsg.SCServerLogout{
+	_ = ctx.Reply(int32(climod.ModuleID_System), int32(cliseq.SystemSeq_ServerLogout), ctx.UID(), &climsg.SCServerLogout{
 		Code: climsg.SCServerLogout_Waiting,
 	})
 

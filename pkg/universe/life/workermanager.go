@@ -14,6 +14,7 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/fabrica-util/xsync"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
+	"github.com/go-pantheon/roma/pkg/universe/data"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/singleflight"
 )
@@ -29,6 +30,7 @@ type Manager struct {
 	workers           *WorkerMap
 	stoppedWorkerChan chan string
 	appRouteTable     routetable.ReNewalRouteTable
+	pusher            *data.PushRepo
 
 	newContext   newContextFunc
 	newPersister newPersisterFunc
@@ -39,11 +41,12 @@ type Manager struct {
 type newContextFunc func(ctx context.Context, w *Worker) Context
 type newPersisterFunc func(ctx context.Context, id int64, allowBorn bool) (persister Persistent, born bool, err error)
 
-func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, newContext newContextFunc, newPersister newPersisterFunc) (m *Manager, stopFunc func() error) {
+func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, pusher *data.PushRepo, newContext newContextFunc, newPersister newPersisterFunc) (m *Manager, stopFunc func() error) {
 	m = &Manager{
 		PreparedTickFuncs: newPreparedTickFuncs(),
 		log:               log.NewHelper(log.With(logger, "module", "universe/life/manager")),
 		appRouteTable:     rt,
+		pusher:            pusher,
 		newContext:        newContext,
 		newPersister:      newPersister,
 	}
@@ -64,7 +67,7 @@ func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, newContext n
 	}
 }
 
-func (m *Manager) Worker(ctx context.Context, oid int64, replier Replier, broadcaster Broadcaster) (worker *Worker, err error) {
+func (m *Manager) Worker(ctx context.Context, oid int64, replier Responsive, broadcaster Broadcastable) (worker *Worker, err error) {
 	v, err, _ := m.group.Do(workerSingleFlightKey(oid), func() (any, error) {
 		status := OnlineStatus(xcontext.Status(ctx))
 
@@ -111,7 +114,7 @@ func (m *Manager) get(_ context.Context, id int64) *Worker {
 	return m.workers.Get(id)
 }
 
-func (m *Manager) load(ctx context.Context, oid int64, replier Replier, broadcaster Broadcaster, allowBorn bool) (*Worker, error) {
+func (m *Manager) load(ctx context.Context, oid int64, replier Responsive, broadcaster Broadcastable, allowBorn bool) (*Worker, error) {
 	persister, born, err := m.newPersister(ctx, oid, allowBorn)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "allowBorn=%v status=%d", allowBorn, OnlineStatus(xcontext.Status(ctx)))
@@ -276,4 +279,8 @@ func (m *Manager) removeWorker(ctx context.Context, key string) {
 	}
 
 	m.workers.Remove(id)
+}
+
+func (m *Manager) Pusher() *data.PushRepo {
+	return m.pusher
 }

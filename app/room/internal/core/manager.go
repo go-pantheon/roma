@@ -21,7 +21,7 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, roomDo *domain.RoomD
 		return newRoomPersister(ctx, roomDo, id, allowBorn)
 	}
 
-	lifeMgr, stopFunc := life.NewManager(logger, rt, newContext, newPersist)
+	lifeMgr, stopFunc := life.NewManager(logger, rt, pusher, newContext, newPersist)
 
 	m := &Manager{
 		Manager: lifeMgr,
@@ -69,7 +69,7 @@ func (m *Manager) Pusher() *data.PushRepo {
 }
 
 func (m *Manager) ExecuteEvent(ctx context.Context, oid int64, f life.EventFunc) error {
-	w, err := m.Worker(ctx, oid, NewReplier(adminReplyFunc), life.NewBroadcaster(m.Pusher()))
+	w, err := m.Worker(ctx, oid, m.NewResponser(mockResponseFunc), m.NewBroadcaster())
 	if err != nil {
 		return err
 	}

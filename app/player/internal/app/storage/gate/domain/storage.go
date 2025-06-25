@@ -65,7 +65,7 @@ func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.Update
 	ctx.Changed(object.ModuleKey)
 
 	if !silent {
-		_ = ctx.Reply(climod.ModuleID_Storage, int32(cliseq.StorageSeq_PushItemUpdated), ctx.UID(), amountMsg)
+		_ = ctx.Reply(int32(climod.ModuleID_Storage), int32(cliseq.StorageSeq_PushItemUpdated), ctx.UID(), amountMsg)
 	}
 }
 

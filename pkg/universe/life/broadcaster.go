@@ -2,6 +2,7 @@ package life
 
 import (
 	"context"
+	"sync"
 
 	"github.com/go-kratos/kratos/v2/log"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
@@ -12,14 +13,14 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type Broadcaster interface {
+type Broadcastable interface {
 	Broadcast(wctx Context, mod climod.ModuleID, seq int32, obj int64, body proto.Message) error
 	Multicast(wctx Context, mod climod.ModuleID, seq int32, obj int64, body proto.Message, uids ...int64) error
 	Consume() <-chan *BroadcastMessage
 	Send(msg *BroadcastMessage) error
 }
 
-var _ Broadcaster = (*WorkerBroadcaster)(nil)
+var _ Broadcastable = (*WorkerBroadcaster)(nil)
 
 // WorkerBroadcaster TODO
 type WorkerBroadcaster struct {
@@ -27,11 +28,12 @@ type WorkerBroadcaster struct {
 	msgs   chan *BroadcastMessage
 }
 
-func NewBroadcaster(pusher *data.PushRepo) Broadcaster {
+func NewBroadcaster(pusher *data.PushRepo) Broadcastable {
 	ep := &WorkerBroadcaster{
 		pusher: pusher,
 		msgs:   make(chan *BroadcastMessage, constants.WorkerReplySize),
 	}
+
 	return ep
 }
 
@@ -42,12 +44,7 @@ func (w *WorkerBroadcaster) Broadcast(wctx Context, mod climod.ModuleID, seq int
 		return
 	}
 
-	w.msgs <- NewBroadcastMessage(true, nil, &servicev1.PushBody{
-		Mod:  int32(mod),
-		Seq:  seq,
-		Obj:  obj,
-		Data: bytes,
-	})
+	w.msgs <- newBroadcastMessage(true, nil, newPushBody(mod, seq, obj, bytes))
 	return
 }
 
@@ -63,12 +60,7 @@ func (w *WorkerBroadcaster) Multicast(wctx Context, mod climod.ModuleID, seq int
 		return
 	}
 
-	w.msgs <- NewBroadcastMessage(false, uids, &servicev1.PushBody{
-		Mod:  int32(mod),
-		Seq:  seq,
-		Obj:  obj,
-		Data: bytes,
-	})
+	w.msgs <- newBroadcastMessage(false, uids, newPushBody(mod, seq, obj, bytes))
 	return
 }
 
@@ -77,16 +69,18 @@ func (w *WorkerBroadcaster) Consume() <-chan *BroadcastMessage {
 }
 
 func (w *WorkerBroadcaster) Send(msg *BroadcastMessage) error {
+	defer putBroadcastMessage(msg)
+
 	if msg.all {
-		return w.pusher.Broadcast(context.Background(), msg.msg)
+		return w.pusher.Broadcast(context.Background(), msg.out)
 	}
 
 	if len(msg.uids) > 16 {
-		return w.pusher.Multicast(context.Background(), msg.uids, msg.msg)
+		return w.pusher.Multicast(context.Background(), msg.uids, msg.out)
 	}
 
 	for _, uid := range msg.uids {
-		if err := w.pusher.Push(context.Background(), uid, msg.msg); err != nil {
+		if err := w.pusher.Push(context.Background(), uid, msg.out); err != nil {
 			log.Errorf("push failed. uid<%d> err<%v>", uid, err)
 		}
 	}
@@ -96,13 +90,62 @@ func (w *WorkerBroadcaster) Send(msg *BroadcastMessage) error {
 type BroadcastMessage struct {
 	all  bool
 	uids []int64
-	msg  *servicev1.PushBody
+	out  *servicev1.PushBody
 }
 
-func NewBroadcastMessage(all bool, uids []int64, msg *servicev1.PushBody) *BroadcastMessage {
-	return &BroadcastMessage{
-		all:  all,
-		uids: uids,
-		msg:  msg,
+func newBroadcastMessage(all bool, uids []int64, out *servicev1.PushBody) *BroadcastMessage {
+	msg := getBroadcastMessage()
+
+	msg.all = all
+	msg.uids = uids
+	msg.out = out
+	return msg
+}
+
+func (b *BroadcastMessage) reset() {
+	b.all = false
+	b.uids = nil
+
+	if b.out != nil {
+		putPushBody(b.out)
+		b.out = nil
 	}
+}
+
+var (
+	broadcastMessagePool = sync.Pool{
+		New: func() any {
+			return &BroadcastMessage{}
+		},
+	}
+
+	pushBodyPool = sync.Pool{
+		New: func() any {
+			return &servicev1.PushBody{}
+		},
+	}
+)
+
+func getBroadcastMessage() *BroadcastMessage {
+	return broadcastMessagePool.Get().(*BroadcastMessage)
+}
+
+func putBroadcastMessage(msg *BroadcastMessage) {
+	msg.reset()
+	broadcastMessagePool.Put(msg)
+}
+
+func newPushBody(mod climod.ModuleID, seq int32, obj int64, data []byte) *servicev1.PushBody {
+	body := pushBodyPool.Get().(*servicev1.PushBody)
+
+	body.Mod = int32(mod)
+	body.Seq = seq
+	body.Obj = obj
+	body.Data = data
+	return body
+}
+
+func putPushBody(body *servicev1.PushBody) {
+	body.Reset()
+	pushBodyPool.Put(body)
 }

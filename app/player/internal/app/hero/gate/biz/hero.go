@@ -87,7 +87,7 @@ func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, arg *life.EventArg) er
 	for _, hero := range newHeroes {
 		msg.Heroes = append(msg.Heroes, hero.EncodeClient())
 	}
-	_ = ctx.Reply(climod.ModuleID_Hero, int32(cliseq.HeroSeq_PushHeroUnlock), ctx.UID(), msg)
+	_ = ctx.Reply(int32(climod.ModuleID_Hero), int32(cliseq.HeroSeq_PushHeroUnlock), ctx.UID(), msg)
 	return nil
 }
 

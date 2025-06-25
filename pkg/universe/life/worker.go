@@ -35,12 +35,12 @@ type Workable interface {
 }
 
 var _ Workable = (*Worker)(nil)
-var _ Replier = (*Worker)(nil)
+var _ Responsive = (*Worker)(nil)
 
 type Worker struct {
 	xsync.Stoppable
-	Broadcaster
-	Replier
+	Broadcastable
+	Responsive
 	*Tickers
 
 	log      *log.Helper
@@ -68,8 +68,8 @@ func newWorker(
 	log *log.Helper,
 	appRouteTable routetable.ReNewalRouteTable,
 	persistManager *PersistManager,
-	replier Replier,
-	broadcaster Broadcaster,
+	replier Responsive,
+	broadcaster Broadcastable,
 	tickers *Tickers,
 	notifyStoppedFunc func(uid int64, index uint64),
 	newContextFunc newContextFunc,
@@ -77,8 +77,8 @@ func newWorker(
 	w = &Worker{
 		log:               log,
 		appRouteTable:     appRouteTable,
-		Broadcaster:       broadcaster,
-		Replier:           replier,
+		Broadcastable:     broadcaster,
+		Responsive:        replier,
 		Tickers:           tickers,
 		index:             globalWorkerIndex.Add(1),
 		persistManager:    persistManager,
@@ -224,13 +224,13 @@ func (w *Worker) sendLogoutMsg(_ context.Context, err error) {
 		msg.Code = climsg.SCServerLogout_Waiting
 	}
 
-	_ = w.ReplyImmediately(climod.ModuleID_System, int32(cliseq.SystemSeq_ServerLogout), w.ID(), msg)
+	_ = w.ReplyImmediately(int32(climod.ModuleID_System), int32(cliseq.SystemSeq_ServerLogout), w.ID(), msg)
 }
 
 // reuse check if the worker can be reused and update the worker status and reply function.
 // if the worker is inner status or the connection is inner context, it can be reused.
 // otherwise, the worker is gate context, it can be reused if the gate referer is the same.
-func (w *Worker) canReuse(ctx context.Context, replier Replier) bool {
+func (w *Worker) canReuse(ctx context.Context, replier Responsive) bool {
 	if !IsInnerStatus(w.Status()) && !IsInnerContext(ctx) {
 		return false
 	}
@@ -242,8 +242,9 @@ func (w *Worker) canReuse(ctx context.Context, replier Replier) bool {
 		w.status = intrav1.OnlineStatus_ONLINE_STATUS_GATE
 		w.referer = xcontext.GateReferer(ctx)
 		w.clientIP = xcontext.ClientIP(ctx)
-		w.Replier.UpdateReplyFunc(replier.GetReplyFunc())
+		w.UpdateReplyFunc(replier.ReplyFunc())
 	}
+
 	return true
 }
 
