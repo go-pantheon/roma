@@ -12,8 +12,8 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/pkg"
-	"github.com/go-pantheon/roma/app/player/internal/data"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/postgresdb"
 	"github.com/jackc/pgx/v5"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/require"
@@ -32,7 +32,7 @@ func (s *OrderRepoSuite) SetupTest() {
 	require.NoError(s.T(), err)
 
 	repo := &orderPgRepo{
-		data: &data.Data{Pdb: s.mock},
+		data: &postgresdb.DB{DB: s.mock},
 		log:  log.NewHelper(log.NewStdLogger(io.Discard)),
 	}
 	s.repo = repo

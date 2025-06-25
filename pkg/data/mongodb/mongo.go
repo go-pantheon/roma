@@ -1,4 +1,4 @@
-package mongo
+package mongodb
 
 import (
 	"context"
@@ -24,10 +24,12 @@ func (r *BaseRepo) Create(ctx context.Context, doc any) error {
 	if doc == nil {
 		return errors.New("document is nil")
 	}
+
 	_, err := r.Coll.InsertOne(ctx, doc)
 	if err != nil {
 		return errors.Wrap(err, "creating document failed")
 	}
+
 	return nil
 }
 
@@ -40,8 +42,10 @@ func (r *BaseRepo) FindByID(ctx context.Context, idKey string, id any, result an
 	if result == nil {
 		return errors.New("result pointer is nil")
 	}
+
 	filter := bson.M{idKey: id}
 	opts := options.FindOne()
+
 	if len(projection) > 0 {
 		opts.SetProjection(projection)
 	}
@@ -51,8 +55,10 @@ func (r *BaseRepo) FindByID(ctx context.Context, idKey string, id any, result an
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return errors.Wrapf(err, "document with id %v not found", id)
 		}
+
 		return errors.Wrapf(err, "querying document %v failed", id)
 	}
+
 	return nil
 }
 

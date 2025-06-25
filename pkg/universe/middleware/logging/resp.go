@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
+	"github.com/go-pantheon/fabrica-net/xcontext"
 	"github.com/go-pantheon/fabrica-net/xnet"
 	"github.com/go-pantheon/fabrica-util/errors"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
@@ -61,7 +62,7 @@ func Resp(ctx context.Context, log *log.Helper, uid int64, out xnet.TunnelMessag
 		tag = "RESP"
 	}
 
-	msg := fmt.Sprintf("[%s] uid=%d i=%d %d-%d oid=%d delay=%d", tag, uid, out.GetIndex(), out.GetMod(), out.GetSeq(), out.GetObj(), delay.Milliseconds())
+	msg := fmt.Sprintf("[%s] uid=%d color=%s i=%d seq=<%d-%d> oid=%d delay=%d", tag, uid, xcontext.Color(ctx), out.GetIndex(), out.GetMod(), out.GetSeq(), out.GetObj(), delay.Milliseconds())
 
 	if err != nil {
 		log.WithContext(ctx).Debugf("%s err=%s", msg, err.Error())

@@ -7,11 +7,3 @@ import (
 func NewClient(conn *Conn) servicev1.PushServiceClient {
 	return servicev1.NewPushServiceClient(conn.ClientConnInterface)
 }
-
-func NewClients(conns []*Conn) []servicev1.PushServiceClient {
-	clients := make([]servicev1.PushServiceClient, len(conns))
-	for i, conn := range conns {
-		clients[i] = NewClient(conn)
-	}
-	return clients
-}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
@@ -13,7 +12,6 @@ import (
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
-	"google.golang.org/protobuf/proto"
 )
 
 var _ life.Persistent = (*UserPersister)(nil)
@@ -21,36 +19,22 @@ var _ life.Persistent = (*UserPersister)(nil)
 type UserPersister struct {
 	mu sync.Mutex
 
-	uid  int64
-	user *userobj.User
-	show *atomic.Value
+	uid      int64
+	user     *userobj.User
+	snapshot *atomic.Value // TODO encode for other apps
 
 	do *domain.UserDomain
 }
 
 func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, allowCreate bool) (ret life.Persistent, newborn bool, err error) {
-	p := do.CacheGet(ctx, uid, time.Now())
-	if p != nil {
-		do.CacheRemove(ctx, uid)
-	} else {
-		p = dbv1.UserProtoPool.Get()
-		defer dbv1.UserProtoPool.Put(p)
-
-		p.Id = uid
-		if err = do.Load(ctx, uid, p); err != nil {
-			if errors.Is(err, xerrors.ErrDBRecordNotFound) {
-				if allowCreate {
-					err = do.Create(ctx, uid, time.Now(), p)
-					newborn = true
-				}
-			}
-		}
-		if err != nil {
-			return
-		}
+	p, newborn, err := do.TakeUserProto(ctx, uid, allowCreate)
+	if err != nil {
+		return
 	}
 
-	user := userobj.NewUser(p.Id, p.ServerVersion)
+	defer dbv1.UserProtoPool.Put(p)
+
+	user := userobj.NewUser(uid, p.ServerVersion)
 	if err = user.DecodeServer(p); err != nil {
 		return
 	}
@@ -58,17 +42,17 @@ func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, all
 	user.SetNewborn(newborn)
 
 	ret = &UserPersister{
-		uid:  uid,
-		user: user,
-		do:   do,
-		show: &atomic.Value{},
+		uid:      uid,
+		user:     user,
+		do:       do,
+		snapshot: &atomic.Value{},
 	}
-	// TODO encode ShowProto
+
 	return
 }
 
 func (s *UserPersister) Refresh(ctx context.Context) (err error) {
-	s.refreshProto()
+	s.encodeSnapshot()
 	return
 }
 
@@ -76,17 +60,15 @@ func (s *UserPersister) PrepareToPersist(ctx context.Context, modules []life.Mod
 	err = s.Lock(func() error {
 		s.user.Version += 1 // update version first
 
-		ret = life.VersionProto(dbv1.UserProtoPool.Get())
-		s.user.EncodeServer(ret.(*dbv1.UserProto), modules)
+		p := dbv1.UserProtoPool.Get()
+		s.user.EncodeServer(p, modules)
+
+		ret = p
 
 		return nil
 	})
 
 	return
-}
-
-func (s *UserPersister) refreshProto() {
-	// TODO encode ShowProto
 }
 
 func (s *UserPersister) Persist(ctx context.Context, uid int64, proto life.VersionProto) (err error) {
@@ -104,24 +86,16 @@ func (s *UserPersister) IncVersion(ctx context.Context, uid int64, newVersion in
 }
 
 func (s *UserPersister) OnStop(ctx context.Context, id int64, p life.VersionProto) (err error) {
-	s.do.CachePut(ctx, s.uid, p.(*dbv1.UserProto), time.Now())
+	s.do.OnLogout(ctx, s.uid, p.(*dbv1.UserProto))
 	return nil
 }
 
-func (s *UserPersister) ID() int64 {
-	return s.uid
+func (s *UserPersister) Snapshot() life.VersionProto {
+	return s.snapshot.Load().(life.VersionProto)
 }
 
-func (s *UserPersister) Version() int64 {
-	return s.user.Version
-}
-
-func (s *UserPersister) UnsafeObject() interface{} {
-	return s.user
-}
-
-func (s *UserPersister) ShowProto() proto.Message {
-	return s.show.Load().(proto.Message)
+func (s *UserPersister) encodeSnapshot() {
+	// TODO encode snapshot
 }
 
 func (s *UserPersister) Lock(f func() error) error {
@@ -133,4 +107,16 @@ func (s *UserPersister) Lock(f func() error) error {
 
 func (s *UserPersister) ModuleKeys() []life.ModuleKey {
 	return userregister.AllModuleKeys()
+}
+
+func (s *UserPersister) ID() int64 {
+	return s.uid
+}
+
+func (s *UserPersister) Version() int64 {
+	return s.user.Version
+}
+
+func (s *UserPersister) UnsafeObject() any {
+	return s.user
 }

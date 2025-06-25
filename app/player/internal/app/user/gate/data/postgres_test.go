@@ -10,8 +10,8 @@ import (
 	basicobj "github.com/go-pantheon/roma/app/player/internal/app/basic/gate/domain/object"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/data"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
-	idata "github.com/go-pantheon/roma/app/player/internal/data"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/postgresdb"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/assert"
@@ -31,7 +31,7 @@ func newTestRepoWithMock(t *testing.T) (domain.UserRepo, pgxmock.PgxPoolIface) {
 	mock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 
-	d := &idata.Data{Pdb: mock}
+	d := &postgresdb.DB{DB: mock}
 	logger := log.DefaultLogger
 
 	// Mock DB initialization

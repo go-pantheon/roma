@@ -6,8 +6,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/admin/domain"
-	"github.com/go-pantheon/roma/app/player/internal/data"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/mongodb"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -22,15 +22,15 @@ var _ domain.UserRepo = (*userMongoRepo)(nil)
 
 type userMongoRepo struct {
 	log  *log.Helper
-	data *data.Data
+	data *mongodb.DB
 	coll *mongo.Collection
 }
 
-func NewUserMongoRepo(data *data.Data, logger log.Logger) domain.UserRepo {
+func NewUserMongoRepo(data *mongodb.DB, logger log.Logger) domain.UserRepo {
 	return &userMongoRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "player/user/admin/data")),
-		coll: data.Mdb.Collection(_mongoUserTableName),
+		coll: data.DB.Collection(_mongoUserTableName),
 	}
 }
 

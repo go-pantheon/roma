@@ -22,8 +22,7 @@ type RoomRepo interface {
 type RoomProtoCache interface {
 	Put(ctx context.Context, uid int64, room *dbv1.RoomProto, ctime time.Time)
 	Get(ctx context.Context, uid int64, ctime time.Time) *dbv1.RoomProto
-	Create() *dbv1.RoomProto
-	Reset(p *dbv1.RoomProto)
+	Remove(ctx context.Context, uid int64)
 }
 
 type RoomDomain struct {
@@ -47,6 +46,33 @@ func (do *RoomDomain) Load(ctx context.Context, id int64, p *dbv1.RoomProto) (er
 	return do.repo.QueryByID(ctx, id, p)
 }
 
+func (do *RoomDomain) TakeRoomProto(ctx context.Context, id int64, allowCreate bool) (ret *dbv1.RoomProto, newborn bool, err error) {
+	p := do.cache.Get(ctx, id, time.Now())
+	if p != nil {
+		do.cache.Remove(ctx, id)
+		return p, false, nil
+	}
+
+	p = dbv1.RoomProtoPool.Get()
+
+	p.Id = id
+
+	if err = do.Load(ctx, id, p); err != nil {
+		if errors.Is(err, xerrors.ErrDBRecordNotFound) {
+			if allowCreate {
+				err = do.Create(ctx, id, time.Now(), p)
+				newborn = true
+			}
+		}
+	}
+
+	if err != nil {
+		return nil, false, err
+	}
+
+	return p, newborn, nil
+}
+
 func (do *RoomDomain) Persist(ctx context.Context, id int64, proto life.VersionProto) (err error) {
 	data, ok := proto.(*dbv1.RoomProto)
 	if !ok {
@@ -64,18 +90,7 @@ func (do *RoomDomain) Exist(ctx context.Context, id int64) (exist bool, err erro
 	return do.repo.Exist(ctx, id)
 }
 
-func (do *RoomDomain) UpdateOfflineCache(ctx context.Context, id int64, proto *dbv1.RoomProto, ctime time.Time) {
-	do.cache.Put(ctx, id, proto, ctime)
-}
-
-func (do *RoomDomain) OfflineCache(ctx context.Context, id int64, ctime time.Time) *dbv1.RoomProto {
-	return do.cache.Get(ctx, id, ctime)
-}
-
-func (do *RoomDomain) GetProtoFromPool() (p *dbv1.RoomProto) {
-	return do.cache.Create()
-}
-
-func (do *RoomDomain) PutBackProtoIntoPool(p *dbv1.RoomProto) {
-	do.cache.Reset(p)
+func (do *RoomDomain) OnLogout(ctx context.Context, id int64, proto *dbv1.RoomProto) error {
+	do.cache.Put(ctx, id, proto, time.Now())
+	return nil
 }

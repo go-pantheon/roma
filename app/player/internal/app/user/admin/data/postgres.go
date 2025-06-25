@@ -8,9 +8,9 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/admin/domain"
-	"github.com/go-pantheon/roma/app/player/internal/data"
 	"github.com/go-pantheon/roma/app/player/internal/data/pguser"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/postgresdb"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
@@ -22,10 +22,10 @@ var _ domain.UserRepo = (*userPostgresRepo)(nil)
 
 type userPostgresRepo struct {
 	log  *log.Helper
-	data *data.Data
+	data *postgresdb.DB
 }
 
-func NewUserPostgresRepo(data *data.Data, logger log.Logger) (domain.UserRepo, error) {
+func NewUserPostgresRepo(data *postgresdb.DB, logger log.Logger) (domain.UserRepo, error) {
 	r := &userPostgresRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "player/user/gate/data")),
@@ -67,7 +67,7 @@ func (r *userPostgresRepo) GetByID(ctx context.Context, user *dbv1.UserProto, mo
 	sqlbuilder.WriteString(_tableName)
 	sqlbuilder.WriteString(`" WHERE id = $1`)
 
-	row := r.data.Pdb.QueryRow(ctx, sqlbuilder.String(), user.Id)
+	row := r.data.DB.QueryRow(ctx, sqlbuilder.String(), user.Id)
 
 	return pguser.ScanUserRow(row, user, mods, scanargs, modvals)
 }
@@ -79,7 +79,7 @@ func (r *userPostgresRepo) GetList(ctx context.Context, start, limit int64, cond
 	}
 
 	countsql := fmt.Sprintf(`SELECT COUNT(*) FROM "%s"%s`, _tableName, wheresql)
-	if err := r.data.Pdb.QueryRow(ctx, countsql, args...).Scan(&count); err != nil {
+	if err := r.data.DB.QueryRow(ctx, countsql, args...).Scan(&count); err != nil {
 		return nil, 0, errors.Wrap(err, "counting users")
 	}
 
@@ -97,7 +97,7 @@ func (r *userPostgresRepo) GetList(ctx context.Context, start, limit int64, cond
 
 	args = append(args, limit, start)
 
-	rows, err := r.data.Pdb.Query(ctx, querysql, args...)
+	rows, err := r.data.DB.Query(ctx, querysql, args...)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "querying user list")
 	}

@@ -23,7 +23,7 @@ const (
 
 type EventManageable interface {
 	EmitEvent(t WorkerEventType, args ...WithArg) error
-	EmitFuncEvent(f EventFunc) error
+	EmitEventFunc(f EventFunc) error
 	ConsumeEvent() <-chan EventFunc
 }
 

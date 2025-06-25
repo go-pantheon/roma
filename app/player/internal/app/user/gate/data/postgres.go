@@ -10,9 +10,9 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
-	"github.com/go-pantheon/roma/app/player/internal/data"
 	"github.com/go-pantheon/roma/app/player/internal/data/pguser"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/postgresdb"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
@@ -24,18 +24,18 @@ var _ domain.UserRepo = (*userPostgresRepo)(nil)
 
 type userPostgresRepo struct {
 	log  *log.Helper
-	data *data.Data
+	data *postgresdb.DB
 }
 
-func NewUserPostgresRepo(data *data.Data, logger log.Logger) (domain.UserRepo, error) {
+func NewUserPostgresRepo(data *postgresdb.DB, logger log.Logger) (domain.UserRepo, error) {
 	return newUserPostgresRepo(data, logger, userregister.AllModuleKeys())
 }
 
-func TestNewUserPostgresRepo(data *data.Data, logger log.Logger, mods []life.ModuleKey) (domain.UserRepo, error) {
+func TestNewUserPostgresRepo(data *postgresdb.DB, logger log.Logger, mods []life.ModuleKey) (domain.UserRepo, error) {
 	return newUserPostgresRepo(data, logger, mods)
 }
 
-func newUserPostgresRepo(data *data.Data, logger log.Logger, _ []life.ModuleKey) (domain.UserRepo, error) {
+func newUserPostgresRepo(data *postgresdb.DB, logger log.Logger, _ []life.ModuleKey) (domain.UserRepo, error) {
 	r := &userPostgresRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "player/user/gate/data")),
@@ -44,7 +44,7 @@ func newUserPostgresRepo(data *data.Data, logger log.Logger, _ []life.ModuleKey)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := migrate.Migrate(ctx, r.data.Pdb, &dbv1.UserProto{}, userregister.AllModuleDBColumnsString()); err != nil {
+	if err := migrate.Migrate(ctx, r.data.DB, &dbv1.UserProto{}, userregister.AllModuleDBColumnsString()); err != nil {
 		return nil, err
 	}
 
@@ -85,7 +85,7 @@ func (r *userPostgresRepo) Create(ctx context.Context, uid int64, user *dbv1.Use
 
 	sqlbuilder.WriteString(")")
 
-	if _, err = r.data.Pdb.Exec(ctx, sqlbuilder.String(), vals...); err != nil {
+	if _, err = r.data.DB.Exec(ctx, sqlbuilder.String(), vals...); err != nil {
 		return errors.Wrapf(err, "inserting user %d", uid)
 	}
 
@@ -121,7 +121,7 @@ func (r *userPostgresRepo) QueryByID(ctx context.Context, uid int64, user *dbv1.
 	sqlbuilder.WriteString(_tableName)
 	sqlbuilder.WriteString(`" WHERE id = $1`)
 
-	row := r.data.Pdb.QueryRow(ctx, sqlbuilder.String(), uid)
+	row := r.data.DB.QueryRow(ctx, sqlbuilder.String(), uid)
 
 	if err := row.Scan(scanargs...); err != nil {
 		return errors.Wrapf(err, "scanning user %d", uid)
@@ -175,7 +175,7 @@ func (r *userPostgresRepo) UpdateByID(ctx context.Context, uid int64, user *dbv1
 	vals := []any{user.Version, uid, user.Version - 1}
 	vals = append(vals, modvals...)
 
-	if _, err = r.data.Pdb.Exec(ctx, sqlbuilder.String(), vals...); err != nil {
+	if _, err = r.data.DB.Exec(ctx, sqlbuilder.String(), vals...); err != nil {
 		return errors.Wrapf(err, "updating user %d", uid)
 	}
 
@@ -186,7 +186,7 @@ func (r *userPostgresRepo) IsExist(ctx context.Context, uid int64) (bool, error)
 	sql := `SELECT EXISTS(SELECT 1 FROM "` + _tableName + `" WHERE id = $1);`
 
 	var exists bool
-	if err := r.data.Pdb.QueryRow(ctx, sql, uid).Scan(&exists); err != nil {
+	if err := r.data.DB.QueryRow(ctx, sql, uid).Scan(&exists); err != nil {
 		return false, errors.Wrapf(err, "scanning user %d existence", uid)
 	}
 
@@ -195,7 +195,7 @@ func (r *userPostgresRepo) IsExist(ctx context.Context, uid int64) (bool, error)
 
 func (r *userPostgresRepo) IncVersion(ctx context.Context, uid int64, newVersion int64) error {
 	sql := `UPDATE "user" SET version = $1 WHERE id = $2 AND version = $3;`
-	_, err := r.data.Pdb.Exec(ctx, sql, newVersion, uid, newVersion-1)
+	_, err := r.data.DB.Exec(ctx, sql, newVersion, uid, newVersion-1)
 	if err != nil {
 		return errors.Wrapf(err, "incrementing user %d version", uid)
 	}

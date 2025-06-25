@@ -10,7 +10,7 @@ type Persistent interface {
 	ID() int64
 	Version() int64
 	UnsafeObject() any
-	ShowProto() proto.Message
+	Snapshot() VersionProto
 	Lock(f func() error) error
 	Refresh(ctx context.Context) (err error)
 	PrepareToPersist(ctx context.Context, modules []ModuleKey) (VersionProto, error)

@@ -25,10 +25,6 @@ func NewRoom() *Room {
 	return u
 }
 
-func NewRoomProto() *dbv1.RoomProto {
-	return &dbv1.RoomProto{}
-}
-
 func (o *Room) EncodeServer(p *dbv1.RoomProto, keys []life.ModuleKey) {
 	p.Id = o.Id
 	p.Sid = o.Sid
@@ -37,9 +33,7 @@ func (o *Room) EncodeServer(p *dbv1.RoomProto, keys []life.ModuleKey) {
 	p.CreatedAt = o.CreatedAt.Unix()
 
 	for _, m := range o.Members {
-		mp := NewMemberProto()
-		m.EncodeServer(mp)
-		p.Members = append(p.Members, mp)
+		p.Members = append(p.Members, m.encodeServer())
 	}
 }
 
@@ -54,11 +48,12 @@ func (o *Room) DecodeServer(p *dbv1.RoomProto) (err error) {
 	o.CreatedAt = xtime.Time(p.CreatedAt)
 
 	o.Members = make([]*Member, 0, len(p.Members))
-	for _, m := range p.Members {
-		member := &Member{}
-		member.DecodeServer(m)
-		o.Members = append(o.Members, member)
+
+	for _, mp := range p.Members {
+		m := NewMember()
+		o.Members = append(o.Members, m.decodeServer(mp))
 	}
+
 	return nil
 }
 
@@ -69,8 +64,10 @@ func (o *Room) EncodeClient() *climsg.RoomProto {
 		},
 		Members: make(map[int64]*climsg.RoomMemberProto),
 	}
+
 	for _, m := range o.Members {
 		p.Members[m.Id] = m.EncodeClient()
 	}
+
 	return p
 }

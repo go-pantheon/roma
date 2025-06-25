@@ -7,9 +7,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
-	"github.com/go-pantheon/roma/app/player/internal/data"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
-	pkmongo "github.com/go-pantheon/roma/pkg/data/mongo"
+	"github.com/go-pantheon/roma/pkg/data/mongodb"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -26,13 +25,13 @@ var _ domain.UserRepo = (*userMongoRepo)(nil)
 
 type userMongoRepo struct {
 	log  *log.Helper
-	repo *pkmongo.BaseRepo
+	repo *mongodb.BaseRepo
 }
 
-func NewUserMongoRepo(data *data.Data, logger log.Logger) (r domain.UserRepo, err error) {
-	coll := data.Mdb.Collection(_mongoUserTableName)
+func NewUserMongoRepo(data *mongodb.DB, logger log.Logger) (r domain.UserRepo, err error) {
+	coll := data.DB.Collection(_mongoUserTableName)
 	repo := &userMongoRepo{
-		repo: pkmongo.NewBaseRepo(coll),
+		repo: mongodb.NewBaseRepo(coll),
 		log:  log.NewHelper(log.With(logger, "module", "player/user/gate/data/mongo")),
 	}
 

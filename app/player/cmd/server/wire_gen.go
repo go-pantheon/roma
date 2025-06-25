@@ -51,7 +51,6 @@ import (
 	registry3 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/registry"
 	service5 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/service"
 	"github.com/go-pantheon/roma/app/player/internal/client"
-	"github.com/go-pantheon/roma/app/player/internal/client/gate"
 	"github.com/go-pantheon/roma/app/player/internal/client/self"
 	"github.com/go-pantheon/roma/app/player/internal/conf"
 	"github.com/go-pantheon/roma/app/player/internal/core"
@@ -62,6 +61,10 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/server"
 	"github.com/go-pantheon/roma/app/player/internal/server/registry"
 	service6 "github.com/go-pantheon/roma/gen/app/player/service"
+	"github.com/go-pantheon/roma/pkg/client/gate"
+	"github.com/go-pantheon/roma/pkg/data/mongodb"
+	"github.com/go-pantheon/roma/pkg/data/postgresdb"
+	"github.com/go-pantheon/roma/pkg/data/redisdb"
 	data3 "github.com/go-pantheon/roma/pkg/universe/data"
 )
 
@@ -69,38 +72,42 @@ import (
 
 // initApp init kratos application.
 func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge, confRegistry *conf.Registry, confData *conf.Data, logger log.Logger, healthServer *health.Server) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
+	universalClient, cleanup, err := data.NewRedisClient(confData)
 	if err != nil {
 		return nil, nil, err
 	}
-	selfRouteTable := self.NewSelfRouteTable(dataData)
-	userRepo, err := data2.NewUserMongoRepo(dataData, logger)
+	selfRouteTable := self.NewSelfRouteTable(universalClient, confData)
+	database, cleanup2, err := data.NewMongoClient(confData)
 	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	db := mongodb.NewMongoDB(database)
+	userRepo, err := data2.NewUserMongoRepo(db, logger)
+	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	userCache := data2.NewUserProtoCache()
 	userDomain := domain.NewUserDomain(userRepo, logger, userCache)
-	routeTable := gate.NewRouteTable(dataData)
+	redisdbDB := redisdb.NewRedisDB(universalClient)
+	gateRouteTable := gate.NewGateRouteTable(redisdbDB)
 	discovery, err := client.NewDiscovery(confRegistry)
 	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	conn, err := gate.NewConn(logger, routeTable, discovery)
+	conn, err := gate.NewConn(logger, gateRouteTable, discovery)
 	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	pushServiceClient := gate.NewClient(conn)
-	v, err := gate.NewConns(logger, routeTable, discovery)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	v2 := gate.NewClients(v)
-	pushRepo := data3.NewPushRepo(pushServiceClient, v2, logger)
-	manager, cleanup2 := core.NewManager(logger, selfRouteTable, userDomain, pushRepo)
+	pushRepo := data3.NewPushRepo(pushServiceClient, logger)
+	manager, cleanup3 := core.NewManager(logger, selfRouteTable, userDomain, pushRepo)
 	httpFilter := filter.NewHttpFilter(manager)
 	servicelessUseCase := registry.NewServicelessUseCase()
 	devUseCase := biz.NewDevUseCase(manager, logger)
@@ -135,8 +142,18 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	storageRegistrar := registry6.NewStorageRegistrar(storageServiceServer)
 	heroRegistrar := registry7.NewHeroRegistrar(heroServiceServer)
 	gateRegistrars := registry.NewGateRegistrars(userRegistrar, devRegistrar, systemRegistrar, storageRegistrar, heroRegistrar)
-	domainUserRepo, err := data4.NewUserPostgresRepo(dataData, logger)
+	pool, cleanup4, err := data.NewPostgreSQLClient(confData)
 	if err != nil {
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	postgresdbDB := postgresdb.NewPostgreSQLDB(pool)
+	domainUserRepo, err := data4.NewUserPostgresRepo(postgresdbDB, logger)
+	if err != nil {
+		cleanup4()
+		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
@@ -151,8 +168,10 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	bizStorageUseCase := biz8.NewStorageUseCase(logger, storageDomain)
 	storageAdminServer := service10.NewStorageAdmin(logger, manager, bizStorageUseCase)
 	registryStorageRegistrar := registry10.NewStorageRegistrar(storageAdminServer)
-	orderRepo, err := data5.NewOrderPgRepo(dataData, logger)
+	orderRepo, err := data5.NewOrderPgRepo(postgresdbDB, logger)
 	if err != nil {
+		cleanup4()
+		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
@@ -167,12 +186,16 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	grpcServer := server.NewGRPCServer(confServer, logger, grpcFilter, serviceRegistrars, adminRegistrars)
 	registryRegistrar, err := server.NewRegistrar(confRegistry)
 	if err != nil {
+		cleanup4()
+		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	app := newApp(logger, httpServer, grpcServer, healthServer, label, registryRegistrar)
 	return app, func() {
+		cleanup4()
+		cleanup3()
 		cleanup2()
 		cleanup()
 	}, nil

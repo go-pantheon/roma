@@ -6,8 +6,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/room/internal/app/room/admin/domain"
-	"github.com/go-pantheon/roma/app/room/internal/data"
 	adminv1 "github.com/go-pantheon/roma/gen/api/server/room/admin/room/v1"
+	"github.com/go-pantheon/roma/pkg/data/mongodb"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -20,15 +20,15 @@ var _ domain.RoomRepo = (*roomMongoRepo)(nil)
 
 type roomMongoRepo struct {
 	log  *log.Helper
-	data *data.Data
+	data *mongodb.DB
 	coll *mongo.Collection
 }
 
-func NewRoomMongoRepo(data *data.Data, logger log.Logger) (domain.RoomRepo, error) {
+func NewRoomMongoRepo(data *mongodb.DB, logger log.Logger) (domain.RoomRepo, error) {
 	r := &roomMongoRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "room/admin/data")),
-		coll: data.Mdb.Collection(_mongoRoomTableName),
+		coll: data.DB.Collection(_mongoRoomTableName),
 	}
 
 	return r, nil

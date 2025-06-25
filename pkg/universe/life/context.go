@@ -88,10 +88,10 @@ func (w *workerContext) OID() int64 {
 }
 
 func (w *workerContext) ShowProto() proto.Message {
-	return w.persister.ShowProto()
+	return w.persister.Snapshot()
 }
 
-func (w *workerContext) UnsafeObject() interface{} {
+func (w *workerContext) UnsafeObject() any {
 	return w.persister.UnsafeObject()
 }
 

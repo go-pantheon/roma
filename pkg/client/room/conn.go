@@ -1,4 +1,4 @@
-package gate
+package room
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
@@ -7,18 +7,18 @@ import (
 	"github.com/go-pantheon/fabrica-kit/router/conn"
 	"github.com/go-pantheon/fabrica-kit/router/routetable"
 	"github.com/go-pantheon/fabrica-kit/router/routetable/redis"
-	"github.com/go-pantheon/roma/app/room/internal/data"
+	"github.com/go-pantheon/roma/pkg/data/redisdb"
 )
 
 const (
-	serviceName = "janus.gate.interface"
+	serviceName = "roma.room.service"
 )
 
 type Conn struct {
 	*conn.Conn
 }
 
-func NewConn(logger log.Logger, rt *GateRouteTable, r registry.Discovery) (*Conn, error) {
+func NewConn(logger log.Logger, rt *RouteTable, r registry.Discovery) (*Conn, error) {
 	conn, err := conn.NewConn(serviceName, balancer.TypeReader, logger, rt, r)
 	if err != nil {
 		return nil, err
@@ -29,18 +29,12 @@ func NewConn(logger log.Logger, rt *GateRouteTable, r registry.Discovery) (*Conn
 	}, nil
 }
 
-func NewConns(logger log.Logger, rt *GateRouteTable, r registry.Discovery) ([]*Conn, error) {
-	conns := make([]*Conn, 0)
-	// TODO
-	return conns, nil
-}
-
-type GateRouteTable struct {
+type RouteTable struct {
 	routetable.ReadOnlyRouteTable
 }
 
-func NewGateRouteTable(d *data.Data) *GateRouteTable {
-	return &GateRouteTable{
-		ReadOnlyRouteTable: routetable.NewReadOnlyRouteTable(redis.New(d.Rdb), serviceName),
+func NewRouteTable(db *redisdb.DB) *RouteTable {
+	return &RouteTable{
+		ReadOnlyRouteTable: routetable.NewReadOnlyRouteTable(redis.New(db.DB), serviceName),
 	}
 }

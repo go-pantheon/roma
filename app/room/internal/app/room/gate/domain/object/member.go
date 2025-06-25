@@ -20,18 +20,20 @@ func NewMember() *Member {
 	}
 }
 
-func NewMemberProto() *dbv1.RoomMemberProto {
-	return &dbv1.RoomMemberProto{}
-}
+func (o *Member) encodeServer() *dbv1.RoomMemberProto {
+	p := dbv1.RoomMemberProtoPool.Get()
 
-func (o *Member) EncodeServer(p *dbv1.RoomMemberProto) {
 	p.Id = o.Id
 	p.JoinedAt = o.JoinedAt.Unix()
+
+	return p
 }
 
-func (o *Member) DecodeServer(p *dbv1.RoomMemberProto) {
+func (o *Member) decodeServer(p *dbv1.RoomMemberProto) *Member {
 	o.Id = p.Id
 	o.JoinedAt = time.Unix(p.JoinedAt, 0)
+
+	return o
 }
 
 func (o *Member) EncodeClient() *climsg.RoomMemberProto {

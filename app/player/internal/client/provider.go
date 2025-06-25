@@ -1,9 +1,9 @@
 package client
 
 import (
-	"github.com/go-pantheon/roma/app/player/internal/client/gate"
-	"github.com/go-pantheon/roma/app/player/internal/client/room"
 	"github.com/go-pantheon/roma/app/player/internal/client/self"
+	"github.com/go-pantheon/roma/pkg/client/gate"
+	"github.com/go-pantheon/roma/pkg/client/room"
 	"github.com/google/wire"
 )
 

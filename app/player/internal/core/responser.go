@@ -4,7 +4,6 @@ import (
 	"github.com/go-pantheon/fabrica-net/xnet"
 	intrav1 "github.com/go-pantheon/roma/gen/api/server/player/intra/v1"
 	"github.com/go-pantheon/roma/gen/app/player/handler"
-	"github.com/go-pantheon/roma/pkg/universe/data"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
@@ -16,10 +15,6 @@ func NewResponser(replyFunc life.ReplyFunc) life.Responsive {
 			return handler.TakeProtoPlayerTunnelResponse(mod, seq, obj, sc)
 		},
 	)
-}
-
-func NewBroadcaster(pusher *data.PushRepo) life.Broadcastable {
-	return life.NewBroadcaster(pusher)
 }
 
 func ReplyFunc(stream intrav1.TunnelService_TunnelServer, p xnet.TunnelMessage) error {

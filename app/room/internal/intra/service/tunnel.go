@@ -58,16 +58,14 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return core.ReplyFunc(stream, p)
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc), core.NewBroadcaster(s.mgr.Pusher())); err != nil {
+	if w, err = s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
 		return err
 	}
 
 	return s.run(ctx, w, stream)
 }
 
-func (s *TunnelService) run(ctx context.Context, w life.Workable, stream intrav1.TunnelService_TunnelServer) error {
-	var err error
-
+func (s *TunnelService) run(ctx context.Context, w life.Workable, stream intrav1.TunnelService_TunnelServer) (err error) {
 	eg, ctx := errgroup.WithContext(ctx)
 	eg.Go(func() error {
 		select {
@@ -110,7 +108,7 @@ func (s *TunnelService) recv(w life.Workable, stream intrav1.TunnelService_Tunne
 		return nil
 	}
 
-	return w.EmitFuncEvent(func(wctx life.Context) error {
+	return w.EmitEventFunc(func(wctx life.Context) error {
 		return s.handle(wctx.(core.Context), in)
 	})
 }

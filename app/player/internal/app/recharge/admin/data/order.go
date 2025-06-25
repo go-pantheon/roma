@@ -11,8 +11,8 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/admin/domain"
 	"github.com/go-pantheon/roma/app/player/internal/app/recharge/pkg"
-	"github.com/go-pantheon/roma/app/player/internal/data"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/postgresdb"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -24,10 +24,10 @@ var _ domain.OrderRepo = (*orderPgRepo)(nil)
 
 type orderPgRepo struct {
 	log  *log.Helper
-	data *data.Data
+	data *postgresdb.DB
 }
 
-func NewOrderPgRepo(data *data.Data, logger log.Logger) (domain.OrderRepo, error) {
+func NewOrderPgRepo(data *postgresdb.DB, logger log.Logger) (domain.OrderRepo, error) {
 	r := &orderPgRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "player/recharge/admin/data/order")),
@@ -40,7 +40,7 @@ func (r *orderPgRepo) GetByID(ctx context.Context, store pkg.Store, transId stri
 	query := fmt.Sprintf(`SELECT info, uid, store, trans_id, ack, ack_at 
 		FROM "%s" WHERE trans_id = $1 AND store = $2 LIMIT 1`, _tableName)
 
-	row := r.data.Pdb.QueryRow(ctx, query, transId, store)
+	row := r.data.DB.QueryRow(ctx, query, transId, store)
 
 	var (
 		o        dbv1.OrderProto
@@ -68,7 +68,7 @@ func (r *orderPgRepo) GetList(ctx context.Context, index, limit int64, cond *dbv
 
 	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM "%s" %s`, _tableName, where)
 	var total int64
-	countRow := r.data.Pdb.QueryRow(ctx, countQuery, args...)
+	countRow := r.data.DB.QueryRow(ctx, countQuery, args...)
 	if err := countRow.Scan(&total); err != nil {
 		return nil, 0, errors.Wrapf(err, "failed to count orders")
 	}
@@ -78,7 +78,7 @@ func (r *orderPgRepo) GetList(ctx context.Context, index, limit int64, cond *dbv
 	}
 
 	query := fmt.Sprintf(`SELECT info, uid, store, trans_id, ack, ack_at FROM "%s" %s ORDER BY ack_at DESC LIMIT %d OFFSET %d`, _tableName, where, limit, index)
-	rows, err := r.data.Pdb.Query(ctx, query, args...)
+	rows, err := r.data.DB.Query(ctx, query, args...)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "failed to get order list")
 	}
@@ -108,7 +108,7 @@ func (r *orderPgRepo) GetList(ctx context.Context, index, limit int64, cond *dbv
 func (r *orderPgRepo) UpdateAckStateByID(ctx context.Context, store pkg.Store, transId string, state dbv1.OrderAckState) error {
 	query := fmt.Sprintf(`UPDATE "%s" SET ack = $1, ack_at = $2 WHERE trans_id = $3 AND store = $4`, _tableName)
 
-	tag, err := r.data.Pdb.Exec(ctx, query, int32(state), time.Now().Unix(), transId, store)
+	tag, err := r.data.DB.Exec(ctx, query, int32(state), time.Now().Unix(), transId, store)
 	if err != nil {
 		return errors.Wrapf(err, "failed to update ack state, store: %s, transId: %s, state: %s", store, transId, state.String())
 	}

@@ -272,7 +272,7 @@ func (w *Worker) Stop(ctx context.Context) (err error) {
 	})
 }
 
-func (w *Worker) EmitFuncEvent(f EventFunc) error {
+func (w *Worker) EmitEventFunc(f EventFunc) error {
 	if w.OnStopping() {
 		return xerrors.ErrLifeStopped
 	}

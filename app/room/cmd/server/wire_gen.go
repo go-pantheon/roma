@@ -21,7 +21,6 @@ import (
 	registry3 "github.com/go-pantheon/roma/app/room/internal/app/room/gate/registry"
 	"github.com/go-pantheon/roma/app/room/internal/app/room/gate/service"
 	"github.com/go-pantheon/roma/app/room/internal/client"
-	"github.com/go-pantheon/roma/app/room/internal/client/gate"
 	"github.com/go-pantheon/roma/app/room/internal/client/self"
 	"github.com/go-pantheon/roma/app/room/internal/conf"
 	"github.com/go-pantheon/roma/app/room/internal/core"
@@ -32,6 +31,9 @@ import (
 	"github.com/go-pantheon/roma/app/room/internal/server"
 	"github.com/go-pantheon/roma/app/room/internal/server/registry"
 	service2 "github.com/go-pantheon/roma/gen/app/room/service"
+	"github.com/go-pantheon/roma/pkg/client/gate"
+	"github.com/go-pantheon/roma/pkg/data/mongodb"
+	"github.com/go-pantheon/roma/pkg/data/redisdb"
 	data3 "github.com/go-pantheon/roma/pkg/universe/data"
 )
 
@@ -39,38 +41,42 @@ import (
 
 // initApp init kratos application.
 func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Registry, confData *conf.Data, logger log.Logger, healthServer *health.Server) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
+	universalClient, cleanup, err := data.NewRedisClient(confData)
 	if err != nil {
 		return nil, nil, err
 	}
-	selfRouteTable := self.NewSelfRouteTable(dataData)
-	roomRepo, err := data2.NewRoomMongoRepo(dataData, logger)
+	db := redisdb.NewRedisDB(universalClient)
+	selfRouteTable := self.NewSelfRouteTable(db, confData)
+	database, cleanup2, err := data.NewMongoClient(confData)
 	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	mongodbDB := mongodb.NewMongoDB(database)
+	roomRepo, err := data2.NewRoomMongoRepo(mongodbDB, logger)
+	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	roomProtoCache := data2.NewProtoCache()
 	roomDomain := domain.NewRoomDomain(roomRepo, logger, roomProtoCache)
-	gateRouteTable := gate.NewGateRouteTable(dataData)
+	gateRouteTable := gate.NewGateRouteTable(db)
 	discovery, err := client.NewDiscovery(confRegistry)
 	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	conn, err := gate.NewConn(logger, gateRouteTable, discovery)
 	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	pushServiceClient := gate.NewClient(conn)
-	v, err := gate.NewConns(logger, gateRouteTable, discovery)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	v2 := gate.NewClients(v)
-	pushRepo := data3.NewPushRepo(pushServiceClient, v2, logger)
-	manager, cleanup2 := core.NewManager(logger, selfRouteTable, roomDomain, pushRepo)
+	pushRepo := data3.NewPushRepo(pushServiceClient, logger)
+	manager, cleanup3 := core.NewManager(logger, selfRouteTable, roomDomain, pushRepo)
 	httpFilter := filter.NewHttpFilter(manager)
 	servicelessUseCase := registry.NewServicelessUseCase()
 	roomUseCase := biz.NewRoomUseCase(manager, roomDomain, logger)
@@ -81,8 +87,9 @@ func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Regi
 	serviceRegistrars := registry.NewServiceRegistrars(servicelessUseCase, intraRegistrar)
 	roomRegistrar := registry3.NewRoomRegistrar(roomServiceServer)
 	gateRegistrars := registry.NewGateRegistrars(roomRegistrar)
-	domainRoomRepo, err := data4.NewRoomMongoRepo(dataData, logger)
+	domainRoomRepo, err := data4.NewRoomMongoRepo(mongodbDB, logger)
 	if err != nil {
+		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
@@ -97,12 +104,14 @@ func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Regi
 	grpcServer := server.NewGRPCServer(confServer, logger, grpcFilter, serviceRegistrars, adminRegistrars)
 	registrar, err := server.NewRegistrar(confRegistry)
 	if err != nil {
+		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	app := newApp(logger, httpServer, grpcServer, healthServer, label, registrar)
 	return app, func() {
+		cleanup3()
 		cleanup2()
 		cleanup()
 	}, nil

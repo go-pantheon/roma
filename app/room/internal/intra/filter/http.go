@@ -25,7 +25,7 @@ func NewHttpFilter(mgr *core.Manager) *HttpFilter {
 
 func (md *HttpFilter) Server() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
-		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+		return func(ctx context.Context, req any) (reply any, err error) {
 			if !profile.IsDev() {
 				return nil, zerrors.ErrProfileIllegal
 			}

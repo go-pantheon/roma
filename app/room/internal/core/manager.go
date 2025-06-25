@@ -12,8 +12,6 @@ import (
 
 type Manager struct {
 	*life.Manager
-
-	pusher *data.PushRepo
 }
 
 func NewManager(logger log.Logger, rt *self.SelfRouteTable, roomDo *domain.RoomDomain, pusher *data.PushRepo) (*Manager, func()) {
@@ -25,8 +23,8 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, roomDo *domain.RoomD
 
 	m := &Manager{
 		Manager: lifeMgr,
-		pusher:  pusher,
 	}
+
 	return m, func() {
 		stopFunc()
 	}
@@ -64,12 +62,8 @@ func (m *Manager) RegisterOnCreatedEvent(f func(ctx Context) error) {
 	})
 }
 
-func (m *Manager) Pusher() *data.PushRepo {
-	return m.pusher
-}
-
 func (m *Manager) ExecuteEvent(ctx context.Context, oid int64, f life.EventFunc) error {
-	w, err := m.Worker(ctx, oid, NewResponser(mockResponseFunc), NewBroadcaster(m.Pusher()))
+	w, err := m.Worker(ctx, oid, NewResponser(mockResponseFunc), life.NewBroadcaster(m.Pusher()))
 	if err != nil {
 		return err
 	}
