@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-pantheon/fabrica-kit/xcontext"
-	"google.golang.org/protobuf/proto"
 )
 
 type Context interface {
@@ -14,14 +13,14 @@ type Context interface {
 	EventManageable
 	Responsive
 
-	UID() int64
-	SetUID(uid int64)
 	Now() time.Time
 	ClientIP() string
 
+	UID() int64
 	OID() int64
+
 	UnsafeObject() any
-	ShowProto() proto.Message
+	Snapshot() VersionProto
 
 	ChangedModules() (modules []ModuleKey, immediately bool)
 	Changed(modules ...ModuleKey)
@@ -57,76 +56,71 @@ func NewContext(ctx context.Context, w *Worker) Context {
 	c.changedModules = make(map[ModuleKey]struct{}, len(c.persister.ModuleKeys()))
 
 	if uid, err := xcontext.UID(ctx); err == nil {
-		c.SetUID(uid)
+		c.uid = uid
 	}
 
 	return c
 }
 
-func (w *workerContext) Now() time.Time {
-	w.Once.Do(func() {
-		w.ctime = time.Now()
-	})
-
-	return w.ctime
-}
-
-func (w *workerContext) ClientIP() string {
-	return w.clientIP
-}
-
-func (w *workerContext) SetUID(uid int64) {
-	w.uid = uid
-}
-
-func (w *workerContext) UID() int64 {
-	return w.uid
-}
-
-func (w *workerContext) OID() int64 {
-	return w.persister.ID()
-}
-
-func (w *workerContext) ShowProto() proto.Message {
-	return w.persister.Snapshot()
-}
-
-func (w *workerContext) UnsafeObject() any {
-	return w.persister.UnsafeObject()
-}
-
-func (w *workerContext) ChangedModules() (modules []ModuleKey, immediately bool) {
+func (c *workerContext) ChangedModules() (modules []ModuleKey, immediately bool) {
 	defer func() {
-		w.changedModules = make(map[ModuleKey]struct{}, len(w.persister.ModuleKeys()))
-		w.changedImmediately = false
+		c.changedModules = make(map[ModuleKey]struct{}, len(c.persister.ModuleKeys()))
+		c.changedImmediately = false
 	}()
 
-	modules = make([]ModuleKey, 0, len(w.changedModules))
-	for mod := range w.changedModules {
+	modules = make([]ModuleKey, 0, len(c.changedModules))
+
+	for mod := range c.changedModules {
 		modules = append(modules, mod)
 	}
 
-	return modules, w.changedImmediately
+	return modules, c.changedImmediately
 }
 
-func (w *workerContext) Changed(modules ...ModuleKey) {
+func (c *workerContext) Changed(modules ...ModuleKey) {
 	if len(modules) == 0 {
-		for _, mod := range w.persister.ModuleKeys() {
-			w.changedModules[mod] = struct{}{}
+		for _, mod := range c.persister.ModuleKeys() {
+			c.changedModules[mod] = struct{}{}
 		}
 
 		return
 	}
 
 	for _, mod := range modules {
-		w.changedModules[mod] = struct{}{}
+		c.changedModules[mod] = struct{}{}
 	}
 }
 
-func (w *workerContext) ChangedImmediately(modules ...ModuleKey) {
-	w.changedImmediately = true
+func (c *workerContext) ChangedImmediately(modules ...ModuleKey) {
+	c.changedImmediately = true
 
-	for _, mod := range modules {
-		w.changedModules[mod] = struct{}{}
-	}
+	c.Changed(modules...)
+}
+
+func (c *workerContext) Now() time.Time {
+	c.Once.Do(func() {
+		c.ctime = time.Now()
+	})
+
+	return c.ctime
+}
+
+func (c *workerContext) ClientIP() string {
+	return c.clientIP
+}
+
+func (c *workerContext) UID() int64 {
+	return c.uid
+}
+
+func (c *workerContext) OID() int64 {
+	return c.persister.ID()
+}
+
+func (c *workerContext) Snapshot() VersionProto {
+	return c.persister.Snapshot()
+}
+
+func (c *workerContext) UnsafeObject() any {
+	return c.persister.UnsafeObject()
 }

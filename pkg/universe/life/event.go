@@ -50,12 +50,11 @@ func (m *eventFuncMap) put(t WorkerEventType, f eventFunc) {
 	m.funcs[t] = append(m.funcs[t], f)
 }
 
-func (m *eventFuncMap) get(t WorkerEventType) ([]eventFunc, bool) {
+func (m *eventFuncMap) get(t WorkerEventType) []eventFunc {
 	m.RLock()
 	defer m.RUnlock()
 
-	fs, ok := m.funcs[t]
-	return fs, ok
+	return m.funcs[t]
 }
 
 type EventArgValue interface {

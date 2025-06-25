@@ -52,7 +52,7 @@ func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, pusher *data
 	}
 
 	m.Stoppable = xsync.NewStopper(10 * time.Second)
-	m.statisticTicker = time.NewTicker(constants.ManagerStatisticTickDuration)
+	m.statisticTicker = time.NewTicker(constants.StatisticTickDuration)
 	m.stoppedWorkerChan = make(chan string, constants.WorkerSize)
 	m.workers = NewWorkerMap()
 

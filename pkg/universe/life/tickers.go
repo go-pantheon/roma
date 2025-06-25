@@ -3,6 +3,7 @@ package life
 import (
 	"time"
 
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
 )
 
@@ -30,10 +31,12 @@ func newTickers(fs *PreparedTickFuncs) *Tickers {
 	t := &Tickers{
 		PreparedTickFuncs: fs,
 	}
-	t.workerTicker = time.NewTicker(time.Second * 10)
-	t.secondTicker = time.NewTicker(time.Second)
-	t.minuteTicker = time.NewTicker(time.Minute)
+
+	t.workerTicker = time.NewTicker(constants.WorkerRenewalTickDuration)
+	t.secondTicker = time.NewTicker(constants.WorkerSecondTickDuration)
+	t.minuteTicker = time.NewTicker(constants.WorkerMinuteTickDuration)
 	t.persistTicker = time.NewTicker(constants.WorkerPersistTickDuration)
+
 	return t
 }
 
@@ -66,14 +69,20 @@ func (tf *PreparedTickFuncs) RegisterCustomEvent(e WorkerEventType, f eventFunc)
 
 func (tf *PreparedTickFuncs) secondTick(wctx Context) (err error) {
 	for _, f := range tf.secondTickFuncs {
-		f(wctx)
+		if tickErr := f(wctx); tickErr != nil {
+			err = errors.Join(err, tickErr)
+		}
 	}
-	return
+
+	return err
 }
 
 func (tf *PreparedTickFuncs) minuteTick(wctx Context) (err error) {
 	for _, f := range tf.minuteTickFuncs {
-		f(wctx)
+		if tickErr := f(wctx); tickErr != nil {
+			err = errors.Join(err, tickErr)
+		}
 	}
-	return
+
+	return err
 }

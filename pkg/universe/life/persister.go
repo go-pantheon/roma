@@ -7,30 +7,26 @@ import (
 )
 
 type Persistent interface {
-	ID() int64
-	Version() int64
-	UnsafeObject() any
-	Snapshot() VersionProto
+	ObjectHolder
+
+	ModuleKeys() []ModuleKey
 	Lock(f func() error) error
 	Refresh(ctx context.Context) (err error)
 	PrepareToPersist(ctx context.Context, modules []ModuleKey) (VersionProto, error)
 	Persist(ctx context.Context, id int64, proto VersionProto) (err error)
 	IncVersion(ctx context.Context, id int64, newVersion int64) (err error)
 	OnStop(ctx context.Context, id int64, proto VersionProto) (err error)
-	ModuleKeys() []ModuleKey
 }
 
-type PersistData struct {
-	ID      int64
-	Version int64
-	Modules map[ModuleKey]string
+type ObjectHolder interface {
+	ID() int64
+	Version() int64
+	UnsafeObject() any
+	Snapshot() VersionProto
 }
 
 type VersionProto interface {
-	Versionable
 	proto.Message
-}
 
-type Versionable interface {
 	GetVersion() int64
 }

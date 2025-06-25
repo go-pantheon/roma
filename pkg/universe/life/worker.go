@@ -309,7 +309,7 @@ func (w *Worker) preparedEventFunc(t WorkerEventType, args ...WithArg) (f EventF
 			a(arg)
 		}
 
-		if ffs, ok := preparedEventFuncMap.get(t); ok {
+		if ffs := preparedEventFuncMap.get(t); len(ffs) > 0 {
 			f = func(wctx Context) (err error) {
 				for _, ff := range ffs {
 					if err := ff(wctx, arg); err != nil {

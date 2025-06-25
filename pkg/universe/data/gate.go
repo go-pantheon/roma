@@ -29,7 +29,7 @@ func (r *PushRepo) Push(c context.Context, uid int64, proto *servicev1.PushBody)
 		Bodies: []*servicev1.PushBody{proto},
 	}
 
-	ctx, cancel := context.WithTimeout(c, constants.AsyncGRPCTimeout)
+	ctx, cancel := context.WithTimeout(c, constants.WorkerPushTimeout)
 	defer cancel()
 
 	ctx = xcontext.SetUID(ctx, uid)
