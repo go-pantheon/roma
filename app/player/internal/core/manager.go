@@ -64,7 +64,7 @@ func (m *Manager) RegisterOnCreatedEvent(f func(ctx Context) error) {
 }
 
 func (m *Manager) ExecuteEvent(ctx context.Context, uid int64, f life.EventFunc) (err error) {
-	w, err := m.Worker(ctx, uid, NewResponser(mockResponseFunc), life.NewBroadcaster(m.Pusher()))
+	w, err := m.Worker(ctx, uid, NewResponser(mockResponseFunc))
 	if err != nil {
 		return err
 	}

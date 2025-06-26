@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/router/routetable"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
@@ -21,7 +23,7 @@ import (
 
 type Manager struct {
 	xsync.Stoppable
-	*PreparedTickFuncs
+	*BuiltinEventFuncs
 
 	log *log.Helper
 
@@ -43,15 +45,15 @@ type newPersisterFunc func(ctx context.Context, id int64, allowBorn bool) (persi
 
 func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, pusher *data.PushRepo, newContext newContextFunc, newPersister newPersisterFunc) (m *Manager, stopFunc func() error) {
 	m = &Manager{
-		PreparedTickFuncs: newPreparedTickFuncs(),
+		Stoppable:         xsync.NewStopper(constants.ManagerStopTimeout),
 		log:               log.NewHelper(log.With(logger, "module", "universe/life/manager")),
+		BuiltinEventFuncs: newBuiltinEventFuncs(),
 		appRouteTable:     rt,
 		pusher:            pusher,
 		newContext:        newContext,
 		newPersister:      newPersister,
 	}
 
-	m.Stoppable = xsync.NewStopper(10 * time.Second)
 	m.statisticTicker = time.NewTicker(constants.StatisticTickDuration)
 	m.stoppedWorkerChan = make(chan string, constants.WorkerSize)
 	m.workers = NewWorkerMap()
@@ -67,22 +69,16 @@ func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, pusher *data
 	}
 }
 
-func (m *Manager) Worker(ctx context.Context, oid int64, replier Responsive, broadcaster Broadcastable) (worker *Worker, err error) {
+func (m *Manager) Worker(ctx context.Context, oid int64, replier Responsive) (worker *Worker, err error) {
 	v, err, _ := m.group.Do(workerSingleFlightKey(oid), func() (any, error) {
 		status := OnlineStatus(xcontext.Status(ctx))
 
-		if old := m.get(ctx, oid); old != nil {
+		if old := m.workers.Get(oid); old != nil {
 			if old.canReuse(ctx, replier) {
 				return old, nil
 			}
 
-			newReferer := xcontext.GateReferer(ctx)
-			newClientIP := xcontext.ClientIP(ctx)
-
-			m.log.WithContext(ctx).Debugf("worker exists, stop it and replace by new worker. oid=%d old-referer=%s old-clientIP=%s new-referer=%s new-clientIP=%s", oid, old.Referer(), old.ClientIP(), newReferer, newClientIP)
 			old.setDisconnectErr(xerrors.ErrLogoutConflictingLogin)
-
-			m.workers.Remove(oid)
 
 			if err := old.Stop(ctx); err != nil {
 				m.log.WithContext(ctx).Errorf("worker stop failed. oid=%d", oid)
@@ -91,7 +87,7 @@ func (m *Manager) Worker(ctx context.Context, oid int64, replier Responsive, bro
 
 		allowBorn := !IsInnerStatus(status)
 
-		return m.load(ctx, oid, replier, broadcaster, allowBorn)
+		return m.load(ctx, oid, replier, NewBroadcaster(m.pusher), allowBorn)
 	})
 	if err != nil {
 		return
@@ -110,25 +106,19 @@ func workerSingleFlightKey(id int64) string {
 	return fmt.Sprintf("worker-%d", id)
 }
 
-func (m *Manager) get(_ context.Context, id int64) *Worker {
-	return m.workers.Get(id)
-}
-
 func (m *Manager) load(ctx context.Context, oid int64, replier Responsive, broadcaster Broadcastable, allowBorn bool) (*Worker, error) {
 	persister, born, err := m.newPersister(ctx, oid, allowBorn)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "allowBorn=%v status=%d", allowBorn, OnlineStatus(xcontext.Status(ctx)))
 	}
 
-	w := newWorker(ctx, m.log, m.appRouteTable, newPersistManager(m.log, persister),
-		replier, broadcaster, newTickers(m.PreparedTickFuncs),
-		m.notifyWorkerStopped, m.newContext)
-
-	// Increment version number immediately after loading to prevent other services from loading the same data simultaneously
-	// Uses version number for optimistic locking. When this worker saves data next time, the database will determine if the data is outdated through version number
-	if err = w.persistManager.IncVersion(ctx); err != nil {
+	// Increment version number of optimistic lock immediately to prevent other services from loading the same data simultaneously
+	if err = persister.IncVersion(ctx, oid, persister.Version()); err != nil {
 		return nil, err
 	}
+
+	w := newWorker(ctx, m.log, m.appRouteTable, replier, broadcaster, m.BuiltinEventFuncs,
+		newPersistManager(m.log, persister), m.notifyWorkerStopped, m.newContext)
 
 	wctx := m.newContext(ctx, w)
 
@@ -149,12 +139,9 @@ func (m *Manager) load(ctx context.Context, oid int64, replier Responsive, broad
 
 	w.start(ctx)
 
-	old := m.workers.Set(persister.ID(), w)
-	if old != nil {
-		m.log.WithContext(ctx).Errorf("worker already exists on load. id=%d", old.ID())
-
+	if old := m.workers.Set(oid, w); old != nil {
 		if err := old.Stop(ctx); err != nil {
-			m.log.WithContext(ctx).Errorf("worker stop failed. id=%d", old.ID())
+			return nil, errors.WithMessagef(err, "old worker stop failed")
 		}
 	}
 
@@ -200,7 +187,7 @@ func (m *Manager) run() error {
 				case <-m.statisticTicker.C:
 					m.statisticTick(ctx)
 				case key := <-m.stoppedWorkerChan:
-					m.removeWorker(ctx, key)
+					m.removeStoppedWorker(ctx, key)
 				}
 			}
 		})
@@ -215,27 +202,42 @@ func (m *Manager) Stop(ctx context.Context) (err error) {
 
 		m.statisticTicker.Stop()
 
+		wg := sync.WaitGroup{}
+
 		for w := range m.workers.Iter() {
-			if wStopErr := w.Val.Stop(ctx); wStopErr != nil {
-				err = errors.JoinUnsimilar(err, wStopErr)
-			}
+			wg.Add(1)
+			xsync.Go(fmt.Sprintf("life-manager-stop-worker-%d", w.Key), func() error {
+				defer wg.Done()
+
+				if wStopErr := w.Val.Stop(ctx); wStopErr != nil {
+					err = errors.JoinUnsimilar(err, wStopErr)
+				}
+
+				return nil
+			})
 		}
+
+		wg.Wait()
 
 		return err
 	})
 }
 
-func (m *Manager) statisticTick(ctx context.Context) {
+func (m *Manager) statisticTick(_ context.Context) {
+	if profile.IsProd() {
+		return
+	}
+
 	if c := m.workers.Count(); c != m.approximateOnlineCount {
 		m.approximateOnlineCount = c
 	}
 }
 
 func (m *Manager) notifyWorkerStopped(id int64, index uint64) {
-	m.stoppedWorkerChan <- buildStoppedWorkerKey(id, index)
+	m.stoppedWorkerChan <- stoppedWorkerKey(id, index)
 }
 
-func buildStoppedWorkerKey(id int64, index uint64) string {
+func stoppedWorkerKey(id int64, index uint64) string {
 	return fmt.Sprintf("%d#%d", id, index)
 }
 
@@ -258,14 +260,14 @@ func parseStoppedWorkerKey(key string) (id int64, index uint64, err error) {
 	return id, index, nil
 }
 
-func (m *Manager) removeWorker(ctx context.Context, key string) {
+func (m *Manager) removeStoppedWorker(ctx context.Context, key string) {
 	id, index, err := parseStoppedWorkerKey(key)
 	if err != nil {
 		m.log.WithContext(ctx).Errorf("life.Manager.remove failed, invalid key. key=%s", key)
 		return
 	}
 
-	w := m.get(ctx, id)
+	w := m.workers.Get(id)
 	if w == nil {
 		return
 	}

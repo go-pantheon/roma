@@ -48,6 +48,18 @@ func newUserPostgresRepo(data *postgresdb.DB, logger log.Logger, _ []life.Module
 		return nil, err
 	}
 
+	sidIndexSQL := `CREATE INDEX IF NOT EXISTS idx_sid ON "` + _tableName + `" (sid);`
+
+	if _, err := r.data.DB.Exec(ctx, sidIndexSQL); err != nil {
+		return nil, errors.Wrapf(err, "creating sid index")
+	}
+
+	versionIndexSQL := `CREATE INDEX IF NOT EXISTS idx_id_version ON "` + _tableName + `" (id, version);`
+
+	if _, err := r.data.DB.Exec(ctx, versionIndexSQL); err != nil {
+		return nil, errors.Wrapf(err, "creating version index")
+	}
+
 	return r, nil
 }
 
@@ -191,6 +203,17 @@ func (r *userPostgresRepo) IsExist(ctx context.Context, uid int64) (bool, error)
 	}
 
 	return exists, nil
+}
+
+func (r *userPostgresRepo) UpdateSID(ctx context.Context, uid int64, sid int64, version int64) error {
+	newVersion := version + 1
+	sql := `UPDATE "` + _tableName + `" SET sid = $1, version = $2 WHERE id = $3 AND version = $4;`
+
+	if _, err := r.data.DB.Exec(ctx, sql, sid, newVersion, uid, version); err != nil {
+		return errors.Wrapf(err, "updating sid for user %d", uid)
+	}
+
+	return nil
 }
 
 func (r *userPostgresRepo) IncVersion(ctx context.Context, uid int64, newVersion int64) error {

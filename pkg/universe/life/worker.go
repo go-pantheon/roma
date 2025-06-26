@@ -41,7 +41,12 @@ type Worker struct {
 	xsync.Stoppable
 	Broadcastable
 	Responsive
+	*BuiltinEventFuncs
 	*Tickers
+
+	appRouteTable    routetable.ReNewalRouteTable
+	nextRTRenewAt    time.Time
+	rtRenewFailCount int
 
 	log      *log.Helper
 	status   intrav1.OnlineStatus
@@ -51,13 +56,9 @@ type Worker struct {
 	// unique identifier for the current worker, used to distinguish between multiple instances of the same ID, one of usages is the optimistic lock for deletion from the Manager
 	index  uint64
 	events chan EventFunc
-	// different error that occurred during the disconnect for logout message, default is xsync.GroupStopping
+	// different error that occurred during the disconnect for logout message, default is xsync.ErrStopByTrigger
 	disconnectErr  atomic.Value
 	persistManager *PersistManager
-
-	appRouteTable    routetable.ReNewalRouteTable
-	nextRTRenewAt    time.Time
-	rtRenewFailCount int
 
 	notifyStoppedFunc func(userId int64, index uint64)
 	newContextFunc    newContextFunc
@@ -67,26 +68,27 @@ func newWorker(
 	ctx context.Context,
 	log *log.Helper,
 	appRouteTable routetable.ReNewalRouteTable,
-	persistManager *PersistManager,
 	replier Responsive,
 	broadcaster Broadcastable,
-	tickers *Tickers,
+	builtinEventFuncs *BuiltinEventFuncs,
+	persistManager *PersistManager,
 	notifyStoppedFunc func(uid int64, index uint64),
 	newContextFunc newContextFunc,
 ) (w *Worker) {
 	w = &Worker{
+		Stoppable:         xsync.NewStopper(constants.WorkerStopTimeout),
+		index:             globalWorkerIndex.Add(1),
 		log:               log,
 		appRouteTable:     appRouteTable,
 		Broadcastable:     broadcaster,
 		Responsive:        replier,
-		Tickers:           tickers,
-		index:             globalWorkerIndex.Add(1),
+		BuiltinEventFuncs: builtinEventFuncs,
+		Tickers:           newTickers(),
 		persistManager:    persistManager,
 		notifyStoppedFunc: notifyStoppedFunc,
 		newContextFunc:    newContextFunc,
 	}
 
-	w.Stoppable = xsync.NewStopper(10 * time.Second)
 	w.disconnectErr.Store(xsync.ErrStopByTrigger)
 	w.events = make(chan EventFunc, constants.WorkerEventSize)
 
@@ -100,8 +102,10 @@ func newWorker(
 }
 
 func (w *Worker) start(ctx context.Context) {
-	xsync.Go(fmt.Sprintf("worker-%d", w.ID()), func() error {
+	w.GoAndQuickStop(fmt.Sprintf("worker-%d", w.ID()), func() error {
 		return w.run(ctx)
+	}, func() error {
+		return w.Stop(ctx)
 	}, xerrors.IsUnlogErr)
 }
 
@@ -117,89 +121,107 @@ func (w *Worker) run(ctx context.Context) error {
 	})
 	eg.Go(func() error {
 		return xsync.Run(func() error {
-			for {
-				select {
-				case <-ctx.Done():
-					return ctx.Err()
-				case <-w.secondTicker.C:
-					if IsGateStatus(w.Status()) {
-						if err := w.EmitEvent(EventTypeSecondTick); err != nil {
-							return err
-						}
-					}
-				case <-w.minuteTicker.C:
-					if IsGateStatus(w.Status()) {
-						if err := w.EmitEvent(EventTypeMinuteTick); err != nil {
-							return err
-						}
-					}
-				case e := <-w.ConsumeEvent():
-					if err := w.ExecuteEvent(w.newContextFunc(ctx, w), e); err != nil {
-						w.log.WithContext(ctx).Errorf("worker execute event failed. %s %+v", w.LogInfo(), err)
-					}
-				case <-w.persistManager.Immediately():
-					if err := w.persistManager.PrepareToPersist(ctx); err != nil {
-						w.log.WithContext(ctx).Errorf("worker immediately prepare to persist failed. %s %+v", w.LogInfo(), err)
-					}
-				case <-w.persistTicker.C:
-					if err := w.persistManager.PrepareToPersist(ctx); err != nil {
-						w.log.WithContext(ctx).Errorf("worker ticker prepare to persist failed. %s %+v", w.LogInfo(), err)
-					}
-				}
-			}
+			return w.runEventLoop(ctx)
 		})
 	})
 	eg.Go(func() error {
 		return xsync.Run(func() error {
-			for {
-				select {
-				case <-ctx.Done():
-					return ctx.Err()
-				case msg := <-w.ConsumeTunnelResponse():
-					if err := w.ExecuteReply(msg); err != nil {
-						w.log.WithContext(ctx).Errorf("worker execute reply failed. id=%d %+v", w.ID(), err)
-					}
-				}
-			}
+			return w.runTunnelResponseLoop(ctx)
 		})
 	})
 	eg.Go(func() error {
 		return xsync.Run(func() error {
-			for {
-				select {
-				case <-ctx.Done():
-					return ctx.Err()
-				case proto := <-w.persistManager.SaveChan():
-					if err := w.persistManager.Persist(ctx, proto); err != nil {
-						if errors.Is(err, xerrors.ErrDBRecordNotAffected) {
-							return err
-						} else {
-							w.log.WithContext(ctx).Errorf("worker persist failed. id=%d %+v", w.ID(), err)
-						}
-					}
-				}
-			}
+			return w.runPersistLoop(ctx)
 		})
 	})
 	eg.Go(func() error {
 		return xsync.Run(func() error {
-			for {
-				select {
-				case <-ctx.Done():
-					return ctx.Err()
-				case <-w.workerTicker.C:
-					if err := w.workerTick(ctx); err != nil {
-						return err
-					}
-				}
-			}
+			return w.runRenewalLoop(ctx)
 		})
 	})
+
 	err := eg.Wait()
 	if err != nil {
 		w.sendLogoutMsg(ctx, err)
 	}
+
 	return err
+}
+
+func (w *Worker) runEventLoop(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-w.secondTicker.C:
+			if IsGateStatus(w.Status()) {
+				if err := w.EmitEvent(EventTypeSecondTick); err != nil {
+					return err
+				}
+			}
+		case <-w.minuteTicker.C:
+			if IsGateStatus(w.Status()) {
+				if err := w.EmitEvent(EventTypeMinuteTick); err != nil {
+					return err
+				}
+			}
+		case e := <-w.ConsumeEvent():
+			if err := w.ExecuteEvent(w.newContextFunc(ctx, w), e); err != nil {
+				w.log.WithContext(ctx).Errorf("worker execute event failed. %s %+v", w.LogInfo(), err)
+			}
+		case <-w.persistManager.Immediately():
+			if err := w.persistManager.PrepareToPersist(ctx); err != nil {
+				w.log.WithContext(ctx).Errorf("worker immediately prepare to persist failed. %s %+v", w.LogInfo(), err)
+			}
+		case <-w.persistTicker.C:
+			if err := w.persistManager.PrepareToPersist(ctx); err != nil {
+				w.log.WithContext(ctx).Errorf("worker ticker prepare to persist failed. %s %+v", w.LogInfo(), err)
+			}
+		}
+	}
+}
+
+func (w *Worker) runTunnelResponseLoop(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case msg := <-w.ConsumeTunnelResponse():
+			if err := w.ExecuteReply(msg); err != nil {
+				w.log.WithContext(ctx).Errorf("worker execute reply failed. %s %+v", w.LogInfo(), err)
+			}
+		}
+	}
+}
+
+func (w *Worker) runPersistLoop(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case proto := <-w.persistManager.SaveChan():
+			if err := w.persistManager.Persist(ctx, proto); err != nil {
+				if errors.Is(err, xerrors.ErrDBRecordNotAffected) {
+					return err
+				} else {
+					w.log.WithContext(ctx).Errorf("worker persist failed. %s %+v", w.LogInfo(), err)
+				}
+			}
+		}
+	}
+}
+
+func (w *Worker) runRenewalLoop(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-w.renewalTicker.C:
+			if err := w.renewalTick(ctx); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 func (w *Worker) setDisconnectErr(err error) {
@@ -207,14 +229,10 @@ func (w *Worker) setDisconnectErr(err error) {
 }
 
 func (w *Worker) sendLogoutMsg(_ context.Context, err error) {
-	if xerrors.IsUnlogErr(err) {
-		return
-	}
-
 	msg := &climsg.SCServerLogout{}
 
 	switch {
-	case errors.Is(err, xerrors.ErrLogoutConflictingLogin):
+	case errors.Is(err, xerrors.ErrLogoutConflictingLogin), errors.Is(err, xerrors.ErrDBRecordNotAffected):
 		msg.Code = climsg.SCServerLogout_ConflictingLogin
 	case errors.Is(err, xerrors.ErrLogoutKickOut):
 		msg.Code = climsg.SCServerLogout_AdminKickOut
@@ -250,7 +268,6 @@ func (w *Worker) canReuse(ctx context.Context, replier Responsive) bool {
 
 func (w *Worker) Stop(ctx context.Context) (err error) {
 	return w.TurnOff(func() (err error) {
-		w.log.Debugf("worker is stopping. id=%d", w.ID())
 		if w.notifyStoppedFunc != nil {
 			w.notifyStoppedFunc(w.ID(), w.Index())
 		}
@@ -258,15 +275,18 @@ func (w *Worker) Stop(ctx context.Context) (err error) {
 		w.Tickers.stop()
 
 		close(w.events)
+
 		wctx := w.newContextFunc(ctx, w)
+
 		for e := range w.ConsumeEvent() {
 			if executeErr := w.ExecuteEvent(wctx, e); executeErr != nil {
 				err = errors.Join(err, executeErr)
 			}
 		}
 
-		w.persistManager.Stop(ctx)
-		w.log.Debugf("worker stopped. %s", w.LogInfo())
+		if persistErr := w.persistManager.Stop(ctx); persistErr != nil {
+			err = errors.Join(err, persistErr)
+		}
 
 		return err
 	})
@@ -278,6 +298,7 @@ func (w *Worker) EmitEventFunc(f EventFunc) error {
 	}
 
 	w.events <- f
+
 	return nil
 }
 
@@ -286,16 +307,17 @@ func (w *Worker) EmitEvent(t WorkerEventType, args ...WithArg) error {
 		return xerrors.ErrLifeStopped
 	}
 
-	f, err := w.preparedEventFunc(t, args...)
+	f, err := w.eventFunc(t, args...)
 	if err != nil {
 		return err
 	}
 
 	w.events <- f
+
 	return nil
 }
 
-func (w *Worker) preparedEventFunc(t WorkerEventType, args ...WithArg) (f EventFunc, e error) {
+func (w *Worker) eventFunc(t WorkerEventType, args ...WithArg) (f EventFunc, e error) {
 	switch t {
 	case EventTypeSecondTick:
 		f = w.secondTick
@@ -309,23 +331,25 @@ func (w *Worker) preparedEventFunc(t WorkerEventType, args ...WithArg) (f EventF
 			a(arg)
 		}
 
-		if ffs := preparedEventFuncMap.get(t); len(ffs) > 0 {
+		if ffs := customEventFuncMap.get(t); len(ffs) > 0 {
 			f = func(wctx Context) (err error) {
 				for _, ff := range ffs {
-					if err := ff(wctx, arg); err != nil {
-						w.log.WithContext(wctx).Errorf("worker execute event failed. id=%d type=%d %+v", wctx.OID(), t, err)
+					if execErr := ff(wctx, arg); execErr != nil {
+						err = errors.Join(err, execErr)
 					}
 				}
-				return
+
+				return nil
 			}
 			return
 		}
 	}
 
 	if f == nil {
-		e = errors.Errorf("worker prepared event func not found. id=%d type=%d", w.ID(), t)
+		return nil, errors.Errorf("worker prepared event func not found. type=%d %s", t, w.LogInfo())
 	}
-	return
+
+	return f, nil
 }
 
 func (w *Worker) ConsumeEvent() <-chan EventFunc {
@@ -333,19 +357,18 @@ func (w *Worker) ConsumeEvent() <-chan EventFunc {
 }
 
 func (w *Worker) ExecuteEvent(wctx Context, f EventFunc) error {
-	e := w.persistManager.Persister().Lock(func() error {
+	return w.persistManager.Persister().Lock(func() error {
 		err := f(wctx)
 		mods, immediately := wctx.ChangedModules()
 		if len(mods) > 0 {
 			w.persistManager.Change(wctx, mods, immediately)
 		}
+		
 		return err
 	})
-
-	return e
 }
 
-func (w *Worker) workerTick(ctx context.Context) error {
+func (w *Worker) renewalTick(ctx context.Context) error {
 	if ct := time.Now(); ct.After(w.nextRTRenewAt) {
 		w.nextRTRenewAt = ct.Add(w.appRouteTable.TTL() / 2)
 

@@ -5,11 +5,11 @@ import (
 )
 
 var (
-	preparedEventFuncMap *eventFuncMap
+	customEventFuncMap *eventFuncMap
 )
 
 func init() {
-	preparedEventFuncMap = newPreparedEventMap()
+	customEventFuncMap = newCustomEventMap()
 }
 
 // WorkerEventType worker event type. Custom event types should be less than 10_000
@@ -36,7 +36,7 @@ type eventFuncMap struct {
 	funcs map[WorkerEventType][]eventFunc
 }
 
-func newPreparedEventMap() *eventFuncMap {
+func newCustomEventMap() *eventFuncMap {
 	m := &eventFuncMap{
 		funcs: make(map[WorkerEventType][]eventFunc, 32),
 	}

@@ -50,7 +50,6 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
 	registry3 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/registry"
 	service5 "github.com/go-pantheon/roma/app/player/internal/app/user/gate/service"
-	"github.com/go-pantheon/roma/app/player/internal/client"
 	"github.com/go-pantheon/roma/app/player/internal/client/self"
 	"github.com/go-pantheon/roma/app/player/internal/conf"
 	"github.com/go-pantheon/roma/app/player/internal/core"
@@ -61,10 +60,8 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/server"
 	"github.com/go-pantheon/roma/app/player/internal/server/registry"
 	service6 "github.com/go-pantheon/roma/gen/app/player/service"
-	"github.com/go-pantheon/roma/pkg/client/gate"
 	"github.com/go-pantheon/roma/pkg/data/mongodb"
 	"github.com/go-pantheon/roma/pkg/data/postgresdb"
-	"github.com/go-pantheon/roma/pkg/data/redisdb"
 	data3 "github.com/go-pantheon/roma/pkg/universe/data"
 )
 
@@ -91,22 +88,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	}
 	userCache := data2.NewUserProtoCache()
 	userDomain := domain.NewUserDomain(userRepo, logger, userCache)
-	redisdbDB := redisdb.NewRedisDB(universalClient)
-	gateRouteTable := gate.NewGateRouteTable(redisdbDB)
-	discovery, err := client.NewDiscovery(confRegistry)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	conn, err := gate.NewConn(logger, gateRouteTable, discovery)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	pushServiceClient := gate.NewClient(conn)
-	pushRepo := data3.NewPushRepo(pushServiceClient, logger)
+	pushRepo := data3.NewPushRepo(logger)
 	manager, cleanup3 := core.NewManager(logger, selfRouteTable, userDomain, pushRepo)
 	httpFilter := filter.NewHttpFilter(manager)
 	servicelessUseCase := registry.NewServicelessUseCase()

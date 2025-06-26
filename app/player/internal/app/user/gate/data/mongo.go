@@ -38,19 +38,26 @@ func NewUserMongoRepo(data *mongodb.DB, logger log.Logger) (r domain.UserRepo, e
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	_, err = coll.Indexes().CreateOne(ctx, mongo.IndexModel{
+	// create uid unique index
+	if _, err := coll.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys:    bson.D{{Key: _userIDField, Value: 1}},
 		Options: options.Index().SetUnique(true),
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, errors.Wrap(err, "create mongo uid index for user failed")
 	}
 
-	_, err = coll.Indexes().CreateOne(ctx, mongo.IndexModel{
+	// create sid index
+	if _, err := coll.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{{Key: _userSIDField, Value: 1}},
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, errors.Wrap(err, "create mongo sid index for user failed")
+	}
+
+	// create id+version index for optimistic locking
+	if _, err := coll.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: _userIDField, Value: 1}, {Key: "version", Value: 1}},
+	}); err != nil {
+		return nil, errors.Wrap(err, "create mongo version index for user failed")
 	}
 
 	return repo, nil
@@ -112,6 +119,17 @@ func (r *userMongoRepo) UpdateByID(ctx context.Context, uid int64, user *dbv1.Us
 
 func (r *userMongoRepo) IsExist(ctx context.Context, uid int64) (bool, error) {
 	return r.repo.Exists(ctx, _userIDField, uid)
+}
+
+func (r *userMongoRepo) UpdateSID(ctx context.Context, uid int64, sid int64, version int64) error {
+	newVersion := version + 1
+	update := bson.M{"$set": bson.M{"sid": sid, "version": newVersion}}
+
+	if err := r.repo.UpdateOne(ctx, _userIDField, uid, version, update); err != nil {
+		return errors.Wrapf(err, "updating sid for user %d", uid)
+	}
+
+	return nil
 }
 
 func (r *userMongoRepo) IncVersion(ctx context.Context, uid int64, newVersion int64) error {

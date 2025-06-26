@@ -58,7 +58,7 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return core.ReplyFunc(stream, p)
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc), life.NewBroadcaster(s.mgr.Pusher())); err != nil {
+	if w, err = s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc)); err != nil {
 		return err
 	}
 
@@ -120,8 +120,7 @@ func (s *TunnelService) handle(wctx core.Context, in *intrav1.TunnelRequest) err
 
 	out, err := handler.RoomHandle(wctx, s.svc, in)
 	if err != nil {
-		// only log the handle error for keep the worker running
-		s.log.WithContext(wctx).Errorf("room handle failed. uid=%d in=%d-%d obj=%d color=%d status=%d %+v", wctx.UID(), in.Mod, in.Seq, in.Obj, xcontext.Color(wctx), xcontext.Status(wctx), err)
+		return err
 	}
 
 	if out == nil {

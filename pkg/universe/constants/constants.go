@@ -25,5 +25,7 @@ const (
 )
 
 const (
-	PersistManagerStopTimeout = time.Second * 20
+	ManagerStopTimeout        = time.Second * 30
+	WorkerStopTimeout         = time.Second * 15
+	PersistManagerStopTimeout = time.Second * 10
 )

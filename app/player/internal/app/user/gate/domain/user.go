@@ -19,6 +19,7 @@ type UserRepo interface {
 	QueryByID(ctx context.Context, uid int64, p *dbv1.UserProto, mods []life.ModuleKey) error
 	UpdateByID(ctx context.Context, uid int64, user *dbv1.UserProto) error
 	IsExist(ctx context.Context, uid int64) (bool, error)
+	UpdateSID(ctx context.Context, uid int64, sid int64, version int64) error
 	IncVersion(ctx context.Context, uid int64, newVersion int64) error
 }
 
@@ -59,6 +60,10 @@ func (do *UserDomain) newDefaultUser(id int64) *userobj.User {
 
 func (do *UserDomain) Exist(ctx context.Context, uid int64) (bool, error) {
 	return do.repo.IsExist(ctx, uid)
+}
+
+func (do *UserDomain) UpdateSID(ctx context.Context, uid int64, sid int64, version int64) (err error) {
+	return do.repo.UpdateSID(ctx, uid, sid, version)
 }
 
 func (do *UserDomain) TakeUserProto(ctx context.Context, uid int64, allowCreate bool) (ret *dbv1.UserProto, newborn bool, err error) {

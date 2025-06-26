@@ -18,13 +18,14 @@ type Context interface {
 
 	UID() int64
 	OID() int64
+	SID() int64
 
 	UnsafeObject() any
 	Snapshot() VersionProto
 
-	ChangedModules() (modules []ModuleKey, immediately bool)
 	Changed(modules ...ModuleKey)
 	ChangedImmediately(modules ...ModuleKey)
+	ChangedModules() (modules []ModuleKey, immediately bool)
 }
 
 var _ Context = (*workerContext)(nil)
@@ -39,9 +40,10 @@ type workerContext struct {
 	ctime     time.Time
 	clientIP  string
 	uid       int64
+	sid       int64
 
-	changedModules     map[ModuleKey]struct{}
 	changedImmediately bool
+	changedModules     map[ModuleKey]struct{}
 }
 
 func NewContext(ctx context.Context, w *Worker) Context {
@@ -57,6 +59,10 @@ func NewContext(ctx context.Context, w *Worker) Context {
 
 	if uid, err := xcontext.UID(ctx); err == nil {
 		c.uid = uid
+	}
+
+	if sid, err := xcontext.SID(ctx); err == nil {
+		c.sid = sid
 	}
 
 	return c
@@ -115,6 +121,10 @@ func (c *workerContext) UID() int64 {
 
 func (c *workerContext) OID() int64 {
 	return c.persister.ID()
+}
+
+func (c *workerContext) SID() int64 {
+	return c.sid
 }
 
 func (c *workerContext) Snapshot() VersionProto {

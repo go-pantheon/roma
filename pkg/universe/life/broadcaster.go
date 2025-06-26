@@ -44,7 +44,8 @@ func (w *WorkerBroadcaster) Broadcast(wctx Context, mod climod.ModuleID, seq int
 		return
 	}
 
-	w.msgs <- newBroadcastMessage(true, nil, newPushBody(mod, seq, obj, bytes))
+	w.msgs <- newBroadcastMessage(true, nil, buildPushBody(mod, seq, obj, bytes))
+
 	return
 }
 
@@ -60,7 +61,7 @@ func (w *WorkerBroadcaster) Multicast(wctx Context, mod climod.ModuleID, seq int
 		return
 	}
 
-	w.msgs <- newBroadcastMessage(false, uids, newPushBody(mod, seq, obj, bytes))
+	w.msgs <- newBroadcastMessage(false, uids, buildPushBody(mod, seq, obj, bytes))
 	return
 }
 
@@ -84,6 +85,7 @@ func (w *WorkerBroadcaster) Send(msg *BroadcastMessage) error {
 			log.Errorf("push failed. uid<%d> err<%v>", uid, err)
 		}
 	}
+
 	return nil
 }
 
@@ -135,7 +137,7 @@ func putBroadcastMessage(msg *BroadcastMessage) {
 	broadcastMessagePool.Put(msg)
 }
 
-func newPushBody(mod climod.ModuleID, seq int32, obj int64, data []byte) *servicev1.PushBody {
+func buildPushBody(mod climod.ModuleID, seq int32, obj int64, data []byte) *servicev1.PushBody {
 	body := pushBodyPool.Get().(*servicev1.PushBody)
 
 	body.Mod = int32(mod)

@@ -12,27 +12,32 @@ import (
 )
 
 func TestWorkMap_Basic(t *testing.T) {
+	goroutines := 10
+	iterations := 100
+
 	m := NewWorkerMap()
-	const goroutines = 10
-	const iterations = 100
 
 	// Test Set and Get concurrently
 	t.Run("Set and Get", func(t *testing.T) {
 		var wg sync.WaitGroup
 		wg.Add(goroutines)
-		for i := 0; i < goroutines; i++ {
+
+		for i := range goroutines {
 			go func(base int) {
 				defer wg.Done()
-				for j := 0; j < iterations; j++ {
+
+				for j := range iterations {
 					key := int64(base*iterations + j)
 					referer := fmt.Sprintf("referer-%d", key)
 					m.Set(key, &Worker{referer: referer})
+
 					val := m.Get(key)
 					require.NotNil(t, val)
 					assert.Equal(t, val.Referer(), referer)
 				}
 			}(i)
 		}
+
 		wg.Wait()
 	})
 
@@ -40,66 +45,78 @@ func TestWorkMap_Basic(t *testing.T) {
 	t.Run("Remove", func(t *testing.T) {
 		var wg sync.WaitGroup
 		wg.Add(goroutines)
-		for i := 0; i < goroutines; i++ {
+
+		for i := range goroutines {
 			go func(base int) {
 				defer wg.Done()
-				for j := 0; j < iterations; j++ {
+
+				for j := range iterations {
 					key := int64(base*iterations + j)
 					m.Remove(key)
 					assert.Nil(t, m.Get(key))
 				}
 			}(i)
 		}
+
 		wg.Wait()
 	})
 }
 
 func TestWorkMap_Concurrent(t *testing.T) {
-	m := NewWorkerMap()
 	count := 1000
+	m := NewWorkerMap()
+
 	var wg sync.WaitGroup
 
 	// Concurrent Set
 	t.Run("Concurrent Set", func(t *testing.T) {
 		wg.Add(count)
-		for i := 0; i < count; i++ {
+
+		for i := range count {
 			go func(i int64) {
 				defer wg.Done()
 				m.Set(i, &Worker{referer: fmt.Sprintf("referer-%d", i)})
 			}(int64(i))
 		}
-		wg.Wait()
 
+		wg.Wait()
 		assert.Equal(t, m.Count(), count)
 	})
 
 	// Concurrent Get
 	t.Run("Concurrent Get", func(t *testing.T) {
 		wg.Add(count)
-		for i := 0; i < count; i++ {
+
+		for i := range count {
 			go func(i int64) {
 				defer wg.Done()
+
 				val := m.Get(i)
+
 				require.NotNil(t, val)
 				assert.Equal(t, val.Referer(), fmt.Sprintf("referer-%d", i))
 			}(int64(i))
 		}
+
 		wg.Wait()
 	})
 }
 
 func TestWorkMap_BatchOperations(t *testing.T) {
+	goroutines := 10
+	batchSize := 100
+
 	m := NewWorkerMap()
-	const goroutines = 10
-	const batchSize = 100
 
 	t.Run("Set", func(t *testing.T) {
 		var wg sync.WaitGroup
 		wg.Add(goroutines)
-		for i := 0; i < goroutines; i++ {
+
+		for i := range goroutines {
 			go func(base int) {
 				defer wg.Done()
-				for j := 0; j < batchSize; j++ {
+
+				for j := range batchSize {
 					m.Set(int64(base*batchSize+j), &Worker{referer: fmt.Sprintf("referer-%d", int64(base*batchSize+j))})
 				}
 			}(i)
@@ -111,27 +128,32 @@ func TestWorkMap_BatchOperations(t *testing.T) {
 	t.Run("Get", func(t *testing.T) {
 		var wg sync.WaitGroup
 		wg.Add(goroutines)
-		for i := 0; i < goroutines; i++ {
+
+		for i := range goroutines {
 			go func(base int) {
 				defer wg.Done()
-				for j := 0; j < batchSize; j++ {
+
+				for j := range batchSize {
 					val := m.Get(int64(base*batchSize + j))
 					require.NotNil(t, val)
 					assert.Equal(t, val.Referer(), fmt.Sprintf("referer-%d", int64(base*batchSize+j)))
 				}
 			}(i)
 		}
+
 		wg.Wait()
 	})
 
 	t.Run("Remove", func(t *testing.T) {
 		var wg sync.WaitGroup
 		wg.Add(goroutines)
-		for i := 0; i < goroutines; i++ {
+
+		for i := range goroutines {
 			go func(base int) {
 				defer wg.Done()
 				keys := make([]int64, batchSize)
-				for j := 0; j < batchSize; j++ {
+
+				for j := range batchSize {
 					keys[j] = int64(base*batchSize + j)
 				}
 				for _, k := range keys {
@@ -140,6 +162,7 @@ func TestWorkMap_BatchOperations(t *testing.T) {
 				}
 			}(i)
 		}
+
 		wg.Wait()
 	})
 }
@@ -148,6 +171,7 @@ func TestWorkMap_BatchOperations(t *testing.T) {
 
 func BenchmarkWorkMap_Set(b *testing.B) {
 	m := NewWorkerMap()
+
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			m.Set(rand.Int63(), &Worker{referer: fmt.Sprintf("referer-%d", rand.Int63())})
@@ -157,7 +181,8 @@ func BenchmarkWorkMap_Set(b *testing.B) {
 
 func BenchmarkWorkMap_Get(b *testing.B) {
 	m := NewWorkerMap()
-	for i := 0; i < 1000; i++ {
+
+	for i := range 1000 {
 		m.Set(int64(i), &Worker{referer: fmt.Sprintf("referer-%d", i)})
 	}
 
@@ -175,8 +200,9 @@ func BenchmarkWorkMap_HeavyLoad(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			for i := 0; i < numCPU; i++ {
+			for range numCPU {
 				key := rand.Int63()
+
 				switch rand.Intn(3) {
 				case 0:
 					m.Set(key, &Worker{referer: fmt.Sprintf("referer-%d", key)})
@@ -197,6 +223,7 @@ func BenchmarkWorkMap_DifferentShardSizes(b *testing.B) {
 	for _, size := range sizes {
 		b.Run(fmt.Sprintf("ShardSize_%d", size), func(b *testing.B) {
 			m := NewWorkerMap(WithShardCount(size))
+
 			b.RunParallel(func(pb *testing.PB) {
 				for pb.Next() {
 					key := rand.Int63()

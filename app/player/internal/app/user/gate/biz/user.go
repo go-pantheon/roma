@@ -46,11 +46,19 @@ func NewUserUseCase(mgr *core.Manager, do *domain.UserDomain, storageDo *storage
 func (uc *UserUseCase) onCreated(ctx core.Context) error {
 	ctime := ctx.Now()
 
-	ctx.User().Basic().CreatedAt = ctime
-	ctx.User().Status().LoginAt = ctime
-	ctx.User().Status().LatestOnlineAt = ctime
+	user := ctx.User()
+
+	user.Basic().CreatedAt = ctime
+	user.Status().LoginAt = ctime
+	user.Status().LatestOnlineAt = ctime
 
 	ctx.Changed(object.ModuleKey, statusobj.ModuleKey)
+
+	user.SID = ctx.SID()
+
+	if err := uc.do.UpdateSID(ctx, user.ID, user.SID, user.Version); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -53,7 +53,7 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return core.ReplyFunc(stream, p)
 	}
 
-	w, err := s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc), life.NewBroadcaster(s.mgr.Pusher()))
+	w, err := s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc))
 	if err != nil {
 		return err
 	}
@@ -115,8 +115,7 @@ func (s *TunnelService) handle(wctx core.Context, in *intrav1.TunnelRequest) err
 
 	out, err := handler.PlayerHandle(wctx, s.svc, in)
 	if err != nil {
-		// only log the handle error for keep the worker running
-		s.log.WithContext(wctx).Errorf("player handle failed. uid=%d in=%d seq=<%d-%d> obj=%d color=%d status=%d %+v", wctx.UID(), in.Index, in.Mod, in.Seq, in.Obj, xcontext.Color(wctx), xcontext.Status(wctx), err)
+		return err
 	}
 
 	if out == nil {
