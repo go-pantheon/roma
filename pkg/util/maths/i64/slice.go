@@ -25,8 +25,10 @@ func IsElementRepeat(array []int64) bool {
 		if _, ok := m[a]; ok {
 			return true
 		}
+
 		m[a] = _emptyStruct
 	}
+
 	return false
 }
 
@@ -36,6 +38,7 @@ func Index(array []int64, v int64) int {
 			return i
 		}
 	}
+
 	return -1
 }
 
@@ -46,6 +49,7 @@ func Copy(a []int64) []int64 {
 
 	out := make([]int64, len(a))
 	copy(out, a)
+
 	return out
 }
 
@@ -53,8 +57,10 @@ func CopyMap(a map[int64]int64) map[int64]int64 {
 	if a == nil {
 		return make(map[int64]int64, 0)
 	}
+
 	out := make(map[int64]int64, len(a))
 	maps.Copy(out, a)
+
 	return out
 }
 
@@ -66,12 +72,14 @@ func Rand(a []int64, count int64) []int64 {
 
 	r := make([]int64, 0, int(count)+len(a))
 	b := Copy(a)
+
 	sorts.I64Mix(b)
 
 	c := CeilDivide(count, int64(len(b)))
-	for i := int64(0); i < c; i++ {
+	for range c {
 		r = append(r, b...)
 	}
+
 	return r[:count]
 }
 
@@ -81,6 +89,7 @@ func Cycle(i int64, array []int64) (int64, error) {
 	if l <= 0 {
 		return 0, errors.New("i cannot be less than 0")
 	}
+
 	if i < 0 {
 		return 0, errors.New("array cannot be empty")
 	}
@@ -89,8 +98,7 @@ func Cycle(i int64, array []int64) (int64, error) {
 		return array[0], nil
 	}
 
-	b := i % l
-	return array[b], nil
+	return array[i%l], nil
 }
 
 // ToKVMap convert the given slice to a kv map. The length of the slice must be an even number
@@ -103,6 +111,7 @@ func ToKVMap(s []int64) (map[int64]int64, error) {
 	for i := 0; i < len(s); i += 2 {
 		r[s[i]] += s[i+1] // +=, prevent the same key from appearing
 	}
+
 	return r, nil
 }
 
@@ -111,9 +120,11 @@ func F64ArraysToI64Arrays(f64Arrays [][]float64) [][]int64 {
 
 	for _, f64Arr := range f64Arrays {
 		i64Arr := make([]int64, 0, len(f64Arr))
+
 		for _, f64 := range f64Arr {
 			i64Arr = append(i64Arr, int64(f64))
 		}
+
 		result = append(result, i64Arr)
 	}
 
@@ -128,12 +139,15 @@ func Value(array []int64, index int) (int64, error) {
 	if array == nil {
 		return 0, errors.New("array is nil")
 	}
+
 	if len(array) == 0 {
 		return 0, errors.New("array is empty")
 	}
+
 	if index >= len(array) {
 		return 0, errors.New("index out of range")
 	}
+
 	return array[index], nil
 }
 
@@ -141,12 +155,15 @@ func CheckSize(array []int64, size int) error {
 	if array == nil {
 		return errors.New("array is nil")
 	}
+
 	if len(array) == 0 {
 		return errors.New("array is empty")
 	}
+
 	if size > len(array) {
 		return errors.New("array size not enough")
 	}
+
 	return nil
 }
 
@@ -158,17 +175,21 @@ func DelElement(array []int64, delId int64) []int64 {
 			j++
 		}
 	}
+
 	return array[:j]
 }
 
 func GetNotZeroCount(array []int64) int64 {
 	var count int64
+
 	for _, a := range array {
 		if a == 0 {
 			continue
 		}
+
 		count++
 	}
+
 	return count
 }
 
@@ -188,5 +209,6 @@ func putMap(m map[int64]struct{}) {
 	for k := range m {
 		delete(m, k)
 	}
+
 	_pool.Put(m)
 }

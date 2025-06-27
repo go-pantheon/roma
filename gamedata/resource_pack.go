@@ -10,6 +10,7 @@ func (d *ResourcePackData) Max() uint64 {
 	if d.ResourcePackDataGen.Max == 0 {
 		return DefaultMaxAmount
 	}
+
 	return u64.Min(d.ResourcePackDataGen.Max, DefaultMaxAmount)
 }
 
@@ -42,5 +43,6 @@ func (d *ResourcePackData) Rand() *ItemPrizes {
 			}
 		}
 	}
+
 	return ret
 }

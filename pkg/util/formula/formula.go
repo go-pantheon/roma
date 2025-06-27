@@ -24,5 +24,6 @@ func replace(f string, params map[string]float64) (ret string) {
 	for k, v := range params {
 		ret = strings.ReplaceAll(f, k, strconv.FormatFloat(v, 'f', 4, 64))
 	}
-	return
+
+	return ret
 }

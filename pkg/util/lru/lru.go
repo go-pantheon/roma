@@ -33,7 +33,7 @@ func WithTTL(ttl time.Duration) LRUOption {
 	}
 }
 
-func 	WithOnRemove(onRemove func(key int64, value proto.Message)) LRUOption {
+func WithOnRemove(onRemove func(key int64, value proto.Message)) LRUOption {
 	return func(l *LRU) {
 		l.onRemove = onRemove
 	}
@@ -53,6 +53,7 @@ func NewLRU(opts ...LRUOption) *LRU {
 		ttl:      time.Minute,
 		ll:       list.New(),
 	}
+
 	for _, opt := range opts {
 		opt(lru)
 	}
@@ -60,11 +61,13 @@ func NewLRU(opts ...LRUOption) *LRU {
 	if lru.capacity <= 0 {
 		lru.capacity = 5000
 	}
+
 	if lru.ttl <= 0 {
 		lru.ttl = time.Minute
 	}
 
 	lru.cache = make(map[int64]*list.Element, lru.capacity)
+
 	return lru
 }
 
@@ -77,12 +80,15 @@ func (l *LRU) Get(key int64, ctime time.Time) (proto.Message, bool) {
 		if ele.Value.(*entry).exp.Before(ctime) {
 			l.ll.Remove(ele)
 			delete(l.cache, key)
+
 			return nil, false
 		}
 
 		l.ll.MoveToFront(ele)
+
 		return ele.Value.(*entry).value, true
 	}
+
 	return nil, false
 }
 
@@ -93,17 +99,20 @@ func (l *LRU) Put(key int64, value proto.Message, ctime time.Time) {
 
 	if ele, ok := l.cache[key]; ok {
 		l.ll.MoveToFront(ele)
+
 		oldValue := ele.Value.(*entry).value
+
 		ele.Value.(*entry).value = value
 		ele.Value.(*entry).exp = ctime.Add(l.ttl)
+
 		if l.onRemove != nil {
 			l.onRemove(key, oldValue)
 		}
+
 		return
 	}
 
-	ele := l.ll.PushFront(&entry{key: key, value: value, exp: ctime.Add(l.ttl)})
-	l.cache[key] = ele
+	l.cache[key] = l.ll.PushFront(&entry{key: key, value: value, exp: ctime.Add(l.ttl)})
 
 	if l.ll.Len() > l.capacity {
 		l.removeOldest()
@@ -115,8 +124,10 @@ func (l *LRU) removeOldest() {
 	ele := l.ll.Back()
 	if ele != nil {
 		kv := ele.Value.(*entry)
+
 		l.ll.Remove(ele)
 		delete(l.cache, kv.key)
+
 		if l.onRemove != nil {
 			l.onRemove(kv.key, kv.value)
 		}
@@ -137,6 +148,7 @@ func (l *LRU) Remove(key int64) {
 func (l *LRU) Len() int {
 	l.RLock()
 	defer l.RUnlock()
+
 	return l.ll.Len()
 }
 
@@ -144,6 +156,7 @@ func (l *LRU) Len() int {
 func (l *LRU) Clear() {
 	l.Lock()
 	defer l.Unlock()
+
 	l.ll = list.New()
 	l.cache = make(map[int64]*list.Element)
 }

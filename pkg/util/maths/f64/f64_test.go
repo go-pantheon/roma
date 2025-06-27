@@ -24,6 +24,7 @@ func TestMax(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Max(tt.x, tt.y)
+
 			if math.IsNaN(tt.expected) {
 				assert.True(t, math.IsNaN(got))
 			} else {
@@ -53,6 +54,7 @@ func TestMin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Min(tt.x, tt.y)
+
 			if math.IsNaN(tt.expected) {
 				assert.True(t, math.IsNaN(got))
 			} else {
@@ -85,6 +87,7 @@ func TestReduce(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Reduce(tt.x, tt.y)
+
 			if math.IsNaN(tt.expected) {
 				assert.True(t, math.IsNaN(got))
 			} else {
@@ -120,6 +123,7 @@ func TestAdd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Add(tt.x, tt.y)
+
 			if math.IsNaN(got) {
 				assert.True(t, math.IsNaN(tt.expected))
 			} else if got != tt.expected {

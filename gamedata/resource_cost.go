@@ -53,10 +53,12 @@ func (c *Costs) CloneWith(others ...*Costs) *Costs {
 		if other == nil {
 			continue
 		}
+
 		for _, itemCost := range other.items {
 			if itemCost == nil || itemCost.itemData == nil || itemCost.amount == 0 {
 				continue
 			}
+
 			if _, ok := items[itemCost.itemData.ID]; ok {
 				items[itemCost.itemData.ID].amount += itemCost.amount
 			} else {
@@ -68,6 +70,7 @@ func (c *Costs) CloneWith(others ...*Costs) *Costs {
 	ret := &Costs{
 		items: make([]*ItemCost, 0, len(items)),
 	}
+
 	for _, itemCost := range items {
 		ret.items = append(ret.items, itemCost)
 	}
@@ -106,6 +109,7 @@ func TryNewItemCost(itemId int64, amount uint64) (*ItemCost, error) {
 	if itemData == nil {
 		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", itemId)
 	}
+	
 	return NewItemCost(itemData, amount), nil
 }
 

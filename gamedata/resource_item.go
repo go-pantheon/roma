@@ -36,5 +36,6 @@ func (d *ResourceItemData) Max() uint64 {
 	if d.ResourceItemDataGen.Max == 0 {
 		return DefaultMaxAmount
 	}
+
 	return u64.Min(d.ResourceItemDataGen.Max, DefaultMaxAmount)
 }

@@ -12,9 +12,11 @@ func Max(x, y float64) float64 {
 	if math.IsNaN(x) || math.IsNaN(y) {
 		return math.NaN()
 	}
+
 	if x > y {
 		return x
 	}
+
 	return y
 }
 
@@ -27,9 +29,11 @@ func Min(x, y float64) float64 {
 	if math.IsNaN(x) || math.IsNaN(y) {
 		return math.NaN()
 	}
+
 	if x < y {
 		return x
 	}
+
 	return y
 }
 
@@ -43,6 +47,7 @@ func Reduce(x, y float64) float64 {
 	if math.IsNaN(x) || math.IsNaN(y) {
 		return math.NaN()
 	}
+
 	if x > y {
 		result := x - y
 		// minimum denormalized float64
@@ -51,6 +56,7 @@ func Reduce(x, y float64) float64 {
 		}
 		return result
 	}
+
 	return 0
 }
 
@@ -65,14 +71,17 @@ func Add(x, y float64) float64 {
 	if math.IsNaN(x) || math.IsNaN(y) {
 		return math.NaN()
 	}
+
 	// Handle opposite infinity cases first
 	if (math.IsInf(x, 1) && math.IsInf(y, -1)) || (math.IsInf(x, -1) && math.IsInf(y, 1)) {
 		return math.NaN()
 	}
+
 	// Handle same infinity cases
 	if math.IsInf(x, 1) || math.IsInf(y, 1) {
 		return math.Inf(1)
 	}
+
 	if math.IsInf(x, -1) || math.IsInf(y, -1) {
 		return math.Inf(-1)
 	}
@@ -83,6 +92,7 @@ func Add(x, y float64) float64 {
 	if math.IsInf(sum, 1) {
 		return math.MaxFloat64
 	}
+
 	if math.IsInf(sum, -1) {
 		return -math.MaxFloat64
 	}
@@ -91,8 +101,10 @@ func Add(x, y float64) float64 {
 	if sum > math.MaxFloat64 {
 		return math.MaxFloat64
 	}
+
 	if sum < -math.MaxFloat64 {
 		return -math.MaxFloat64
 	}
+
 	return sum
 }

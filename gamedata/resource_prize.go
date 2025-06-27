@@ -41,6 +41,7 @@ func (p *Prizes) Walk(itemFunc func(itemPrize *ItemPrize) (isContinue bool), pac
 			break
 		}
 	}
+
 	for _, packPrize := range p.packs.packs {
 		if !packFunc(packPrize) {
 			break

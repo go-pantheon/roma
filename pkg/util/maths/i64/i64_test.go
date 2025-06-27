@@ -102,6 +102,7 @@ func TestRandom(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Random(tt.v)
+
 			if tt.v == 0 {
 				assert.Equal(t, int64(0), got)
 			} else {
@@ -260,73 +261,97 @@ func TestToI64(t *testing.T) {
 
 // Benchmark tests
 func BenchmarkMax(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Max(int64(i), int64(i+1))
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = Max(int64(b.N), int64(b.N+1))
+		}
+	})
 }
 
 func BenchmarkMin(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Min(int64(i), int64(i+1))
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = Min(int64(b.N), int64(b.N+1))
+		}
+	})
 }
 
 func BenchmarkReduce(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Reduce(int64(i+1), int64(i))
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = Reduce(int64(b.N+1), int64(b.N))
+		}
+	})
 }
 
 func BenchmarkAdd(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Add(int64(i), int64(i))
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = Add(int64(b.N), int64(b.N))
+		}
+	})
 }
 
 func BenchmarkRandom(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Random(1000)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = Random(1000)
+		}
+	})
 }
 
 func BenchmarkDivide2f64(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Divide2f64(1000, 10)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = Divide2f64(1000, 10)
+		}
+	})
 }
 
 func BenchmarkF64WithDigits(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		F64WithDigits(3.14159, 2)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = F64WithDigits(3.14159, 2)
+		}
+	})
 }
 
 func BenchmarkPow(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Pow(2, 10)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = Pow(2, 10)
+		}
+	})
 }
 
 func BenchmarkExp(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Exp(5)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = Exp(5)
+		}
+	})
 }
 
 func BenchmarkCeilDivide(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		CeilDivide(1000, 3)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = CeilDivide(1000, 3)
+		}
+	})
 }
 
 func BenchmarkToI32(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		ToI32(int64(i))
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_ = ToI32(int64(b.N))
+		}
+	})
 }
 
 func BenchmarkToI64(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		ToI64("12345")
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = ToI64("12345")
+		}
+	})
 }
