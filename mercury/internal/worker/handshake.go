@@ -1,44 +1,91 @@
 package worker
 
 import (
-	"encoding/base64"
+	"context"
 	"time"
 
+	"github.com/go-pantheon/fabrica-net/xnet"
+	"github.com/go-pantheon/fabrica-util/security/ecdh"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
 	intrav1 "github.com/go-pantheon/roma/gen/api/server/gate/intra/v1"
-	"github.com/go-pantheon/roma/mercury/internal/base"
-	"github.com/go-pantheon/roma/mercury/internal/base/security"
+	"github.com/go-pantheon/roma/mercury/internal/core"
+	"github.com/go-pantheon/roma/mercury/internal/core/security"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 )
 
-func (w *Worker) Handshake(ctx *base.Context) error {
-	cs, err := w.packHandshakeCS(ctx)
-	if err != nil {
-		return err
-	}
-	if err = w.tcpCli.Send(cs); err != nil {
-		return err
+func (w *Worker) Auth(ctx context.Context, pack xnet.Pack) (xnet.Session, error) {
+	req := &clipkt.Packet{}
+	if err := proto.Unmarshal(pack, req); err != nil {
+		return nil, errors.Wrap(err, "unmarshal packet failed")
 	}
 
-	timeout := time.NewTimer(5 * time.Second)
-	select {
-	case <-timeout.C:
-		timeout.Stop()
-		return errors.Errorf("worker-%d handshake timeout", w.UID())
-	default:
-		sc := <-w.tcpCli.Receive()
-		return w.unpackHandshakeSC(ctx, sc)
+	sc := &climsg.SCHandshake{}
+	if err := proto.Unmarshal(req.Data, sc); err != nil {
+		return nil, errors.Wrap(err, "unmarshal handshake failed")
 	}
+
+	if sc.Pub == nil || sc.Sign == nil {
+		return nil, errors.Errorf("handshake packet is invalid")
+	}
+
+	if err := security.VerifyECDHSvrPubKey(sc.Pub, sc.Sign); err != nil {
+		return nil, err
+	}
+
+	now := time.Now().Unix()
+	if sc.Timestamp < now-5 || sc.Timestamp > now+5 {
+		return nil, errors.Errorf("handshake packet is expired")
+	}
+
+	svrPubBytes, err := ecdh.ParseKey(sc.Pub)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		ecdhInfo xnet.ECDHable
+		cryptor  xnet.Cryptor
+	)
+
+	if core.Unencrypted() {
+		ecdhInfo = xnet.NewUnECDH()
+		cryptor = xnet.NewUnCryptor()
+	} else {
+		ecdhInfo, err = xnet.NewECDHInfo(w.hsInfo.cliPriv, svrPubBytes)
+		if err != nil {
+			return nil, err
+		}
+
+		cryptor, err = xnet.NewCryptor(ecdhInfo.SharedKey())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return xnet.NewSession(w.userId, core.Color(), int64(intrav1.OnlineStatus_ONLINE_STATUS_GATE),
+		xnet.WithEncryptor(cryptor),
+		xnet.WithECDH(ecdhInfo),
+		xnet.WithStartTime(sc.Timestamp),
+		xnet.WithCSIndex(sc.StartIndex-1),
+	), nil
 }
 
-func (w *Worker) packHandshakeCS(ctx *base.Context) (result []byte, err error) {
+func (w *Worker) handshakePack(ctx *core.Context, token string, cliPub []byte) (ret xnet.Pack, err error) {
+	cliPubSign, err := security.SignECDHCliPubKey(cliPub[:])
+	if err != nil {
+		return nil, err
+	}
+
 	cs := &climsg.CSHandshake{
-		Token: w.Token,
-		Pub:   security.ClientPubKey,
+		Token:     token,
+		Pub:       cliPub[:],
+		Sign:      cliPubSign,
+		ServerId:  1,
+		Timestamp: time.Now().Unix(),
 	}
 
 	data, err := proto.Marshal(cs)
@@ -54,59 +101,49 @@ func (w *Worker) packHandshakeCS(ctx *base.Context) (result []byte, err error) {
 		Data:  data,
 	}
 
-	if result, err = proto.Marshal(req); err != nil {
+	if ret, err = proto.Marshal(req); err != nil {
 		err = errors.Wrap(err, "proto marshal failed")
 		return
 	}
-	if result, err = security.EncryptCSHandshake(result); err != nil {
-		err = errors.Wrap(err, "encrypt handshake packet failed")
-		return
-	}
 
-	w.log.WithContext(ctx).Infof("send handshake. len=%d token=%s", len(result), cs.Token)
-	return result, nil
+	w.log.WithContext(ctx).Infof("send handshake. len=%d token=%s", len(ret), cs.Token)
+	return ret, nil
 }
 
-func (w *Worker) unpackHandshakeSC(ctx *base.Context, bytes []byte) (err error) {
-	org, err := security.DecryptSCHandshake(bytes)
+type HandshakeInfo struct {
+	token   string
+	cliPub  [32]byte
+	cliPriv [32]byte
+}
+
+func newHandshakeInfo(userId int64) (*HandshakeInfo, error) {
+	token, err := genToken(userId)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	reply := &clipkt.Packet{}
-	if err = proto.Unmarshal(org, reply); err != nil {
-		return errors.Wrapf(err, "Packet unmarshal failed")
+	cliPriv, cliPub, err := ecdh.GenKeyPair()
+	if err != nil {
+		return nil, err
 	}
 
-	if reply.Mod != int32(climod.ModuleID_System) || reply.Seq != int32(cliseq.SystemSeq_Handshake) {
-		return errors.Errorf("not handshake msg. mod=%d seq=%d", reply.Mod, reply.Seq)
-	}
-
-	sc := &climsg.SCHandshake{}
-	if err = proto.Unmarshal(reply.Data, sc); err != nil {
-		return errors.Wrapf(err, "SCHandshake unmarshal failed")
-	}
-
-	if err = w.crypto.InitProtoAES(sc.Pub); err != nil {
-		return
-	}
-
-	w.log.WithContext(ctx).Debugf("receive handshake. len=%d key=%s startIndex=%d", len(bytes), base64.StdEncoding.EncodeToString(sc.Pub), sc.StartIndex)
-
-	ctx.SendIndex = sc.StartIndex
-	return nil
+	return &HandshakeInfo{
+		token:   token,
+		cliPub:  cliPub,
+		cliPriv: cliPriv,
+	}, nil
 }
 
 func genToken(id int64) (string, error) {
 	auth := &intrav1.AuthToken{
 		AccountId:   id,
 		Timeout:     time.Now().Add(time.Hour).Unix(),
-		Unencrypted: base.Unencrypted(),
-		Color:       base.Color(),
+		Unencrypted: core.Unencrypted(),
+		Color:       core.Color(),
 		Status:      intrav1.OnlineStatus_ONLINE_STATUS_GATE,
 	}
 
-	if base.App().StatusAdmin {
+	if core.AppConf().StatusAdmin {
 		auth.Status = intrav1.OnlineStatus_ONLINE_STATUS_ADMIN
 	}
 
@@ -115,9 +152,5 @@ func genToken(id int64) (string, error) {
 		return "", errors.Wrapf(err, "AuthToken marshal failed")
 	}
 
-	token, err := security.EncryptToken(bytes)
-	if err != nil {
-		return "", errors.Wrapf(err, "AuthToken encrypt failed")
-	}
-	return token, nil
+	return security.EncryptAccountToken(bytes)
 }

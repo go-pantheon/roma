@@ -114,7 +114,7 @@ mercury-build:
 # Start mercury client
 mercury-start:
 	cd mercury && echo "start: mercury" \
-	  && nohup bin/mercury/client -conf=configs -gamedata gen/gamedata/json > bin/mercury/debug.log &
+	  && nohup bin/mercury/client -conf=configs -gamedata ../gen/gamedata/json > bin/mercury/debug.log &
 
 .PHONY: mercury-stop
 # Kill mercury process

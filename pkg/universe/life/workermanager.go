@@ -206,20 +206,17 @@ func (m *Manager) Stop(ctx context.Context) (err error) {
 
 		for w := range m.workers.Iter() {
 			wg.Add(1)
+
 			xsync.Go(fmt.Sprintf("life-manager-stop-worker-%d", w.Key), func() error {
 				defer wg.Done()
 
-				if wStopErr := w.Val.Stop(ctx); wStopErr != nil {
-					err = errors.JoinUnsimilar(err, wStopErr)
-				}
-
-				return nil
+				return w.Val.Stop(ctx)
 			})
 		}
 
 		wg.Wait()
 
-		return err
+		return nil
 	})
 }
 

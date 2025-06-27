@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func DontLog(err error) bool {
+func UnlogFilter(err error) bool {
 	return errors.Is(err, xsync.ErrStopByTrigger) || IsConnectionError(err) || IsContextError(err) || xerrors.IsLogoutError(err)
 }
 

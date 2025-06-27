@@ -2,7 +2,7 @@ package user
 
 import (
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
-	"github.com/go-pantheon/roma/mercury/internal/base"
+	"github.com/go-pantheon/roma/mercury/internal/core"
 	"github.com/go-pantheon/roma/mercury/internal/job"
 	"github.com/go-pantheon/roma/mercury/internal/task/user"
 	"github.com/pkg/errors"
@@ -19,17 +19,15 @@ func NewLoginJob() *job.Job {
 	return j
 }
 
-func assertLogin(ctx *base.Context, cs, sc proto.Message) (done bool, err error) {
+func assertLogin(ctx *core.Context, cs, sc proto.Message) (done bool, err error) {
 	p, ok := sc.(*climsg.SCLogin)
 	if !ok {
-		return
+		return false, errors.New("invalid sc message")
 	}
 
 	if p.Code != 1 {
-		err = errors.Errorf("SCLogin failed. code=%d", p.Code)
-		return
+		return false, errors.Errorf("SCLogin failed. code=%d", p.Code)
 	}
 
-	done = true
-	return
+	return done, nil
 }

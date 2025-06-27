@@ -257,11 +257,12 @@ func (x *Gate) GetAddr() []string {
 type App struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	FirstUid          int64                  `protobuf:"varint,1,opt,name=first_uid,json=firstUid,proto3" json:"first_uid,omitempty"`
-	WorkerCount       int64                  `protobuf:"varint,2,opt,name=worker_count,json=workerCount,proto3" json:"worker_count,omitempty"`
-	LoginInterval     *durationpb.Duration   `protobuf:"bytes,3,opt,name=login_interval,json=loginInterval,proto3" json:"login_interval,omitempty"`
-	StatusAdmin       bool                   `protobuf:"varint,4,opt,name=status_admin,json=statusAdmin,proto3" json:"status_admin,omitempty"`
-	HeartbeatInterval *durationpb.Duration   `protobuf:"bytes,5,opt,name=heartbeat_interval,json=heartbeatInterval,proto3" json:"heartbeat_interval,omitempty"`
-	WorkMinInterval   *durationpb.Duration   `protobuf:"bytes,8,opt,name=work_min_interval,json=workMinInterval,proto3" json:"work_min_interval,omitempty"`
+	ServerId          int64                  `protobuf:"varint,2,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+	WorkerCount       int64                  `protobuf:"varint,3,opt,name=worker_count,json=workerCount,proto3" json:"worker_count,omitempty"`
+	LoginInterval     *durationpb.Duration   `protobuf:"bytes,4,opt,name=login_interval,json=loginInterval,proto3" json:"login_interval,omitempty"`
+	StatusAdmin       bool                   `protobuf:"varint,5,opt,name=status_admin,json=statusAdmin,proto3" json:"status_admin,omitempty"`
+	HeartbeatInterval *durationpb.Duration   `protobuf:"bytes,6,opt,name=heartbeat_interval,json=heartbeatInterval,proto3" json:"heartbeat_interval,omitempty"`
+	WorkMinInterval   *durationpb.Duration   `protobuf:"bytes,7,opt,name=work_min_interval,json=workMinInterval,proto3" json:"work_min_interval,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -303,6 +304,13 @@ func (x *App) GetFirstUid() int64 {
 	return 0
 }
 
+func (x *App) GetServerId() int64 {
+	if x != nil {
+		return x.ServerId
+	}
+	return 0
+}
+
 func (x *App) GetWorkerCount() int64 {
 	if x != nil {
 		return x.WorkerCount
@@ -339,12 +347,14 @@ func (x *App) GetWorkMinInterval() *durationpb.Duration {
 }
 
 type Secret struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AesKey        string                 `protobuf:"bytes,1,opt,name=aes_key,json=aesKey,proto3" json:"aes_key,omitempty"`
-	ServerPubKey  string                 `protobuf:"bytes,2,opt,name=server_pub_key,json=serverPubKey,proto3" json:"server_pub_key,omitempty"`
-	ClientPriKey  string                 `protobuf:"bytes,3,opt,name=client_pri_key,json=clientPriKey,proto3" json:"client_pri_key,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	AccountAesKey        string                 `protobuf:"bytes,1,opt,name=account_aes_key,json=accountAesKey,proto3" json:"account_aes_key,omitempty"`
+	ClientCertVersion    int32                  `protobuf:"varint,2,opt,name=client_cert_version,json=clientCertVersion,proto3" json:"client_cert_version,omitempty"`
+	ClientCertPrivateKey string                 `protobuf:"bytes,3,opt,name=client_cert_private_key,json=clientCertPrivateKey,proto3" json:"client_cert_private_key,omitempty"`
+	ServerCertVersion    int32                  `protobuf:"varint,4,opt,name=server_cert_version,json=serverCertVersion,proto3" json:"server_cert_version,omitempty"`
+	ServerCert           string                 `protobuf:"bytes,5,opt,name=server_cert,json=serverCert,proto3" json:"server_cert,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *Secret) Reset() {
@@ -377,23 +387,37 @@ func (*Secret) Descriptor() ([]byte, []int) {
 	return file_internal_conf_conf_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *Secret) GetAesKey() string {
+func (x *Secret) GetAccountAesKey() string {
 	if x != nil {
-		return x.AesKey
+		return x.AccountAesKey
 	}
 	return ""
 }
 
-func (x *Secret) GetServerPubKey() string {
+func (x *Secret) GetClientCertVersion() int32 {
 	if x != nil {
-		return x.ServerPubKey
+		return x.ClientCertVersion
+	}
+	return 0
+}
+
+func (x *Secret) GetClientCertPrivateKey() string {
+	if x != nil {
+		return x.ClientCertPrivateKey
 	}
 	return ""
 }
 
-func (x *Secret) GetClientPriKey() string {
+func (x *Secret) GetServerCertVersion() int32 {
 	if x != nil {
-		return x.ClientPriKey
+		return x.ServerCertVersion
+	}
+	return 0
+}
+
+func (x *Secret) GetServerCert() string {
+	if x != nil {
+		return x.ServerCert
 	}
 	return ""
 }
@@ -402,12 +426,12 @@ var File_internal_conf_conf_proto protoreflect.FileDescriptor
 
 const file_internal_conf_conf_proto_rawDesc = "" +
 	"\n" +
-	"\x18internal/conf/conf.proto\x12\x15mercury.internal.conf\x1a\x1egoogle/protobuf/duration.proto\"\xcc\x01\n" +
-	"\tBootstrap\x122\n" +
-	"\x05label\x18\x01 \x01(\v2\x1c.mercury.internal.conf.LabelR\x05label\x12/\n" +
-	"\x04gate\x18\x02 \x01(\v2\x1b.mercury.internal.conf.GateR\x04gate\x12,\n" +
-	"\x03app\x18\x03 \x01(\v2\x1a.mercury.internal.conf.AppR\x03app\x12,\n" +
-	"\x03log\x18\x04 \x01(\v2\x1a.mercury.internal.conf.LogR\x03log\"i\n" +
+	"\x18internal/conf/conf.proto\x12\rinternal.conf\x1a\x1egoogle/protobuf/duration.proto\"\xac\x01\n" +
+	"\tBootstrap\x12*\n" +
+	"\x05label\x18\x01 \x01(\v2\x14.internal.conf.LabelR\x05label\x12'\n" +
+	"\x04gate\x18\x02 \x01(\v2\x13.internal.conf.GateR\x04gate\x12$\n" +
+	"\x03app\x18\x03 \x01(\v2\x12.internal.conf.AppR\x03app\x12$\n" +
+	"\x03log\x18\x04 \x01(\v2\x12.internal.conf.LogR\x03log\"i\n" +
 	"\x05Label\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x18\n" +
 	"\aprofile\x18\x02 \x01(\tR\aprofile\x12\x14\n" +
@@ -417,18 +441,22 @@ const file_internal_conf_conf_proto_rawDesc = "" +
 	"\x04type\x18\x01 \x01(\tR\x04type\x12\x14\n" +
 	"\x05level\x18\x02 \x01(\tR\x05level\"\x1a\n" +
 	"\x04Gate\x12\x12\n" +
-	"\x04addr\x18\x01 \x03(\tR\x04addr\"\xbb\x02\n" +
+	"\x04addr\x18\x01 \x03(\tR\x04addr\"\xd8\x02\n" +
 	"\x03App\x12\x1b\n" +
-	"\tfirst_uid\x18\x01 \x01(\x03R\bfirstUid\x12!\n" +
-	"\fworker_count\x18\x02 \x01(\x03R\vworkerCount\x12@\n" +
-	"\x0elogin_interval\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\rloginInterval\x12!\n" +
-	"\fstatus_admin\x18\x04 \x01(\bR\vstatusAdmin\x12H\n" +
-	"\x12heartbeat_interval\x18\x05 \x01(\v2\x19.google.protobuf.DurationR\x11heartbeatInterval\x12E\n" +
-	"\x11work_min_interval\x18\b \x01(\v2\x19.google.protobuf.DurationR\x0fworkMinInterval\"m\n" +
-	"\x06Secret\x12\x17\n" +
-	"\aaes_key\x18\x01 \x01(\tR\x06aesKey\x12$\n" +
-	"\x0eserver_pub_key\x18\x02 \x01(\tR\fserverPubKey\x12$\n" +
-	"\x0eclient_pri_key\x18\x03 \x01(\tR\fclientPriKeyB\x1cZ\x1amercury.internal.conf;confb\x06proto3"
+	"\tfirst_uid\x18\x01 \x01(\x03R\bfirstUid\x12\x1b\n" +
+	"\tserver_id\x18\x02 \x01(\x03R\bserverId\x12!\n" +
+	"\fworker_count\x18\x03 \x01(\x03R\vworkerCount\x12@\n" +
+	"\x0elogin_interval\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\rloginInterval\x12!\n" +
+	"\fstatus_admin\x18\x05 \x01(\bR\vstatusAdmin\x12H\n" +
+	"\x12heartbeat_interval\x18\x06 \x01(\v2\x19.google.protobuf.DurationR\x11heartbeatInterval\x12E\n" +
+	"\x11work_min_interval\x18\a \x01(\v2\x19.google.protobuf.DurationR\x0fworkMinInterval\"\xe8\x01\n" +
+	"\x06Secret\x12&\n" +
+	"\x0faccount_aes_key\x18\x01 \x01(\tR\raccountAesKey\x12.\n" +
+	"\x13client_cert_version\x18\x02 \x01(\x05R\x11clientCertVersion\x125\n" +
+	"\x17client_cert_private_key\x18\x03 \x01(\tR\x14clientCertPrivateKey\x12.\n" +
+	"\x13server_cert_version\x18\x04 \x01(\x05R\x11serverCertVersion\x12\x1f\n" +
+	"\vserver_cert\x18\x05 \x01(\tR\n" +
+	"serverCertB\x1cZ\x1amercury/internal/conf;confb\x06proto3"
 
 var (
 	file_internal_conf_conf_proto_rawDescOnce sync.Once
@@ -444,22 +472,22 @@ func file_internal_conf_conf_proto_rawDescGZIP() []byte {
 
 var file_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_internal_conf_conf_proto_goTypes = []any{
-	(*Bootstrap)(nil),           // 0: mercury.internal.conf.Bootstrap
-	(*Label)(nil),               // 1: mercury.internal.conf.Label
-	(*Log)(nil),                 // 2: mercury.internal.conf.Log
-	(*Gate)(nil),                // 3: mercury.internal.conf.Gate
-	(*App)(nil),                 // 4: mercury.internal.conf.App
-	(*Secret)(nil),              // 5: mercury.internal.conf.Secret
+	(*Bootstrap)(nil),           // 0: internal.conf.Bootstrap
+	(*Label)(nil),               // 1: internal.conf.Label
+	(*Log)(nil),                 // 2: internal.conf.Log
+	(*Gate)(nil),                // 3: internal.conf.Gate
+	(*App)(nil),                 // 4: internal.conf.App
+	(*Secret)(nil),              // 5: internal.conf.Secret
 	(*durationpb.Duration)(nil), // 6: google.protobuf.Duration
 }
 var file_internal_conf_conf_proto_depIdxs = []int32{
-	1, // 0: mercury.internal.conf.Bootstrap.label:type_name -> mercury.internal.conf.Label
-	3, // 1: mercury.internal.conf.Bootstrap.gate:type_name -> mercury.internal.conf.Gate
-	4, // 2: mercury.internal.conf.Bootstrap.app:type_name -> mercury.internal.conf.App
-	2, // 3: mercury.internal.conf.Bootstrap.log:type_name -> mercury.internal.conf.Log
-	6, // 4: mercury.internal.conf.App.login_interval:type_name -> google.protobuf.Duration
-	6, // 5: mercury.internal.conf.App.heartbeat_interval:type_name -> google.protobuf.Duration
-	6, // 6: mercury.internal.conf.App.work_min_interval:type_name -> google.protobuf.Duration
+	1, // 0: internal.conf.Bootstrap.label:type_name -> internal.conf.Label
+	3, // 1: internal.conf.Bootstrap.gate:type_name -> internal.conf.Gate
+	4, // 2: internal.conf.Bootstrap.app:type_name -> internal.conf.App
+	2, // 3: internal.conf.Bootstrap.log:type_name -> internal.conf.Log
+	6, // 4: internal.conf.App.login_interval:type_name -> google.protobuf.Duration
+	6, // 5: internal.conf.App.heartbeat_interval:type_name -> google.protobuf.Duration
+	6, // 6: internal.conf.App.work_min_interval:type_name -> google.protobuf.Duration
 	7, // [7:7] is the sub-list for method output_type
 	7, // [7:7] is the sub-list for method input_type
 	7, // [7:7] is the sub-list for extension type_name

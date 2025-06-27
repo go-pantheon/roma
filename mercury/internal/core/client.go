@@ -1,4 +1,4 @@
-package base
+package core
 
 import (
 	"github.com/go-pantheon/roma/gen/api/server/player/admin/user/v1"

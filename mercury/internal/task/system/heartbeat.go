@@ -24,8 +24,8 @@ func NewHeartbeatTask(assert task.AssertFunc) *HeartbeatTask {
 		nil,
 		assert,
 	)
-	o := &HeartbeatTask{
+
+	return &HeartbeatTask{
 		CommonTask: common,
 	}
-	return o
 }

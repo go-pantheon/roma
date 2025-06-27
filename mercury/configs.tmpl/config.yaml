@@ -10,6 +10,7 @@ log:
   level: debug
 app:
   first_uid: 1
+  server_id: 1
   worker_count: 1
   login_interval: 2s
   status_admin: false

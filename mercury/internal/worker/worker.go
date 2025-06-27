@@ -14,8 +14,7 @@ import (
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
 	"github.com/go-pantheon/roma/gen/app/codec"
-	"github.com/go-pantheon/roma/mercury/internal/base"
-	"github.com/go-pantheon/roma/mercury/internal/base/security"
+	"github.com/go-pantheon/roma/mercury/internal/core"
 	"github.com/go-pantheon/roma/mercury/internal/job/system"
 	"github.com/go-pantheon/roma/mercury/internal/task"
 	"github.com/pkg/errors"
@@ -23,21 +22,20 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var _ base.UserManager = (*Worker)(nil)
+var _ core.UserManager = (*Worker)(nil)
 
 type Worker struct {
 	xsync.Stoppable
-
-	crypto *security.Crypto
 
 	logger log.Logger
 	log    *log.Helper
 
 	userId int64
-	Token  string
+	sid    int64
+	hsInfo *HandshakeInfo
 
 	tcpCli   *tcp.Client
-	adminCli *base.AdminClients
+	adminCli *core.AdminClients
 
 	taskChan     chan task.Taskable
 	redirectChan chan *clipkt.Packet
@@ -59,16 +57,17 @@ func (w *Worker) UID() int64 {
 	return w.userId
 }
 
-func (w *Worker) AdminClient() *base.AdminClients {
+func (w *Worker) AdminClient() *core.AdminClients {
 	return w.adminCli
 }
 
 func NewWorker(userId int64, logger log.Logger) *Worker {
 	w := &Worker{
 		Stoppable:    xsync.NewStopper(time.Second * 10),
-		crypto:       &security.Crypto{},
 		logger:       logger,
 		userId:       userId,
+		sid:          core.ServerId(),
+		hsInfo:       &HandshakeInfo{},
 		taskChan:     make(chan task.Taskable),
 		redirectChan: make(chan *clipkt.Packet, 1024),
 	}
@@ -78,20 +77,21 @@ func NewWorker(userId int64, logger log.Logger) *Worker {
 	return w
 }
 
-func (w *Worker) Start(ctx *base.Context) (err error) {
-	addrs := base.Dep.Conf.Boot.Gate.Addr
-	addr := addrs[w.userId%int64(len(addrs))]
-
-	opts := []tcp.Option{
-		tcp.Bind(addr),
-	}
-
-	w.tcpCli = tcp.NewClient(w.userId, opts...)
-
-	w.Token, err = genToken(w.userId)
+func (w *Worker) Start(ctx *core.Context) (err error) {
+	w.hsInfo, err = newHandshakeInfo(w.userId)
 	if err != nil {
 		return err
 	}
+
+	handshakePack, err := w.handshakePack(ctx, w.hsInfo.token, w.hsInfo.cliPub[:])
+	if err != nil {
+		return err
+	}
+
+	addrs := core.BootConf().Gate.Addr
+	addr := addrs[w.userId%int64(len(addrs))]
+
+	w.tcpCli = tcp.NewClient(w.userId, addr, handshakePack, tcp.WithAuthFunc(w.Auth))
 
 	if err = w.tcpCli.Start(ctx); err != nil {
 		return err
@@ -101,7 +101,7 @@ func (w *Worker) Start(ctx *base.Context) (err error) {
 
 	xsync.Go("worker.start", func() error {
 		return w.Work(ctx)
-	}, DontLog)
+	}, UnlogFilter)
 	return nil
 }
 
@@ -128,7 +128,8 @@ func (w *Worker) stop(ctx context.Context) {
 		w.tcpCli.WaitStopped()
 		close(w.redirectChan)
 
-		w.log.Debugf("worker-%d closed", w.UID())
+		w.log.Infof("worker-%d closed", w.UID())
+
 		return err
 	})
 }
@@ -137,8 +138,8 @@ func (w *Worker) DistributeTask(t task.Taskable) {
 	w.taskChan <- t
 }
 
-func (w *Worker) Work(bctx *base.Context) error {
-	heartbeatTicker := time.NewTicker(base.App().HeartbeatInterval.AsDuration())
+func (w *Worker) Work(bctx *core.Context) error {
+	heartbeatTicker := time.NewTicker(core.AppConf().HeartbeatInterval.AsDuration())
 	heartbeat := system.NewHeartbeatTask()
 
 	defer w.stop(bctx)
@@ -178,7 +179,7 @@ func (w *Worker) Work(bctx *base.Context) error {
 	return eg.Wait()
 }
 
-func (w *Worker) work(ctx *base.Context, t task.Taskable) error {
+func (w *Worker) work(ctx *core.Context, t task.Taskable) error {
 	if err := w.send(ctx, t.CSPacket()); err != nil {
 		return err
 	}
@@ -197,7 +198,7 @@ func (w *Worker) work(ctx *base.Context, t task.Taskable) error {
 	}
 }
 
-func (w *Worker) receive(ctx *base.Context, t task.Taskable) (done bool, err error) {
+func (w *Worker) receive(ctx *core.Context, t task.Taskable) (done bool, err error) {
 	var (
 		resp     *clipkt.Packet
 		redirect *clipkt.Packet
@@ -238,9 +239,9 @@ func (w *Worker) receive(ctx *base.Context, t task.Taskable) (done bool, err err
 	return
 }
 
-func (w *Worker) send(ctx *base.Context, pkt *clipkt.Packet) (err error) {
-	pkt.Index = ctx.SendIndex
-	ctx.SendIndex++
+func (w *Worker) send(_ *core.Context, pkt *clipkt.Packet) (err error) {
+	pkt.Index = int32(w.tcpCli.Session().IncreaseCSIndex())
+
 	if pkt.Obj == 0 {
 		pkt.Obj = w.UID()
 	}
@@ -251,13 +252,6 @@ func (w *Worker) send(ctx *base.Context, pkt *clipkt.Packet) (err error) {
 		return
 	}
 
-	if !base.Unencrypted() {
-		if in, err = w.crypto.EncryptProto(in); err != nil {
-			err = errors.Wrapf(err, "Packet encrypt failed. uid=%d mod=%d seq=%d", w.UID(), pkt.Mod, pkt.Seq)
-			return
-		}
-	}
-
 	w.SentMsgCount.Add(1)
 	task.LogCS(w.log, pkt)
 
@@ -265,12 +259,6 @@ func (w *Worker) send(ctx *base.Context, pkt *clipkt.Packet) (err error) {
 }
 
 func (w *Worker) decode(pack []byte) (body *clipkt.Packet, err error) {
-	if !base.Unencrypted() {
-		if pack, err = w.crypto.DecryptProto(pack); err != nil {
-			return
-		}
-	}
-
 	p := &clipkt.Packet{}
 	err = proto.Unmarshal(pack, p)
 	if err != nil {

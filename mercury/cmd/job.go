@@ -12,7 +12,7 @@ import (
 	"github.com/go-pantheon/roma/mercury/internal/workshop"
 )
 
-func initWorkshop(_ context.Context, logger log.Logger, bc *conf.Bootstrap) *workshop.Workshop {
+func newWorkshop(_ context.Context, logger log.Logger, bc *conf.Bootstrap) *workshop.Workshop {
 	ws := workshop.NewWorkshop("echo")
 	ws.AddJob(
 		user.NewLoginJob(),
@@ -20,8 +20,9 @@ func initWorkshop(_ context.Context, logger log.Logger, bc *conf.Bootstrap) *wor
 		storage.NewStorageJob(),
 	)
 
-	for i := int64(0); i < bc.App.WorkerCount; i++ {
-		ws.AddWorker(worker.NewWorker(i+bc.App.FirstUid, logger))
+	for i := range bc.App.WorkerCount {
+		ws.AddWorker(worker.NewWorker(int64(i)+bc.App.FirstUid, logger))
 	}
+
 	return ws
 }

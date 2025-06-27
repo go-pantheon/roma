@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package mercury.internal.conf;
+package internal.conf;
 
-option go_package = "mercury.internal.conf;conf";
+option go_package = "mercury/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 
@@ -31,15 +31,18 @@ message Gate {
 
 message App {
 	int64 first_uid = 1;
-	int64 worker_count = 2;
-	google.protobuf.Duration login_interval = 3;
-	bool status_admin = 4;
-	google.protobuf.Duration heartbeat_interval = 5;
-	google.protobuf.Duration work_min_interval = 8;
+	int64 server_id = 2;
+	int64 worker_count = 3;
+	google.protobuf.Duration login_interval = 4;
+	bool status_admin = 5;
+	google.protobuf.Duration heartbeat_interval = 6;
+	google.protobuf.Duration work_min_interval = 7;
 }
 
 message Secret {
-	string aes_key = 1;
-	string server_pub_key = 2;
-	string client_pri_key = 3;
+  string account_aes_key = 1;
+  int32 client_cert_version = 2;
+  string client_cert_private_key = 3;
+  int32 server_cert_version = 4;
+  string server_cert = 5;
 }

@@ -7,7 +7,7 @@ import (
 
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
-	"github.com/go-pantheon/roma/mercury/internal/base"
+	"github.com/go-pantheon/roma/mercury/internal/core"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -15,7 +15,7 @@ import (
 
 var _ Taskable = (*CommonTask)(nil)
 
-type AssertFunc func(ctx *base.Context, cs, sc proto.Message) (done bool, err error)
+type AssertFunc func(ctx *core.Context, cs, sc proto.Message) (done bool, err error)
 
 type CommonTask struct {
 	T      Type
@@ -28,7 +28,7 @@ type CommonTask struct {
 }
 
 func NewCommonTask(t Type, mod climod.ModuleID, seq int32, scType reflect.Type, cs proto.Message, assert AssertFunc) *CommonTask {
-	o := &CommonTask{
+	return &CommonTask{
 		T:      t,
 		Mod:    mod,
 		Seq:    seq,
@@ -36,20 +36,20 @@ func NewCommonTask(t Type, mod climod.ModuleID, seq int32, scType reflect.Type, 
 		CS:     cs,
 		Assert: assert,
 	}
-	return o
 }
 
 func (t *CommonTask) IsExpectSC(mod climod.ModuleID, seq int32) bool {
 	return t.Mod == mod && t.Seq == seq
 }
 
-func (t *CommonTask) Receive(ctx *base.Context, p *clipkt.Packet) (out *clipkt.Packet, done bool, err error) {
+func (t *CommonTask) Receive(ctx *core.Context, p *clipkt.Packet) (out *clipkt.Packet, done bool, err error) {
 	sc, err := t.UnmarshalSC(p)
 	if err != nil {
 		return
 	}
 
 	slog.Info("receive message", "msg", protojson.Format(sc))
+
 	if !t.IsExpectSC(climod.ModuleID(p.Mod), p.Seq) {
 		out = p
 		return
@@ -58,15 +58,16 @@ func (t *CommonTask) Receive(ctx *base.Context, p *clipkt.Packet) (out *clipkt.P
 	if done, err = t.Assert(ctx, t.CS, sc); err != nil {
 		return
 	}
+
 	return
 }
 
 func (t *CommonTask) UnmarshalSC(p *clipkt.Packet) (sc proto.Message, err error) {
 	sc = reflect.New(t.scType).Interface().(proto.Message)
 	if err = proto.Unmarshal(p.Data, sc); err != nil {
-		err = errors.Wrapf(err, "message unmarshal failed. %+v", t.scType)
-		return
+		return nil, errors.Wrapf(err, "message unmarshal failed. %+v", t.scType)
 	}
+
 	return
 }
 
@@ -94,7 +95,7 @@ func (t *CommonTask) CSPacket() *clipkt.Packet {
 	}
 }
 
-func (t *CommonTask) GetObj(ctx *base.Context) int64 {
+func (t *CommonTask) GetObj(ctx *core.Context) int64 {
 	user, err := ctx.Manager.GetClientUser()
 	if err != nil {
 		return 0

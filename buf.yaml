@@ -23,13 +23,19 @@ modules:
     lint:
       use:
         - STANDARD
-  - path: third_party
   - path: app
     lint:
       use:
         - STANDARD
       except:
         - PACKAGE_VERSION_SUFFIX
+  - path: mercury
+    lint:
+      use:
+        - STANDARD
+      except:
+        - PACKAGE_VERSION_SUFFIX
+  - path: third_party
 lint:
   use:
     - STANDARD
