@@ -363,7 +363,7 @@ func (w *Worker) ExecuteEvent(wctx Context, f EventFunc) error {
 		if len(mods) > 0 {
 			w.persistManager.Change(wctx, mods, immediately)
 		}
-		
+
 		return err
 	})
 }
@@ -373,7 +373,7 @@ func (w *Worker) renewalTick(ctx context.Context) error {
 		w.nextRTRenewAt = ct.Add(w.appRouteTable.TTL() / 2)
 
 		if err := w.appRouteTable.RenewSelf(ctx, "gate", w.ID(), w.Referer()); err != nil {
-			if errors.Is(err, routetable.ErrRouteTableNotFound) || errors.Is(err, routetable.ErrRouteTableValueNotSame) {
+			if errors.Is(err, xerrors.ErrRouteTableNotFound) || errors.Is(err, xerrors.ErrRouteTableValueNotSame) {
 				return err
 			}
 
