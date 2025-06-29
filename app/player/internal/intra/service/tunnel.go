@@ -37,7 +37,13 @@ func NewTunnelService(logger log.Logger, mgr *core.Manager, svc *service.PlayerS
 	}
 }
 
-func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error {
+func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) (err error) {
+	defer func() {
+		if err != nil {
+			s.log.Errorf("tunnel error: %+v", err)
+		}
+	}()
+
 	ctx := stream.Context()
 
 	if !life.IsGateContext(ctx) {

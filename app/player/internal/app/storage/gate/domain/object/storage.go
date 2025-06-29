@@ -32,8 +32,9 @@ type Storage struct {
 
 func NewStorage() life.Module {
 	o := &Storage{
-		Items: make(map[int64]*ItemInfo, 128),
-		Packs: make(map[int64]*PackInfo, 128),
+		Items:         make(map[int64]*ItemInfo, 128),
+		Packs:         make(map[int64]*PackInfo, 128),
+		RecoveryInfos: make(map[int64]*RecoveryInfo, 128),
 	}
 
 	return o

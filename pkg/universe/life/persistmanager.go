@@ -121,12 +121,12 @@ func (s *PersistManager) Persist(ctx context.Context, proto VersionProto) error 
 	return s.persist(ctx, proto)
 }
 
-func (s *PersistManager) persist(c context.Context, proto VersionProto) error {
+func (s *PersistManager) persist(_ context.Context, proto VersionProto) error {
 	if IsAdminID(s.ID()) {
 		return nil
 	}
 
-	ctx, cancel := context.WithTimeout(c, constants.WorkerPersistTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.WorkerPersistTimeout)
 	defer cancel()
 
 	return s.persister.Persist(ctx, s.ID(), proto)
@@ -140,7 +140,7 @@ func (s *PersistManager) IncVersion(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, constants.WorkerPersistTimeout)
 	defer cancel()
 
-	return s.persister.IncVersion(ctx, s.ID(), s.persister.Version())
+	return s.persister.IncVersion(ctx, s.ID())
 }
 
 func (s *PersistManager) ID() int64 {

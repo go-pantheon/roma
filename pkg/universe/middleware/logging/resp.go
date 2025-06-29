@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
-	"github.com/go-pantheon/fabrica-net/xcontext"
+	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"github.com/go-pantheon/fabrica-net/xnet"
 	"github.com/go-pantheon/fabrica-util/errors"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"

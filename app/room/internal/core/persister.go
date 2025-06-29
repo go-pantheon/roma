@@ -76,7 +76,14 @@ func (s *RoomPersister) Persist(ctx context.Context, uid int64, proto life.Versi
 	return s.do.Persist(ctx, uid, proto)
 }
 
-func (s *RoomPersister) IncVersion(ctx context.Context, uid int64, newVersion int64) (err error) {
+func (s *RoomPersister) IncVersion(ctx context.Context, uid int64) (err error) {
+	var newVersion int64
+	s.Lock(func() error {
+		s.room.Version += 1
+		newVersion = s.room.Version
+		return nil
+	})
+
 	return s.do.IncVersion(ctx, uid, newVersion)
 }
 

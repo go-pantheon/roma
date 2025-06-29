@@ -37,20 +37,21 @@ func NewTunnelService(logger log.Logger, mgr *core.Manager, svc *service.RoomSer
 	}
 }
 
-func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error {
+func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) (err error) {
+	defer func() {
+		if err != nil {
+			s.log.Errorf("tunnel error: %+v", err)
+		}
+	}()
+
 	ctx := stream.Context()
 
 	if !life.IsGateContext(ctx) {
 		return errors.Errorf("must be called by Gateway. status=%d", xcontext.Status(ctx))
 	}
 
-	var (
-		w   life.Workable
-		oid int64
-		err error
-	)
-
-	if oid, err = xcontext.OID(ctx); err != nil {
+	oid, err := xcontext.OID(ctx)
+	if err != nil {
 		return err
 	}
 
@@ -58,7 +59,8 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) error 
 		return core.ReplyFunc(stream, p)
 	}
 
-	if w, err = s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc)); err != nil {
+	w, err := s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc))
+	if err != nil {
 		return err
 	}
 

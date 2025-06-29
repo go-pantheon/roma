@@ -188,6 +188,7 @@ func (w *Worker) work(ctx *core.Context, t task.Taskable) error {
 		if w.OnStopping() {
 			return nil
 		}
+
 		done, err := w.receive(ctx, t)
 		if err != nil {
 			return err
@@ -204,7 +205,7 @@ func (w *Worker) receive(ctx *core.Context, t task.Taskable) (done bool, err err
 		redirect *clipkt.Packet
 	)
 
-	timeout := time.NewTimer(5 * time.Second)
+	timeout := time.NewTimer(10 * time.Second)
 	defer timeout.Stop()
 
 	select {
@@ -258,18 +259,20 @@ func (w *Worker) send(_ *core.Context, pkt *clipkt.Packet) (err error) {
 	return w.tcpCli.Send(in)
 }
 
-func (w *Worker) decode(pack []byte) (body *clipkt.Packet, err error) {
-	p := &clipkt.Packet{}
+func (w *Worker) decode(pack []byte) (p *clipkt.Packet, err error) {
+	p = &clipkt.Packet{}
+
 	err = proto.Unmarshal(pack, p)
 	if err != nil {
-		err = errors.Wrapf(err, "Packet unmarshal failed. uid=%d mod=%d seq=%d", w.UID(), p.Mod, p.Seq)
-		return
+		return nil, errors.Wrapf(err, "Packet unmarshal failed. uid=%d mod=%d seq=%d", w.UID(), p.Mod, p.Seq)
 	}
-	return
+
+	return p, nil
 }
 
 func (w *Worker) Output() string {
-	s := &strings.Builder{}
+	var s strings.Builder
+
 	s.WriteString(fmt.Sprintf("worker-%d ", w.UID()))
 	if w.Completed.Load() {
 		s.WriteString("completed")

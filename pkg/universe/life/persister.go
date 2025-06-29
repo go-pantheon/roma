@@ -14,7 +14,7 @@ type Persistent interface {
 	Refresh(ctx context.Context) (err error)
 	PrepareToPersist(ctx context.Context, modules []ModuleKey) (VersionProto, error)
 	Persist(ctx context.Context, id int64, proto VersionProto) (err error)
-	IncVersion(ctx context.Context, id int64, newVersion int64) (err error)
+	IncVersion(ctx context.Context, id int64) (err error)
 	OnStop(ctx context.Context, id int64, proto VersionProto) (err error)
 }
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
@@ -89,9 +90,30 @@ func (r *userMongoRepo) QueryByID(ctx context.Context, uid int64, p *dbv1.UserPr
 		}
 	}
 
-	if err := r.repo.FindByID(ctx, _userIDField, uid, p, projection); err != nil {
-		return errors.Wrapf(err, "querying user %d", uid)
+	filter := bson.M{"id": uid}
+	opts := options.FindOne()
+
+	if len(projection) > 0 {
+		opts.SetProjection(projection)
 	}
+
+	err := r.repo.Coll.FindOne(ctx, filter, opts).Decode(p)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return xerrors.ErrDBRecordNotFound
+		}
+
+		return errors.Wrapf(err, "querying document %v failed", uid)
+	}
+
+	// if err := r.repo.FindByID(ctx, _userIDField, uid, p, projection); err != nil {
+	// 	if errors.Is(err, mongo.ErrNoDocuments) {
+	// 		return xerrors.ErrDBRecordNotFound
+	// 	}
+
+	// 	return errors.Wrapf(err, "querying user %d", uid)
+	// }
+
 	return nil
 }
 

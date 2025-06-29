@@ -113,7 +113,7 @@ func (m *Manager) load(ctx context.Context, oid int64, replier Responsive, broad
 	}
 
 	// Increment version number of optimistic lock immediately to prevent other services from loading the same data simultaneously
-	if err = persister.IncVersion(ctx, oid, persister.Version()); err != nil {
+	if err = persister.IncVersion(ctx, oid); err != nil {
 		return nil, err
 	}
 

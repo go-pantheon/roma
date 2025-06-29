@@ -8,9 +8,9 @@ require (
 	github.com/emicklei/proto v1.14.2
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20250527152916-d6f5f00cf562
 	github.com/go-kratos/kratos/v2 v2.8.4
-	github.com/go-pantheon/fabrica-kit v0.0.17
-	github.com/go-pantheon/fabrica-net v0.0.19
-	github.com/go-pantheon/fabrica-util v0.0.27
+	github.com/go-pantheon/fabrica-kit v0.0.18
+	github.com/go-pantheon/fabrica-net v0.0.21
+	github.com/go-pantheon/fabrica-util v0.0.28
 	github.com/google/wire v0.6.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/json-iterator/go v1.1.12
@@ -23,7 +23,7 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.2.2
 	go.uber.org/mock v0.5.2
 	golang.org/x/sync v0.15.0
-	google.golang.org/api v0.238.0
+	google.golang.org/api v0.239.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
@@ -91,7 +91,7 @@ require (
 	go.etcd.io/etcd/api/v3 v3.6.1 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.6.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.62.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.37.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.37.0 // indirect

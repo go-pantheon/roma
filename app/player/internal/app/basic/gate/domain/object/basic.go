@@ -35,7 +35,10 @@ type Basic struct {
 }
 
 func NewBasic() life.Module {
-	return &Basic{}
+	return &Basic{
+		Name:      "test",
+		CreatedAt: time.Now(),
+	}
 }
 
 func (o *Basic) IsLifeModule() {}

@@ -16,6 +16,7 @@ package {{ .Package }}
 import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/pkg/universe/life"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 {{- range .Messages }}
@@ -41,7 +42,7 @@ import (
 
 			func Decode{{ $msgName }}(p *{{ $msgName }}, module life.Module) error {
 				if p.Module == nil {
-					return errors.New("{{ $msgName }}.Module is nil")
+					return nil
 				}
 
 				switch p.Module.(type) {
@@ -62,10 +63,45 @@ import (
 				return mp
 			}
 			{{ end }}
+
+			// UnmarshalBSON implements the bson.Unmarshaler interface for {{ $msgName }}.
+			// This is required to handle the 'oneof' field when decoding from MongoDB.
+			func (x *{{ $msgName }}) UnmarshalBSON(data []byte) error {
+				var m bson.M
+				if err := bson.Unmarshal(data, &m); err != nil {
+					return err
+				}
+
+				for key, value := range m {
+					// Marshal the value back to BSON to be unmarshaled into the target struct.
+					valData, err := bson.Marshal(value)
+					if err != nil {
+						return errors.Wrapf(err, "failed to marshal value for key %s", key)
+					}
+
+					switch key {
+					{{- range .OneofElements }}
+					case "{{ .Name }}":
+						{{ .Name }} := {{ .Type }}Pool.Get()
+						if err := bson.Unmarshal(valData, {{ .Name }}); err != nil {
+							return err
+						}
+
+						mp := {{ $msgName | ToLowerCamel }}{{ .Name | ToUpperCamel }}Pool.get()
+						mp.{{ .Name | ToUpperCamel }} = {{ .Name }}
+						x.{{ $filedName }} = mp
+					{{- end }}
+					}
+					// Assuming there is only one field in the 'oneof'
+					if x.{{ $filedName }} != nil {
+						break
+					}
+				}
+				return nil
+			}
 		{{- end }}
 	{{ end }}	 
 {{- end }}
-
 {{- end }}
 `
 

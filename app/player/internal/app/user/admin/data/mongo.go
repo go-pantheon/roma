@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/admin/domain"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
@@ -51,11 +52,13 @@ func (r *userMongoRepo) GetByID(ctx context.Context, user *dbv1.UserProto, mods 
 	}
 
 	opts := options.FindOne().SetProjection(projection)
+
 	err := r.coll.FindOne(ctx, filter, opts).Decode(user)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return errors.Wrapf(err, "user %d not found", user.Id)
+			return xerrors.ErrDBRecordNotFound
 		}
+
 		return errors.Wrapf(err, "querying user %d", user.Id)
 	}
 
@@ -98,6 +101,7 @@ func (r *userMongoRepo) GetList(ctx context.Context, start, limit int64, conds m
 		}
 		return nil, 0, errors.Wrap(err, "finding users failed")
 	}
+
 	defer cursor.Close(ctx)
 
 	var users []*dbv1.UserProto

@@ -5,6 +5,7 @@ package dbv1
 import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/pkg/universe/life"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func EncodeUserModuleProto(module life.Module) *UserModuleProto {
@@ -36,7 +37,7 @@ func EncodeUserModuleProto(module life.Module) *UserModuleProto {
 
 func DecodeUserModuleProto(p *UserModuleProto, module life.Module) error {
 	if p.Module == nil {
-		return errors.New("UserModuleProto.Module is nil")
+		return nil
 	}
 
 	switch p.Module.(type) {
@@ -124,4 +125,110 @@ func (x *UserRoomProto) Wrap() *UserModuleProto {
 	mp.Module.(*UserModuleProto_Room).Room = x
 
 	return mp
+}
+
+// UnmarshalBSON implements the bson.Unmarshaler interface for UserModuleProto.
+// This is required to handle the 'oneof' field when decoding from MongoDB.
+func (x *UserModuleProto) UnmarshalBSON(data []byte) error {
+	var m bson.M
+	if err := bson.Unmarshal(data, &m); err != nil {
+		return err
+	}
+
+	for key, value := range m {
+		// Marshal the value back to BSON to be unmarshaled into the target struct.
+		valData, err := bson.Marshal(value)
+		if err != nil {
+			return errors.Wrapf(err, "failed to marshal value for key %s", key)
+		}
+
+		switch key {
+		case "basic":
+			basic := UserBasicProtoPool.Get()
+			if err := bson.Unmarshal(valData, basic); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoBasicPool.get()
+			mp.Basic = basic
+			x.Module = mp
+		case "dev":
+			dev := UserDevProtoPool.Get()
+			if err := bson.Unmarshal(valData, dev); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoDevPool.get()
+			mp.Dev = dev
+			x.Module = mp
+		case "status":
+			status := UserStatusProtoPool.Get()
+			if err := bson.Unmarshal(valData, status); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoStatusPool.get()
+			mp.Status = status
+			x.Module = mp
+		case "system":
+			system := UserSystemProtoPool.Get()
+			if err := bson.Unmarshal(valData, system); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoSystemPool.get()
+			mp.System = system
+			x.Module = mp
+		case "plunder_list":
+			plunder_list := UserPlunderListProtoPool.Get()
+			if err := bson.Unmarshal(valData, plunder_list); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoPlunderListPool.get()
+			mp.PlunderList = plunder_list
+			x.Module = mp
+		case "hero_list":
+			hero_list := UserHeroListProtoPool.Get()
+			if err := bson.Unmarshal(valData, hero_list); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoHeroListPool.get()
+			mp.HeroList = hero_list
+			x.Module = mp
+		case "storage":
+			storage := UserStorageProtoPool.Get()
+			if err := bson.Unmarshal(valData, storage); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoStoragePool.get()
+			mp.Storage = storage
+			x.Module = mp
+		case "recharge":
+			recharge := UserRechargeProtoPool.Get()
+			if err := bson.Unmarshal(valData, recharge); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoRechargePool.get()
+			mp.Recharge = recharge
+			x.Module = mp
+		case "room":
+			room := UserRoomProtoPool.Get()
+			if err := bson.Unmarshal(valData, room); err != nil {
+				return err
+			}
+
+			mp := userModuleProtoRoomPool.get()
+			mp.Room = room
+			x.Module = mp
+		}
+		// Assuming there is only one field in the 'oneof'
+		if x.Module != nil {
+			break
+		}
+	}
+	return nil
 }

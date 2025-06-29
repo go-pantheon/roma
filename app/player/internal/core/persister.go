@@ -81,7 +81,14 @@ func (s *UserPersister) Persist(ctx context.Context, uid int64, proto life.Versi
 	return s.do.Persist(ctx, uid, p)
 }
 
-func (s *UserPersister) IncVersion(ctx context.Context, uid int64, newVersion int64) (err error) {
+func (s *UserPersister) IncVersion(ctx context.Context, uid int64) (err error) {
+	var newVersion int64
+	s.Lock(func() error {
+		s.user.Version += 1
+		newVersion = s.user.Version
+		return nil
+	})
+
 	return s.do.IncVersion(ctx, uid, newVersion)
 }
 

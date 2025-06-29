@@ -1,10 +1,12 @@
 package pguser
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister/modulecolumn"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
@@ -47,6 +49,10 @@ func BuildUserWhereSQL(conds map[life.ModuleKey]*dbv1.UserModuleProto) (sql stri
 
 func ScanUserRow(row pgx.Row, user *dbv1.UserProto, mods []life.ModuleKey, scanargs []any, modvals [][]byte) error {
 	if err := row.Scan(scanargs...); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return xerrors.ErrDBRecordNotFound
+		}
+
 		return errors.Wrapf(err, "scanning user %d", user.Id)
 	}
 

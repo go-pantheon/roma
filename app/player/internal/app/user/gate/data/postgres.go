@@ -2,10 +2,12 @@ package data
 
 import (
 	"context"
+	"database/sql"
 	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/data/db/postgresql/migrate"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
@@ -136,6 +138,10 @@ func (r *userPostgresRepo) QueryByID(ctx context.Context, uid int64, user *dbv1.
 	row := r.data.DB.QueryRow(ctx, sqlbuilder.String(), uid)
 
 	if err := row.Scan(scanargs...); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return xerrors.ErrDBRecordNotFound
+		}
+
 		return errors.Wrapf(err, "scanning user %d", uid)
 	}
 
