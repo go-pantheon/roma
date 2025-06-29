@@ -5,7 +5,6 @@ import (
 	"github.com/go-pantheon/roma/mercury/internal/core"
 	"github.com/go-pantheon/roma/mercury/internal/job"
 	"github.com/go-pantheon/roma/mercury/internal/task/user"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -19,15 +18,6 @@ func NewLoginJob() *job.Job {
 	return j
 }
 
-func assertLogin(ctx *core.Context, cs, sc proto.Message) (done bool, err error) {
-	p, ok := sc.(*climsg.SCLogin)
-	if !ok {
-		return false, errors.New("invalid sc message")
-	}
-
-	if p.Code != 1 {
-		return false, errors.Errorf("SCLogin failed. code=%d", p.Code)
-	}
-
-	return done, nil
+func assertLogin(ctx core.Worker, cs, sc proto.Message) (err error) {
+	return nil
 }

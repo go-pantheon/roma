@@ -46,7 +46,7 @@ func newApp(logger log.Logger, hs *http.Server, gs *grpc.Server, health *health.
 		panic(err)
 	}
 
-	profile.Init(label.Service, label.Profile, label.Color, label.Zone, label.Version, label.Node, url)
+	profile.SetGRPCEndpoint(url)
 
 	return kratos.New(
 		kratos.Name(label.Service),
@@ -85,6 +85,8 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
+
+	profile.Init(bc.Label.Service, bc.Label.Profile, bc.Label.Color, bc.Label.Zone, bc.Label.Version, bc.Label.Node)
 
 	if err := xtime.InitSimple(bc.Label.Language); err != nil {
 		panic(err)

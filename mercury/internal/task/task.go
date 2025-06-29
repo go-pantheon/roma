@@ -21,12 +21,11 @@ type Taskable interface {
 
 	Type() Type
 	CSPacket() *clipkt.Packet
-	GetObj(ctx *core.Context) int64
-	IsExpectSC(mod climod.ModuleID, seq int32) bool
+	GetObj(ctx core.Worker) int64
 }
 
 type Receiver interface {
-	Receive(ctx *core.Context, sc *clipkt.Packet) (redirect *clipkt.Packet, done bool, err error)
+	Receive(ctx core.Worker, sc *clipkt.Packet) (err error)
 }
 
 func LogCS(l *log.Helper, cs *clipkt.Packet) {

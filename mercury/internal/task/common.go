@@ -15,7 +15,7 @@ import (
 
 var _ Taskable = (*CommonTask)(nil)
 
-type AssertFunc func(ctx *core.Context, cs, sc proto.Message) (done bool, err error)
+type AssertFunc func(ctx core.Worker, cs, sc proto.Message) error
 
 type CommonTask struct {
 	T      Type
@@ -38,11 +38,7 @@ func NewCommonTask(t Type, mod climod.ModuleID, seq int32, scType reflect.Type, 
 	}
 }
 
-func (t *CommonTask) IsExpectSC(mod climod.ModuleID, seq int32) bool {
-	return t.Mod == mod && t.Seq == seq
-}
-
-func (t *CommonTask) Receive(ctx *core.Context, p *clipkt.Packet) (out *clipkt.Packet, done bool, err error) {
+func (t *CommonTask) Receive(ctx core.Worker, p *clipkt.Packet) (err error) {
 	sc, err := t.UnmarshalSC(p)
 	if err != nil {
 		return
@@ -50,25 +46,17 @@ func (t *CommonTask) Receive(ctx *core.Context, p *clipkt.Packet) (out *clipkt.P
 
 	slog.Info("receive message", "msg", protojson.Format(sc))
 
-	if !t.IsExpectSC(climod.ModuleID(p.Mod), p.Seq) {
-		out = p
-		return
-	}
-
-	if done, err = t.Assert(ctx, t.CS, sc); err != nil {
-		return
-	}
-
-	return
+	return t.CommonAssert(ctx, climod.ModuleID(p.Mod), p.Seq, t.CS, sc)
 }
 
 func (t *CommonTask) UnmarshalSC(p *clipkt.Packet) (sc proto.Message, err error) {
 	sc = reflect.New(t.scType).Interface().(proto.Message)
 	if err = proto.Unmarshal(p.Data, sc); err != nil {
+		slog.Error("message unmarshal failed", "error", err, "type", t.scType)
 		return nil, errors.Wrapf(err, "message unmarshal failed. %+v", t.scType)
 	}
 
-	return
+	return sc, nil
 }
 
 func (t *CommonTask) Type() Type {
@@ -95,8 +83,8 @@ func (t *CommonTask) CSPacket() *clipkt.Packet {
 	}
 }
 
-func (t *CommonTask) GetObj(ctx *core.Context) int64 {
-	user, err := ctx.Manager.GetClientUser()
+func (t *CommonTask) GetObj(ctx core.Worker) int64 {
+	user, err := ctx.GetClientUser()
 	if err != nil {
 		return 0
 	}
@@ -107,6 +95,32 @@ func (t *CommonTask) GetObj(ctx *core.Context) int64 {
 	case climod.ModuleID_Room:
 		return 0
 	default:
-		return ctx.Manager.UID()
+		return ctx.UID()
 	}
+}
+
+func (t *CommonTask) CommonAssert(ctx core.Worker, mod climod.ModuleID, seq int32, cs, sc proto.Message) error {
+	if t.Mod != mod || t.Seq != seq {
+		return errors.Errorf("expect [%d-%d], but got [%d-%d]", mod, seq, t.Mod, t.Seq)
+	}
+
+	scValue := reflect.ValueOf(sc)
+	getMethod := scValue.MethodByName("GetCode")
+
+	if !getMethod.IsValid() || getMethod.Type().NumIn() != 0 || getMethod.Type().NumOut() != 1 {
+		return errors.New("invalid sc message")
+	}
+
+	results := getMethod.Call(nil)
+	codeValue := results[0]
+
+	if codeValue.Kind() != reflect.Int32 {
+		return errors.New("invalid sc message")
+	}
+
+	if code := codeValue.Int(); code != 1 {
+		return errors.Errorf("failed code=%d", code)
+	}
+
+	return t.Assert(ctx, cs, sc)
 }

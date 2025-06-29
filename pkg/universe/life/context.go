@@ -55,7 +55,7 @@ func NewContext(ctx context.Context, w *Worker) Context {
 		clientIP:        w.ClientIP(),
 	}
 
-	c.changedModules = make(map[ModuleKey]struct{}, len(c.persister.ModuleKeys()))
+	c.changedModules = make(map[ModuleKey]struct{}, len(c.persister.AllModuleKeys()))
 
 	if uid, err := xcontext.UID(ctx); err == nil {
 		c.uid = uid
@@ -70,7 +70,7 @@ func NewContext(ctx context.Context, w *Worker) Context {
 
 func (c *workerContext) ChangedModules() (modules []ModuleKey, immediately bool) {
 	defer func() {
-		c.changedModules = make(map[ModuleKey]struct{}, len(c.persister.ModuleKeys()))
+		c.changedModules = make(map[ModuleKey]struct{}, len(c.persister.AllModuleKeys()))
 		c.changedImmediately = false
 	}()
 
@@ -85,7 +85,7 @@ func (c *workerContext) ChangedModules() (modules []ModuleKey, immediately bool)
 
 func (c *workerContext) Changed(modules ...ModuleKey) {
 	if len(modules) == 0 {
-		for _, mod := range c.persister.ModuleKeys() {
+		for _, mod := range c.persister.AllModuleKeys() {
 			c.changedModules[mod] = struct{}{}
 		}
 

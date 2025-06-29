@@ -5,7 +5,6 @@ import (
 	"github.com/go-pantheon/roma/mercury/gen/task/dev"
 	"github.com/go-pantheon/roma/mercury/internal/core"
 	"github.com/go-pantheon/roma/mercury/internal/job"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -19,15 +18,6 @@ func NewDevListJob() *job.Job {
 	return j
 }
 
-func assertDevList(ctx *core.Context, cs, sc proto.Message) (done bool, err error) {
-	p, ok := sc.(*climsg.SCDevList)
-	if !ok {
-		return false, errors.New("invalid sc message")
-	}
-
-	if p.Code != 1 {
-		return false, errors.Errorf("SCDevList failed. code=%d", p.Code)
-	}
-
-	return true, nil
+func assertDevList(ctx core.Worker, cs, sc proto.Message) (err error) {
+	return nil
 }

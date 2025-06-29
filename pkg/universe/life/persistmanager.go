@@ -28,7 +28,7 @@ func newPersistManager(log *log.Helper, persister Persistent) (s *PersistManager
 		Stoppable:       xsync.NewStopper(constants.PersistManagerStopTimeout),
 		log:             log,
 		persister:       persister,
-		changedModules:  NewChangedModules(len(persister.ModuleKeys())),
+		changedModules:  NewChangedModules(len(persister.AllModuleKeys())),
 		saveChan:        make(chan VersionProto, constants.WorkerHolderSize),
 		immediatelyChan: make(chan struct{}, constants.WorkerHolderSize),
 	}
@@ -59,7 +59,7 @@ func (s *PersistManager) Stop(ctx context.Context) (err error) {
 		close(s.saveChan)
 
 		// Persist the object before stopping
-		proto, err := s.prepareToPersist(ctx)
+		proto, err := s.persister.PrepareToPersist(ctx, s.persister.AllModuleKeys())
 		if err != nil {
 			return err
 		}
@@ -86,7 +86,12 @@ func (s *PersistManager) PrepareToPersist(ctx context.Context) error {
 		return xerrors.ErrLifeStopped
 	}
 
-	proto, err := s.prepareToPersist(ctx)
+	modules := s.changedModules.Move()
+	if len(modules) == 0 {
+		return nil
+	}
+
+	proto, err := s.persister.PrepareToPersist(ctx, s.persister.AllModuleKeys())
 	if err != nil {
 		return err
 	}
@@ -98,19 +103,6 @@ func (s *PersistManager) PrepareToPersist(ctx context.Context) error {
 	s.saveChan <- proto
 
 	return nil
-}
-
-func (s *PersistManager) prepareToPersist(ctx context.Context) (VersionProto, error) {
-	if IsAdminID(s.ID()) {
-		return nil, nil
-	}
-
-	modules := s.changedModules.Move()
-	if len(modules) == 0 {
-		return nil, nil
-	}
-
-	return s.persister.PrepareToPersist(ctx, modules)
 }
 
 func (s *PersistManager) Persist(ctx context.Context, proto VersionProto) error {
@@ -130,17 +122,6 @@ func (s *PersistManager) persist(_ context.Context, proto VersionProto) error {
 	defer cancel()
 
 	return s.persister.Persist(ctx, s.ID(), proto)
-}
-
-func (s *PersistManager) IncVersion(ctx context.Context) error {
-	if IsAdminID(s.ID()) {
-		return nil
-	}
-
-	ctx, cancel := context.WithTimeout(ctx, constants.WorkerPersistTimeout)
-	defer cancel()
-
-	return s.persister.IncVersion(ctx, s.ID())
 }
 
 func (s *PersistManager) ID() int64 {

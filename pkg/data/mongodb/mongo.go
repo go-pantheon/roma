@@ -53,10 +53,10 @@ func (r *BaseRepo) FindByID(ctx context.Context, idKey string, id any, result an
 	err := r.Coll.FindOne(ctx, filter, opts).Decode(result)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return errors.Wrapf(err, "document with id %v not found", id)
+			return errors.Wrapf(err, "document not found. id=%d", id)
 		}
 
-		return errors.Wrapf(err, "querying document %v failed", id)
+		return errors.Wrapf(err, "document querying failed. id=%d", id)
 	}
 
 	return nil
@@ -72,11 +72,11 @@ func (r *BaseRepo) UpdateOne(ctx context.Context, idKey string, id any, version 
 
 	res, err := r.Coll.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return errors.Wrapf(err, "updating document %v failed", id)
+		return errors.Wrapf(err, "document updating failed. id=%d version=%d", id, version)
 	}
 
 	if res.MatchedCount == 0 {
-		return errors.Errorf("document %v not found or version mismatch", id)
+		return errors.Errorf("document not found or version mismatch. id=%d version=%d", id, version)
 	}
 
 	return nil
@@ -89,7 +89,7 @@ func (r *BaseRepo) Exists(ctx context.Context, idKey string, id any) (bool, erro
 
 	count, err := r.Coll.CountDocuments(ctx, filter, opts)
 	if err != nil {
-		return false, errors.Wrapf(err, "counting document %v failed", id)
+		return false, errors.Wrapf(err, "counting document failed. id=%d", id)
 	}
 
 	return count > 0, nil
@@ -102,11 +102,11 @@ func (r *BaseRepo) IncrementVersion(ctx context.Context, idKey string, id any, n
 
 	res, err := r.Coll.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return errors.Wrapf(err, "incrementing version for document %v failed", id)
+		return errors.Wrapf(err, "incrementing version failed. id=%d", id)
 	}
 
 	if res.MatchedCount == 0 {
-		return errors.Errorf("document %v not found or version mismatch", id)
+		return errors.Errorf("document not found or version mismatch. id=%d newVersion=%d", id, newVersion)
 	}
 
 	return nil

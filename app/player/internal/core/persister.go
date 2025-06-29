@@ -12,6 +12,7 @@ import (
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
 
 var _ life.Persistent = (*UserPersister)(nil)
@@ -93,7 +94,9 @@ func (s *UserPersister) IncVersion(ctx context.Context, uid int64) (err error) {
 }
 
 func (s *UserPersister) OnStop(ctx context.Context, id int64, p life.VersionProto) (err error) {
-	s.do.OnLogout(ctx, s.uid, p.(*dbv1.UserProto))
+	cp := proto.Clone(p).(*dbv1.UserProto)
+
+	s.do.OnLogout(ctx, s.uid, cp)
 	return nil
 }
 
@@ -112,7 +115,7 @@ func (s *UserPersister) Lock(f func() error) error {
 	return f()
 }
 
-func (s *UserPersister) ModuleKeys() []life.ModuleKey {
+func (s *UserPersister) AllModuleKeys() []life.ModuleKey {
 	return userregister.AllModuleKeys()
 }
 

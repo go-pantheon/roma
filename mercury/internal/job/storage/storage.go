@@ -26,10 +26,10 @@ func NewStorageJob() *job.Job {
 		Cmd:  "clear",
 		Args: map[string]string{},
 	}, assert))
-	
+
 	return j
 }
 
-func assert(ctx *core.Context, cs, sc proto.Message) (done bool, err error) {
-	return true, nil
+func assert(ctx core.Worker, cs, sc proto.Message) (err error) {
+	return nil
 }

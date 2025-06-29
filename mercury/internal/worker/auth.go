@@ -74,7 +74,7 @@ func (w *Worker) Auth(ctx context.Context, pack xnet.Pack) (xnet.Session, error)
 	), nil
 }
 
-func (w *Worker) handshakePack(ctx *core.Context, token string, cliPub []byte) (ret xnet.Pack, err error) {
+func (w *Worker) handshakePack(ctx context.Context, token string, cliPub []byte) (ret xnet.Pack, err error) {
 	cliPubSign, err := security.SignECDHCliPubKey(cliPub[:])
 	if err != nil {
 		return nil, err
@@ -95,7 +95,6 @@ func (w *Worker) handshakePack(ctx *core.Context, token string, cliPub []byte) (
 	}
 
 	req := &clipkt.Packet{
-		Index: ctx.SendIndex,
 		Mod:   int32(climod.ModuleID_System),
 		Seq:   int32(cliseq.SystemSeq_Handshake),
 		Data:  data,

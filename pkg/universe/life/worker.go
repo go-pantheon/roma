@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/router/routetable"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
@@ -372,7 +373,7 @@ func (w *Worker) renewalTick(ctx context.Context) error {
 	if ct := time.Now(); ct.After(w.nextRTRenewAt) {
 		w.nextRTRenewAt = ct.Add(w.appRouteTable.TTL() / 2)
 
-		if err := w.appRouteTable.RenewSelf(ctx, "gate", w.ID(), w.Referer()); err != nil {
+		if err := w.appRouteTable.RenewSelf(ctx, profile.Color(), w.ID(), profile.GRPCEndpoint()); err != nil {
 			if errors.Is(err, xerrors.ErrRouteTableNotFound) || errors.Is(err, xerrors.ErrRouteTableValueNotSame) {
 				return err
 			}

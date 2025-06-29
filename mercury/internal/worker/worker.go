@@ -15,14 +15,16 @@ import (
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
 	"github.com/go-pantheon/roma/gen/app/codec"
 	"github.com/go-pantheon/roma/mercury/internal/core"
+	"github.com/go-pantheon/roma/mercury/internal/job"
 	"github.com/go-pantheon/roma/mercury/internal/job/system"
 	"github.com/go-pantheon/roma/mercury/internal/task"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
-var _ core.UserManager = (*Worker)(nil)
+var _ core.Worker = (*Worker)(nil)
 
 type Worker struct {
 	xsync.Stoppable
@@ -30,23 +32,22 @@ type Worker struct {
 	logger log.Logger
 	log    *log.Helper
 
-	userId int64
-	sid    int64
-	hsInfo *HandshakeInfo
-
 	tcpCli   *tcp.Client
 	adminCli *core.AdminClients
 
-	taskChan     chan task.Taskable
-	redirectChan chan *clipkt.Packet
+	taskChan chan task.Taskable
 
+	userId     int64
+	sid        int64
+	hsInfo     *HandshakeInfo
 	clientUser *climsg.UserProto
 
-	Completed    atomic.Bool
-	WorkingTime  time.Duration
-	SentMsgCount atomic.Uint32
-	RecvMsgCount atomic.Uint32
-	PushMsgCount atomic.Uint32
+	CompletedChan chan struct{}
+	Completed     atomic.Bool
+	WorkingTime   time.Duration
+	SentMsgCount  atomic.Uint32
+	RecvMsgCount  atomic.Uint32
+	PushMsgCount  atomic.Uint32
 }
 
 func (w *Worker) Log() *log.Helper {
@@ -63,13 +64,13 @@ func (w *Worker) AdminClient() *core.AdminClients {
 
 func NewWorker(userId int64, logger log.Logger) *Worker {
 	w := &Worker{
-		Stoppable:    xsync.NewStopper(time.Second * 10),
-		logger:       logger,
-		userId:       userId,
-		sid:          core.ServerId(),
-		hsInfo:       &HandshakeInfo{},
-		taskChan:     make(chan task.Taskable),
-		redirectChan: make(chan *clipkt.Packet, 1024),
+		Stoppable:     xsync.NewStopper(time.Second * 10),
+		logger:        logger,
+		userId:        userId,
+		sid:           core.ServerId(),
+		hsInfo:        &HandshakeInfo{},
+		taskChan:      make(chan task.Taskable),
+		CompletedChan: make(chan struct{}),
 	}
 
 	w.log = log.NewHelper(log.With(logger, "module", fmt.Sprintf("worker-%d", userId)))
@@ -77,7 +78,7 @@ func NewWorker(userId int64, logger log.Logger) *Worker {
 	return w
 }
 
-func (w *Worker) Start(ctx *core.Context) (err error) {
+func (w *Worker) Start(ctx context.Context, jobs []*job.Job) (err error) {
 	w.hsInfo, err = newHandshakeInfo(w.userId)
 	if err != nil {
 		return err
@@ -93,58 +94,23 @@ func (w *Worker) Start(ctx *core.Context) (err error) {
 
 	w.tcpCli = tcp.NewClient(w.userId, addr, handshakePack, tcp.WithAuthFunc(w.Auth))
 
-	if err = w.tcpCli.Start(ctx); err != nil {
-		return err
-	}
+	w.GoAndQuickStop(fmt.Sprintf("worker.%d.work", w.userId), func() error {
+		return w.Run(ctx, jobs)
+	}, func() error {
+		return w.Stop(ctx)
+	})
 
-	w.log.Infof("worker-%d connect to gate: %s", w.userId, addr)
-
-	xsync.Go("worker.start", func() error {
-		return w.Work(ctx)
-	}, UnlogFilter)
 	return nil
 }
 
-func (w *Worker) SetClientUser(p *climsg.UserProto) {
-	w.clientUser = p
-}
-
-func (w *Worker) GetClientUser() (*climsg.UserProto, error) {
-	if w.clientUser == nil {
-		return nil, errors.Errorf("clientUser is nil. uid=%d", w.UID())
+func (w *Worker) Run(ctx context.Context, jobs []*job.Job) error {
+	if err := w.tcpCli.Start(ctx); err != nil {
+		return err
 	}
 
-	return w.clientUser, nil
-}
+	w.log.Infof("[worker-%d] connect to gate: %s", w.userId, w.tcpCli.Bind())
 
-func (w *Worker) Stop(ctx context.Context) {
-	w.stop(ctx)
-	w.log.Infof(w.Output())
-}
-
-func (w *Worker) stop(ctx context.Context) {
-	w.TurnOff(func() (err error) {
-		w.tcpCli.Stop(ctx)
-		w.tcpCli.WaitStopped()
-		close(w.redirectChan)
-
-		w.log.Infof("worker-%d closed", w.UID())
-
-		return err
-	})
-}
-
-func (w *Worker) DistributeTask(t task.Taskable) {
-	w.taskChan <- t
-}
-
-func (w *Worker) Work(bctx *core.Context) error {
-	heartbeatTicker := time.NewTicker(core.AppConf().HeartbeatInterval.AsDuration())
-	heartbeat := system.NewHeartbeatTask()
-
-	defer w.stop(bctx)
-
-	eg, ctx := errgroup.WithContext(bctx)
+	eg, ctx := errgroup.WithContext(ctx)
 	eg.Go(func() error {
 		select {
 		case <-w.StopTriggered():
@@ -154,93 +120,56 @@ func (w *Worker) Work(bctx *core.Context) error {
 		}
 	})
 	eg.Go(func() error {
-		return xsync.Run(func() error {
-			for {
-				select {
-				case t := <-w.taskChan:
-					if err := w.work(bctx, t); err != nil {
-						return err
-					}
-				case <-heartbeatTicker.C:
-					if err := w.work(bctx, heartbeat); err != nil {
-						return err
-					}
-				case redirect := <-w.redirectChan:
-					if err := w.send(bctx, redirect); err != nil {
-						return err
-					}
-				case <-ctx.Done():
-					return ctx.Err()
-				}
-			}
-		})
+		return w.assign(ctx, jobs)
+	})
+	eg.Go(func() error {
+		return w.work(ctx)
 	})
 
 	return eg.Wait()
 }
 
-func (w *Worker) work(ctx *core.Context, t task.Taskable) error {
-	if err := w.send(ctx, t.CSPacket()); err != nil {
-		return err
+func (w *Worker) assign(ctx context.Context, jobs []*job.Job) error {
+	dealTicker := time.NewTimer(core.AppConf().WorkMinInterval.AsDuration())
+	defer dealTicker.Stop()
+
+	heartbeatTicker := time.NewTicker(core.AppConf().HeartbeatInterval.AsDuration())
+	defer heartbeatTicker.Stop()
+
+	for _, j := range jobs {
+		for _, t := range j.Tasks {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-heartbeatTicker.C:
+				w.taskChan <- system.NewHeartbeatTask()
+			case <-dealTicker.C:
+				w.taskChan <- t
+			}
+		}
 	}
 
-	for {
-		if w.OnStopping() {
-			return nil
-		}
-
-		done, err := w.receive(ctx, t)
-		if err != nil {
-			return err
-		}
-		if done {
-			return nil
-		}
-	}
+	return nil
 }
 
-func (w *Worker) receive(ctx *core.Context, t task.Taskable) (done bool, err error) {
-	var (
-		resp     *clipkt.Packet
-		redirect *clipkt.Packet
-	)
+func (w *Worker) work(ctx context.Context) error {
+	return xsync.Run(func() error {
+		for {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case t := <-w.taskChan:
+				if err := w.send(t.CSPacket()); err != nil {
+					return err
+				}
 
-	timeout := time.NewTimer(10 * time.Second)
-	defer timeout.Stop()
-
-	select {
-	case <-w.StopTriggered():
-		err = xsync.ErrStopByTrigger
-		return
-	case <-timeout.C:
-		err = errors.Errorf("worker receive response timeout")
-		return
-	case bytes, ok := <-w.tcpCli.Receive():
-		if !ok {
-			err = errors.Errorf("tcp client disconnected")
-			return
+				return w.receive(ctx, t)
+			}
 		}
-		if resp, err = w.decode(bytes); err != nil {
-			return
-		}
-	}
-
-	if codec.IsPushSC(climod.ModuleID(resp.Mod), resp.Seq) {
-		w.PushMsgCount.Add(1)
-	} else {
-		w.RecvMsgCount.Add(1)
-	}
-
-	task.LogSC(w.log, resp)
-
-	redirect, done, err = t.Receive(ctx, resp)
-	if redirect != nil {
-		w.redirectChan <- redirect
-	}
-	return
+	})
 }
 
-func (w *Worker) send(_ *core.Context, pkt *clipkt.Packet) (err error) {
+func (w *Worker) send(pkt *clipkt.Packet) (err error) {
 	pkt.Index = int32(w.tcpCli.Session().IncreaseCSIndex())
 
 	if pkt.Obj == 0 {
@@ -259,6 +188,38 @@ func (w *Worker) send(_ *core.Context, pkt *clipkt.Packet) (err error) {
 	return w.tcpCli.Send(in)
 }
 
+func (w *Worker) receive(ctx context.Context, t task.Taskable) (err error) {
+	var resp *clipkt.Packet
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	select {
+	case <-w.StopTriggered():
+		return xsync.ErrStopByTrigger
+	case <-ctx.Done():
+		return ctx.Err()
+	case bytes, ok := <-w.tcpCli.Receive():
+		if !ok {
+			return errors.Errorf("tcp client disconnected")
+		}
+
+		if resp, err = w.decode(bytes); err != nil {
+			return err
+		}
+	}
+
+	if codec.IsPushSC(climod.ModuleID(resp.Mod), resp.Seq) {
+		w.PushMsgCount.Add(1)
+	} else {
+		w.RecvMsgCount.Add(1)
+	}
+
+	task.LogSC(w.log, resp)
+
+	return t.Receive(w, resp)
+}
+
 func (w *Worker) decode(pack []byte) (p *clipkt.Packet, err error) {
 	p = &clipkt.Packet{}
 
@@ -270,14 +231,40 @@ func (w *Worker) decode(pack []byte) (p *clipkt.Packet, err error) {
 	return p, nil
 }
 
+func (w *Worker) Stop(ctx context.Context) error {
+	return w.TurnOff(func() (err error) {
+		if err = w.tcpCli.Stop(ctx); err != nil {
+			return err
+		}
+
+		w.log.Infof("[worker-%d] closed", w.UID())
+		w.log.Infof(w.Output())
+
+		return nil
+	})
+}
+
+func (w *Worker) SetClientUser(p *climsg.UserProto) {
+	w.clientUser = p
+	w.log.Infof("[worker-%d] set client user: %s", w.UID(), protojson.Format(p))
+}
+
+func (w *Worker) GetClientUser() (*climsg.UserProto, error) {
+	if w.clientUser == nil {
+		return nil, errors.Errorf("clientUser is nil. uid=%d", w.UID())
+	}
+
+	return w.clientUser, nil
+}
+
 func (w *Worker) Output() string {
 	var s strings.Builder
 
-	s.WriteString(fmt.Sprintf("worker-%d ", w.UID()))
+	s.WriteString(fmt.Sprintf("[worker-%d] ", w.UID()))
 	if w.Completed.Load() {
-		s.WriteString("completed")
+		s.WriteString("completed. ")
 	} else {
-		s.WriteString("not completed")
+		s.WriteString("not completed. ")
 	}
 	s.WriteString(fmt.Sprintf(" time: %.4fs", w.WorkingTime.Seconds()))
 	s.WriteString(fmt.Sprintf(" sent: %d", w.SentMsgCount.Load()))

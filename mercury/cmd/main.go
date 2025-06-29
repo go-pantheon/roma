@@ -18,7 +18,6 @@ import (
 	"github.com/go-pantheon/roma/mercury/internal/conf"
 	"github.com/go-pantheon/roma/mercury/internal/core"
 	"github.com/go-pantheon/roma/mercury/internal/core/security"
-	"github.com/go-pantheon/roma/mercury/internal/workshop"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
@@ -78,7 +77,7 @@ func main() {
 
 	log.Infof("[%s] is running. profile=%s, color=%s", Name, bc.Label.Profile, bc.Label.Color)
 
-	if err = run(logger, &bc); err != nil {
+	if err = run(logger); err != nil {
 		if errors.Is(err, workshopCompletedFlag) {
 			log.Infof("[%s] is completed. profile=%s, color=%s", Name, bc.Label.Profile, bc.Label.Color)
 			return
@@ -90,31 +89,21 @@ func main() {
 
 var workshopCompletedFlag = errors.Errorf("mercury completed")
 
-func run(logger log.Logger, bc *conf.Bootstrap) error {
-	var ws *workshop.Workshop
+func run(logger log.Logger) error {
+	ws := newWorkshop(logger)
 
 	eg, ctx := errgroup.WithContext(context.Background())
+
 	eg.Go(func() error {
-		<-ctx.Done()
-		return ctx.Err()
-	})
-	eg.Go(func() error {
-		newWorkshop(ctx, logger, bc).Run(ctx)
-		return workshopCompletedFlag
+		return ws.Run(ctx)
 	})
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 
 	eg.Go(func() error {
-		for {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-c:
-				ws.Stop(ctx)
-			}
-		}
+		<-c
+		return ws.Stop(ctx)
 	})
 
 	return eg.Wait()

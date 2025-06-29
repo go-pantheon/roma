@@ -114,6 +114,6 @@ func (s *RoomPersister) Version() int64 {
 	return s.room.Version
 }
 
-func (s *RoomPersister) ModuleKeys() []life.ModuleKey {
+func (s *RoomPersister) AllModuleKeys() []life.ModuleKey {
 	return []life.ModuleKey{}
 }

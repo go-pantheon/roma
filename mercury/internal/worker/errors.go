@@ -10,7 +10,7 @@ import (
 )
 
 func UnlogFilter(err error) bool {
-	return errors.Is(err, xsync.ErrStopByTrigger) || IsConnectionError(err) || IsContextError(err) || xerrors.IsLogoutError(err)
+	return errors.Is(err, xsync.ErrStopByTrigger) || IsConnectionError(err) || IsContextError(err) || xerrors.IsLogoutError(err) || errors.Is(err, io.EOF)
 }
 
 func IsConnectionError(err error) bool {

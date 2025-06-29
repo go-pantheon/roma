@@ -9,7 +9,7 @@ import (
 type Persistent interface {
 	ObjectHolder
 
-	ModuleKeys() []ModuleKey
+	AllModuleKeys() []ModuleKey
 	Lock(f func() error) error
 	Refresh(ctx context.Context) (err error)
 	PrepareToPersist(ctx context.Context, modules []ModuleKey) (VersionProto, error)
