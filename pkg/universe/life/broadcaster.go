@@ -17,7 +17,7 @@ type Broadcastable interface {
 	Broadcast(wctx Context, mod climod.ModuleID, seq int32, obj int64, body proto.Message) error
 	Multicast(wctx Context, mod climod.ModuleID, seq int32, obj int64, body proto.Message, uids ...int64) error
 	Consume() <-chan *BroadcastMessage
-	Send(msg *BroadcastMessage) error
+	ExecuteBroadcast(msg *BroadcastMessage) error
 }
 
 var _ Broadcastable = (*WorkerBroadcaster)(nil)
@@ -69,7 +69,7 @@ func (w *WorkerBroadcaster) Consume() <-chan *BroadcastMessage {
 	return w.msgs
 }
 
-func (w *WorkerBroadcaster) Send(msg *BroadcastMessage) error {
+func (w *WorkerBroadcaster) ExecuteBroadcast(msg *BroadcastMessage) error {
 	defer putBroadcastMessage(msg)
 
 	if msg.all {

@@ -20,6 +20,7 @@ type Workshop struct {
 	logger  log.Logger
 	Name    string
 	Jobs    []*job.Job
+	WIDs    []int64
 	Workers map[int64]*worker.Worker
 }
 
@@ -32,6 +33,12 @@ func NewWorkshop(name string, logger log.Logger) *Workshop {
 		Workers:   make(map[int64]*worker.Worker, core.AppConf().WorkerCount),
 	}
 
+	firstWID := core.AppConf().FirstUid
+
+	for i := range core.AppConf().WorkerCount {
+		ws.WIDs = append(ws.WIDs, firstWID+int64(i))
+	}
+
 	return ws
 }
 
@@ -39,34 +46,38 @@ func (ws *Workshop) AddJob(js ...*job.Job) {
 	ws.Jobs = append(ws.Jobs, js...)
 
 	for _, j := range js {
-		log.Infof("[%s] add job: %d", ws.Name, j.T)
+		log.Infof("[workshop-%s] add job: %d", ws.Name, j.T)
 	}
 }
 
 func (ws *Workshop) Run(ctx context.Context) error {
 	var wg sync.WaitGroup
 
-	for i := range core.AppConf().WorkerCount {
+	for _, wid := range ws.WIDs {
+		if _, ok := ws.Workers[wid]; ok {
+			continue
+		}
+
+		w := worker.NewWorker(wid, ws.logger)
+		ws.Workers[w.UID()] = w
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
 			wg.Add(1)
 
-			w := worker.NewWorker(int64(i)+core.AppConf().FirstUid, ws.logger)
-			ws.Workers[w.UID()] = w
-
 			go func(w *worker.Worker) {
 				defer wg.Done()
 
 				st := time.Now()
 
-				w.Log().Infof("[worker-%d] start at: %s", w.UID(), st.Format("15:04:05"))
-
 				if err := w.Start(ctx, ws.Jobs); err != nil {
 					w.Log().Errorf("[worker-%d] start failed: %+v", w.UID(), err)
 					return
 				}
+
+				w.Log().Infof("[worker-%d] start at: %s", w.UID(), st.Format("15:04:05"))
 
 				w.WaitStopped()
 

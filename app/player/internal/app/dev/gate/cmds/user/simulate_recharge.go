@@ -5,6 +5,7 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds"
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/go-pantheon/roma/pkg/util/maths/i64"
 )
 
@@ -33,25 +34,30 @@ func NewSimulateRechargeCommander(uc *biz.DevUseCase) *SimulateRechargeCommander
 	return cmd
 }
 
-func (c *SimulateRechargeCommander) Func(ctx core.Context, args map[string]string) (sc *climsg.SCDevExecute, err error) {
-	sc = &climsg.SCDevExecute{}
+func (c *SimulateRechargeCommander) Func(ctx core.Context, args map[string]string) (*climsg.SCDevExecute, error) {
+	sc := &climsg.SCDevExecute{}
+	
 	var (
 		user  = ctx.User()
 		cents int64
 	)
-	if cents, err = i64.ToI64(args[RechargeCentsArg]); err != nil {
+
+	if cents, err := i64.ToI64(args[RechargeCentsArg]); err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessagef(err, "cents=%d", cents)
+
+		return sc, nil
 	}
-	if err = user.Recharge().AddRecharge(cents); err != nil {
+	if err := user.Recharge().AddRecharge(cents); err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessage(err)
+
+		return sc, nil
 	}
 
 	ctx.Changed()
 
 	sc.Code = climsg.SCDevExecute_Succeeded
-	return
+
+	return sc, nil
 }

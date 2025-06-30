@@ -25,19 +25,20 @@ import (
 )
 
 // TakeProto{{.UpperGroup}}TunnelResponse takes a proto message from pool and must call Put{{.UpperGroup}}ResponseProto to put it back.
-func TakeProto{{.UpperGroup}}TunnelResponse(mod, seq int32, Obj int64, in proto.Message) (ret *intrav1.TunnelResponse, err error) {
+func TakeProto{{.UpperGroup}}TunnelResponse(index, mod, seq int32, Obj int64, in proto.Message) (ret *intrav1.TunnelResponse, err error) {
 	data, err := proto.Marshal(in)
 	if err != nil {
 		return nil, errors.Wrapf(err, "proto marshal failed. mod=%d seq=%d obj=%d", mod, seq, Obj)
 	}
 
-	return TakeBytes{{.UpperGroup}}TunnelResponse(mod, seq, Obj, data), nil
+	return TakeBytes{{.UpperGroup}}TunnelResponse(index, mod, seq, Obj, data), nil
 }
 
 // TakeBytes{{.UpperGroup}}TunnelResponse takes a proto message from pool and must call Put{{.UpperGroup}}TunnelResponse to put it back.
-func TakeBytes{{.UpperGroup}}TunnelResponse(mod, seq int32, Obj int64, data []byte) (p *intrav1.TunnelResponse) {
+func TakeBytes{{.UpperGroup}}TunnelResponse(index, mod, seq int32, Obj int64, data []byte) (p *intrav1.TunnelResponse) {
 	p = get{{.UpperGroup}}TunnelResponse()
 
+	p.Index = index
 	p.Mod = mod
 	p.Seq = seq
 	p.Obj = Obj

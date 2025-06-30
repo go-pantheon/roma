@@ -38,5 +38,5 @@ func PlayerHandle(ctx context.Context, s *service.PlayerServices, in xnet.Tunnel
 		return nil, err
 	}
 
-	return TakeProtoPlayerTunnelResponse(in.GetMod(), in.GetSeq(), in.GetObj(), sc)
+	return TakeProtoPlayerTunnelResponse(in.GetIndex(), in.GetMod(), in.GetSeq(), in.GetObj(), sc)
 }

@@ -2,6 +2,7 @@ package biz
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/hero/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/app/hero/gate/domain/object"
 	storagedo "github.com/go-pantheon/roma/app/player/internal/app/storage/gate/domain"
@@ -11,7 +12,6 @@ import (
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
 	"github.com/go-pantheon/roma/pkg/universe/life"
-	"github.com/pkg/errors"
 )
 
 func NewHeroUseCase(mgr *core.Manager, logger log.Logger,
@@ -43,6 +43,7 @@ func (uc *HeroUseCase) onCreated(ctx core.Context) error {
 			uc.log.WithContext(ctx).Errorf("unlock hero on created failed. %+v", err)
 			continue
 		}
+
 		ctx.Changed(object.ModuleKey)
 	}
 
@@ -53,6 +54,7 @@ func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, arg *life.EventArg) er
 	itemIds := life.GetArg[[]int64](arg, core.ArgKeyStorageItemIDs)
 
 	var needUnlock bool
+
 	for _, itemId := range itemIds {
 		if itemData := gamedata.GetResourceItemData(itemId); itemData != nil {
 			if itemData.Type == gamedata.ItemTypeHeroPiece {
@@ -61,6 +63,7 @@ func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, arg *life.EventArg) er
 			}
 		}
 	}
+
 	if !needUnlock {
 		return nil
 	}
@@ -72,6 +75,7 @@ func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, arg *life.EventArg) er
 		if _, ok := heroes[heroData.ID]; ok {
 			continue
 		}
+
 		if uc.storageDo.CanCost(ctx, heroData.CostCosts) == nil {
 			if newHero, err := uc.unlockHero(ctx, heroData, heroData.CostCosts); err != nil {
 				uc.log.WithContext(ctx).Errorf("unlock hero failed. %+v", err)
@@ -84,60 +88,69 @@ func (uc *HeroUseCase) OnStorageUpdated(ctx core.Context, arg *life.EventArg) er
 	msg := &climsg.SCPushHeroUnlock{
 		Heroes: make([]*climsg.HeroProto, 0, len(newHeroes)),
 	}
+
 	for _, hero := range newHeroes {
 		msg.Heroes = append(msg.Heroes, hero.EncodeClient())
 	}
-	_ = ctx.Reply(int32(climod.ModuleID_Hero), int32(cliseq.HeroSeq_PushHeroUnlock), ctx.UID(), msg)
+
+	_ = ctx.Push(int32(climod.ModuleID_Hero), int32(cliseq.HeroSeq_PushHeroUnlock), ctx.UID(), msg)
+
 	return nil
 }
 
-func (uc *HeroUseCase) unlockHero(ctx core.Context, d *gamedata.HeroBaseData, cost *gamedata.Costs) (r *object.Hero, err error) {
+func (uc *HeroUseCase) unlockHero(ctx core.Context, d *gamedata.HeroBaseData, cost *gamedata.Costs) (*object.Hero, error) {
 	if ctx.User().HeroList().Heroes[d.ID] != nil {
-		err = errors.Errorf("hero already unlocked. heroId=%d", d.ID)
-		return
+		return nil, errors.Errorf("hero already unlocked. heroId=%d", d.ID)
 	}
 
-	if err = uc.storageDo.Cost(ctx, cost); err != nil {
-		return
+	if err := uc.storageDo.Cost(ctx, cost); err != nil {
+		return nil, err
 	}
 
-	r, err = uc.heroDo.UnlockHero(ctx, d)
+	r, err := uc.heroDo.UnlockHero(ctx, d)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	ctx.Changed(object.ModuleKey)
-	return
+
+	return r, nil
 }
 
-func (uc *HeroUseCase) HeroLevelUpgrade(ctx core.Context, cs *climsg.CSHeroLevelUpgrade) (sc *climsg.SCHeroLevelUpgrade, err error) {
-	sc = &climsg.SCHeroLevelUpgrade{}
+func (uc *HeroUseCase) HeroLevelUpgrade(ctx core.Context, cs *climsg.CSHeroLevelUpgrade) (*climsg.SCHeroLevelUpgrade, error) {
+	sc := &climsg.SCHeroLevelUpgrade{}
+
 	var hero *object.Hero
 	if hero = ctx.User().HeroList().Heroes[cs.HeroId]; hero == nil {
 		sc.Code = climsg.SCHeroLevelUpgrade_ErrHeroNotExist
-		return
+		return sc, nil
 	}
+
 	heroData := gamedata.GetHeroBaseData(hero.Id)
 	if heroData == nil {
 		sc.Code = climsg.SCHeroLevelUpgrade_ErrHeroNotExist
-		return
+		return sc, nil
 	}
+
 	levelData := heroData.LevelData.SubDataMap[int64(hero.Level)+1]
 	if levelData == nil {
 		sc.Code = climsg.SCHeroLevelUpgrade_ErrMaxLevel
-		return
+		return sc, nil
 	}
+
 	if len(levelData.Cost) > 0 {
-		if err = uc.storageDo.Cost(ctx, levelData.CostCosts); err != nil {
+		if err := uc.storageDo.Cost(ctx, levelData.CostCosts); err != nil {
 			sc.Code = climsg.SCHeroLevelUpgrade_ErrCostNotEnough
-			return
+			return sc, nil
 		}
 	}
+
 	hero.Level = levelData.Level
 
 	ctx.Changed(object.ModuleKey)
 
 	sc.Code = climsg.SCHeroLevelUpgrade_Succeeded
 	sc.Hero = hero.EncodeClient()
-	return
+
+	return sc, nil
 }

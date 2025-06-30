@@ -11,6 +11,7 @@ import (
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	cliseq "github.com/go-pantheon/roma/gen/api/client/sequence"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 var _ cmds.Commandable = (*CreateAdminPlayerCommander)(nil)
@@ -35,8 +36,8 @@ func NewAdminPlayerCommander(uc *biz.DevUseCase, storageDo *storagedo.StorageDom
 	return cmd
 }
 
-func (c *CreateAdminPlayerCommander) Func(ctx core.Context, args map[string]string) (sc *climsg.SCDevExecute, err error) {
-	sc = &climsg.SCDevExecute{}
+func (c *CreateAdminPlayerCommander) Func(ctx core.Context, args map[string]string) (*climsg.SCDevExecute, error) {
+	sc := &climsg.SCDevExecute{}
 
 	// add all heroes
 	for _, d := range gamedata.GetHeroBaseDataList() {
@@ -46,32 +47,44 @@ func (c *CreateAdminPlayerCommander) Func(ctx core.Context, args map[string]stri
 
 	// add all necessary items
 	amounts := make(map[int64]uint64)
+
 	for _, i := range []int64{1, 2, 3} {
 		if d := gamedata.GetResourceItemData(i); d != nil {
 			amounts[d.ID] = 100000000
 		}
 	}
+
 	prizes, err := gamedata.TryNewItemPrizes(amounts)
 	if err != nil {
 		log.Errorf("failed to create admin player. %+v", err)
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessage(err)
+
+		return sc, nil
 	}
 
 	if err = c.storageDo.Add(ctx, storagedo.WithItems(prizes.Items()...)); err != nil {
-		log.Errorf("failed to create admin player. %+v", err)
 		sc.Code = climsg.SCDevExecute_ErrUnspecified
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessage(err)
+
+		return sc, nil
 	}
 
 	ctx.Changed()
 
-	_ = ctx.Reply(int32(climod.ModuleID_System), int32(cliseq.SystemSeq_ServerLogout), ctx.UID(), &climsg.SCServerLogout{
-		Code: climsg.SCServerLogout_Waiting,
-	})
+	err = ctx.Push(int32(climod.ModuleID_System), int32(cliseq.SystemSeq_ServerLogout), ctx.UID(),
+		&climsg.SCServerLogout{
+			Code: climsg.SCServerLogout_Waiting,
+		},
+	)
+	if err != nil {
+		sc.Code = climsg.SCDevExecute_ErrUnspecified
+		sc.Message = life.ErrorMessage(err)
+
+		return sc, nil
+	}
 
 	sc.Code = climsg.SCDevExecute_Succeeded
-	return
+
+	return sc, nil
 }

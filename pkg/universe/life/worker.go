@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	globalWorkerIndex = &atomic.Uint64{}
+	globalWorkerUnique = &atomic.Uint64{}
 )
 
 type Workable interface {
@@ -55,7 +55,7 @@ type Worker struct {
 	clientIP string
 
 	// unique identifier for the current worker, used to distinguish between multiple instances of the same ID, one of usages is the optimistic lock for deletion from the Manager
-	index  uint64
+	unique uint64
 	events chan EventFunc
 	// different error that occurred during the disconnect for logout message, default is xsync.ErrStopByTrigger
 	disconnectErr  atomic.Value
@@ -78,7 +78,7 @@ func newWorker(
 ) (w *Worker) {
 	w = &Worker{
 		Stoppable:         xsync.NewStopper(constants.WorkerStopTimeout),
-		index:             globalWorkerIndex.Add(1),
+		unique:            globalWorkerUnique.Add(1),
 		log:               log,
 		appRouteTable:     appRouteTable,
 		Broadcastable:     broadcaster,
@@ -168,15 +168,15 @@ func (w *Worker) runEventLoop(ctx context.Context) error {
 			}
 		case e := <-w.ConsumeEvent():
 			if err := w.ExecuteEvent(w.newContextFunc(ctx, w), e); err != nil {
-				w.log.WithContext(ctx).Errorf("worker execute event failed. %s %+v", w.LogInfo(), err)
+				return err
 			}
 		case <-w.persistManager.Immediately():
 			if err := w.persistManager.PrepareToPersist(ctx); err != nil {
-				w.log.WithContext(ctx).Errorf("worker immediately prepare to persist failed. %s %+v", w.LogInfo(), err)
+				return err
 			}
 		case <-w.persistTicker.C:
 			if err := w.persistManager.PrepareToPersist(ctx); err != nil {
-				w.log.WithContext(ctx).Errorf("worker ticker prepare to persist failed. %s %+v", w.LogInfo(), err)
+				return err
 			}
 		}
 	}
@@ -188,8 +188,8 @@ func (w *Worker) runTunnelResponseLoop(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		case msg := <-w.ConsumeTunnelResponse():
-			if err := w.ExecuteReply(msg); err != nil {
-				w.log.WithContext(ctx).Errorf("worker execute reply failed. %s %+v", w.LogInfo(), err)
+			if err := w.ExecuteSend(msg); err != nil {
+				w.log.WithContext(ctx).Errorf("worker execute reply failed. i=%d seq=<%d-%d> %s %+v", msg.GetIndex(), msg.GetMod(), msg.GetSeq(), w.LogInfo(), err)
 			}
 		}
 	}
@@ -243,7 +243,7 @@ func (w *Worker) sendLogoutMsg(_ context.Context, err error) {
 		msg.Code = climsg.SCServerLogout_Waiting
 	}
 
-	_ = w.ReplyImmediately(int32(climod.ModuleID_System), int32(cliseq.SystemSeq_ServerLogout), w.ID(), msg)
+	_ = w.PushImmediately(int32(climod.ModuleID_System), int32(cliseq.SystemSeq_ServerLogout), w.ID(), msg)
 }
 
 // reuse check if the worker can be reused and update the worker status and reply function.
@@ -261,7 +261,7 @@ func (w *Worker) canReuse(ctx context.Context, replier Responsive) bool {
 		w.status = intrav1.OnlineStatus_ONLINE_STATUS_GATE
 		w.referer = xcontext.GateReferer(ctx)
 		w.clientIP = xcontext.ClientIP(ctx)
-		w.UpdateReplyFunc(replier.ReplyFunc())
+		w.UpdateSendFunc(replier.SendFunc())
 	}
 
 	return true
@@ -270,7 +270,7 @@ func (w *Worker) canReuse(ctx context.Context, replier Responsive) bool {
 func (w *Worker) Stop(ctx context.Context) (err error) {
 	return w.TurnOff(func() (err error) {
 		if w.notifyStoppedFunc != nil {
-			w.notifyStoppedFunc(w.ID(), w.Index())
+			w.notifyStoppedFunc(w.ID(), w.Unique())
 		}
 
 		w.Tickers.stop()
@@ -359,13 +359,16 @@ func (w *Worker) ConsumeEvent() <-chan EventFunc {
 
 func (w *Worker) ExecuteEvent(wctx Context, f EventFunc) error {
 	return w.persistManager.Persister().Lock(func() error {
-		err := f(wctx)
+		if err := f(wctx); err != nil {
+			return err
+		}
+
 		mods, immediately := wctx.ChangedModules()
 		if len(mods) > 0 {
 			w.persistManager.Change(wctx, mods, immediately)
 		}
 
-		return err
+		return nil
 	})
 }
 
@@ -404,8 +407,8 @@ func IsAdminID(id int64) bool {
 	return id == 0
 }
 
-func (w *Worker) Index() uint64 {
-	return w.index
+func (w *Worker) Unique() uint64 {
+	return w.unique
 }
 
 func (w *Worker) Status() intrav1.OnlineStatus {

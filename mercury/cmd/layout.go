@@ -8,8 +8,8 @@ import (
 	"github.com/go-pantheon/roma/mercury/internal/workshop"
 )
 
-func newWorkshop(logger log.Logger) *workshop.Workshop {
-	ws := workshop.NewWorkshop("echo", logger)
+func newNormalWorkshop(logger log.Logger) *workshop.Workshop {
+	ws := workshop.NewWorkshop("normal", logger)
 	ws.AddJob(
 		user.NewLoginJob(),
 		dev.NewDevListJob(),

@@ -30,5 +30,5 @@ func RoomHandle(ctx context.Context, s *service.RoomServices, in xnet.TunnelMess
 		return nil, err
 	}
 
-	return TakeProtoRoomTunnelResponse(in.GetMod(), in.GetSeq(), in.GetObj(), sc)
+	return TakeProtoRoomTunnelResponse(in.GetIndex(), in.GetMod(), in.GetSeq(), in.GetObj(), sc)
 }

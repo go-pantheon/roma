@@ -11,19 +11,20 @@ import (
 )
 
 // TakeProtoRoomTunnelResponse takes a proto message from pool and must call PutRoomResponseProto to put it back.
-func TakeProtoRoomTunnelResponse(mod, seq int32, Obj int64, in proto.Message) (ret *intrav1.TunnelResponse, err error) {
+func TakeProtoRoomTunnelResponse(index, mod, seq int32, Obj int64, in proto.Message) (ret *intrav1.TunnelResponse, err error) {
 	data, err := proto.Marshal(in)
 	if err != nil {
 		return nil, errors.Wrapf(err, "proto marshal failed. mod=%d seq=%d obj=%d", mod, seq, Obj)
 	}
 
-	return TakeBytesRoomTunnelResponse(mod, seq, Obj, data), nil
+	return TakeBytesRoomTunnelResponse(index, mod, seq, Obj, data), nil
 }
 
 // TakeBytesRoomTunnelResponse takes a proto message from pool and must call PutRoomTunnelResponse to put it back.
-func TakeBytesRoomTunnelResponse(mod, seq int32, Obj int64, data []byte) (p *intrav1.TunnelResponse) {
+func TakeBytesRoomTunnelResponse(index, mod, seq int32, Obj int64, data []byte) (p *intrav1.TunnelResponse) {
 	p = getRoomTunnelResponse()
 
+	p.Index = index
 	p.Mod = mod
 	p.Seq = seq
 	p.Obj = Obj

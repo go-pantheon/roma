@@ -48,13 +48,13 @@ func (uc *StorageUseCase) onSecondTick(ctx core.Context) error {
 	return nil
 }
 
-func (uc *StorageUseCase) UsePack(ctx core.Context, cs *climsg.CSUsePack) (sc *climsg.SCUsePack, err error) {
-	sc = &climsg.SCUsePack{}
+func (uc *StorageUseCase) UsePack(ctx core.Context, cs *climsg.CSUsePack) (*climsg.SCUsePack, error) {
+	sc := &climsg.SCUsePack{}
 
 	packData := gamedata.GetResourcePackData(cs.Id)
 	if packData == nil {
 		sc.Code = climsg.SCUsePack_ErrPackNotExist
-		return
+		return sc, nil
 	}
 
 	prizes, err := uc.do.UsePack(ctx, packData)
@@ -65,13 +65,16 @@ func (uc *StorageUseCase) UsePack(ctx core.Context, cs *climsg.CSUsePack) (sc *c
 			uc.log.WithContext(ctx).Errorf("use pack failed. uid=%d %+v", ctx.UID(), err)
 			sc.Code = climsg.SCUsePack_ErrUnspecified
 		}
-		return
+
+		return sc, nil
 	}
 
 	sc.Code = climsg.SCUsePack_Succeeded
-	sc.Prizes = make(map[int64]int64)
+	sc.Prizes = make(map[int64]int64, len(prizes.Items()))
+
 	for _, prize := range prizes.Items() {
 		sc.Prizes[prize.Data().Id()] = int64(prize.Amount())
 	}
-	return
+
+	return sc, nil
 }

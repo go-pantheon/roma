@@ -10,6 +10,7 @@ import (
 	devobj "github.com/go-pantheon/roma/app/player/internal/app/dev/gate/domain/object"
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/go-pantheon/roma/pkg/util/maths/i64"
 )
 
@@ -40,8 +41,8 @@ func NewChangeTimeCommander(uc *biz.DevUseCase) *ChangeTimeCommander {
 	return cmd
 }
 
-func (c *ChangeTimeCommander) Func(ctx core.Context, args map[string]string) (sc *climsg.SCDevExecute, err error) {
-	sc = &climsg.SCDevExecute{}
+func (c *ChangeTimeCommander) Func(ctx core.Context, args map[string]string) (*climsg.SCDevExecute, error) {
+	sc := &climsg.SCDevExecute{}
 
 	user := ctx.User()
 
@@ -50,10 +51,11 @@ func (c *ChangeTimeCommander) Func(ctx core.Context, args map[string]string) (sc
 		dur     time.Duration
 	)
 
-	if minutes, err = i64.ToI64(args[ChangeTimeArgMinutes]); err != nil {
+	if minutes, err := i64.ToI64(args[ChangeTimeArgMinutes]); err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessagef(err, "minutes=%d", minutes)
+
+		return sc, nil
 	}
 
 	if minutes == 0 {
@@ -64,7 +66,9 @@ func (c *ChangeTimeCommander) Func(ctx core.Context, args map[string]string) (sc
 	}
 
 	ctx.Changed(devobj.ModuleKey)
+
 	sc.Code = climsg.SCDevExecute_Succeeded
 	sc.Message = fmt.Sprintf("New time is changed to %s. Offset to %.2fm", xtime.Format(ctx.Now()), user.Dev().TimeOffset().Minutes())
-	return
+
+	return sc, nil
 }

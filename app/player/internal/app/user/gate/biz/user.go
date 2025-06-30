@@ -103,40 +103,40 @@ func (uc *UserUseCase) secondTick(ctx core.Context) error {
 	return nil
 }
 
-func (uc *UserUseCase) Login(ctx core.Context, cs *climsg.CSLogin) (sc *climsg.SCLogin, err error) {
-	sc = &climsg.SCLogin{}
+func (uc *UserUseCase) Login(ctx core.Context, cs *climsg.CSLogin) (*climsg.SCLogin, error) {
+	sc := &climsg.SCLogin{}
 	user := ctx.User()
 
 	uc.dailyReset(ctx)
 
-	sc.User, err = user.EncodeClient()
+	userProto, err := user.EncodeClient()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	sc.Code = climsg.SCLogin_Succeeded
-
+	sc.User = userProto
 	sc.ServerTime = time.Now().Unix()
 	sc.Newborn = user.GetAndResetNewborn()
 
 	return sc, nil
 }
 
-func (uc *UserUseCase) UpdateName(ctx core.Context, cs *climsg.CSUpdateName) (sc *climsg.SCUpdateName, err error) {
-	sc = &climsg.SCUpdateName{}
+func (uc *UserUseCase) UpdateName(ctx core.Context, cs *climsg.CSUpdateName) (*climsg.SCUpdateName, error) {
+	sc := &climsg.SCUpdateName{}
 
 	name := strings.TrimSpace(cs.Name)
 
 	if size := utf8.RuneCountInString(name); size < nameMinLength || size > nameMaxLength {
 		sc.Code = climsg.SCUpdateName_ErrNameIllegal
-		return
+		return sc, nil
 	}
 
 	basic := ctx.User().Basic()
 
 	if name == basic.Name {
 		sc.Code = climsg.SCUpdateName_ErrNameNotChanged
-		return
+		return sc, nil
 	}
 
 	basic.Name = name
@@ -144,26 +144,29 @@ func (uc *UserUseCase) UpdateName(ctx core.Context, cs *climsg.CSUpdateName) (sc
 	ctx.Changed(object.ModuleKey)
 
 	sc.Code = climsg.SCUpdateName_Succeeded
-	return
+
+	return sc, nil
 }
 
-func (uc *UserUseCase) SetGender(ctx core.Context, cs *climsg.CSSetGender) (sc *climsg.SCSetGender, err error) {
-	sc = &climsg.SCSetGender{}
+func (uc *UserUseCase) SetGender(ctx core.Context, cs *climsg.CSSetGender) (*climsg.SCSetGender, error) {
+	sc := &climsg.SCSetGender{}
 
 	if cs.Gender != object.GenderMale && cs.Gender != object.GenderFemale {
 		sc.Code = climsg.SCSetGender_ErrGenderIllegal
-		return
+		return sc, nil
 	}
 
-	o := ctx.User().Basic()
-	if o.Gender != object.GenderUnset {
+	basic := ctx.User().Basic()
+	if basic.Gender != object.GenderUnset {
 		sc.Code = climsg.SCSetGender_ErrGenderSet
-		return
+		return sc, nil
 	}
 
-	o.Gender = cs.Gender
+	basic.Gender = cs.Gender
+
 	ctx.Changed(object.ModuleKey)
 
 	sc.Code = climsg.SCSetGender_Succeeded
-	return
+
+	return sc, nil
 }

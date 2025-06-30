@@ -27,9 +27,10 @@ func NewShowTimeCommander(uc *biz.DevUseCase) *ShowTimeCommander {
 	return cmd
 }
 
-func (c *ShowTimeCommander) Func(ctx core.Context, args map[string]string) (sc *climsg.SCDevExecute, err error) {
-	sc = &climsg.SCDevExecute{}
+func (c *ShowTimeCommander) Func(ctx core.Context, args map[string]string) (*climsg.SCDevExecute, error) {
+	sc := &climsg.SCDevExecute{}
 	sc.Code = climsg.SCDevExecute_Succeeded
 	sc.Message = xtime.Format(ctx.Now())
-	return
+
+	return sc, nil
 }

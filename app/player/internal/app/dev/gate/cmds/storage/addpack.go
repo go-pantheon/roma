@@ -7,6 +7,7 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	"github.com/go-pantheon/roma/gamedata"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/go-pantheon/roma/pkg/util/maths/i64"
 	"github.com/go-pantheon/roma/pkg/util/maths/u64"
 )
@@ -45,37 +46,41 @@ func NewAddPackCommander(uc *biz.DevUseCase, storageDo *domain.StorageDomain) *A
 	return c
 }
 
-func (c *AddPackCommander) Func(ctx core.Context, args map[string]string) (sc *climsg.SCDevExecute, err error) {
-	sc = &climsg.SCDevExecute{}
+func (c *AddPackCommander) Func(ctx core.Context, args map[string]string) (*climsg.SCDevExecute, error) {
+	sc := &climsg.SCDevExecute{}
 
 	var (
 		packId int64
 		count  uint64
 	)
 
-	if packId, err = i64.ToI64(args[AddPackArgItemId]); err != nil {
+	if packId, err := i64.ToI64(args[AddPackArgItemId]); err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessagef(err, "packId=%d", packId)
+
+		return sc, nil
 	}
-	if count, err = u64.ToU64(args[AddPackArgAmount]); err != nil {
+	if count, err := u64.ToU64(args[AddPackArgAmount]); err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessagef(err, "count=%d", count)
+
+		return sc, nil
 	}
 
 	prizes, err := gamedata.TryNewPackPrize(packId, count)
 	if err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessage(err)
+
+		return sc, nil
 	}
 
 	if err = c.storageDo.Add(ctx, domain.WithPacks(prizes)); err != nil {
-		sc.Message = err.Error()
-		return
+		sc.Message = life.ErrorMessage(err)
+		return sc, nil
 	}
 
 	sc.Code = climsg.SCDevExecute_Succeeded
-	return
+
+	return sc, nil
 }

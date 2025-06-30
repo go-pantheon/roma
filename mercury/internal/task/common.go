@@ -101,25 +101,25 @@ func (t *CommonTask) GetObj(ctx core.Worker) int64 {
 
 func (t *CommonTask) CommonAssert(ctx core.Worker, mod climod.ModuleID, seq int32, cs, sc proto.Message) error {
 	if t.Mod != mod || t.Seq != seq {
-		return errors.Errorf("expect [%d-%d], but got [%d-%d]", mod, seq, t.Mod, t.Seq)
+		return errors.Errorf("expect <%d-%d>, but got <%d-%d>", mod, seq, t.Mod, t.Seq)
 	}
 
 	scValue := reflect.ValueOf(sc)
 	getMethod := scValue.MethodByName("GetCode")
 
 	if !getMethod.IsValid() || getMethod.Type().NumIn() != 0 || getMethod.Type().NumOut() != 1 {
-		return errors.New("invalid sc message")
+		return errors.Errorf("<%d-%d> invalid sc message", mod, seq)
 	}
 
 	results := getMethod.Call(nil)
 	codeValue := results[0]
 
 	if codeValue.Kind() != reflect.Int32 {
-		return errors.New("invalid sc message")
+		return errors.Errorf("<%d-%d> invalid sc message", mod, seq)
 	}
 
 	if code := codeValue.Int(); code != 1 {
-		return errors.Errorf("failed code=%d", code)
+		return errors.Errorf("<%d-%d> failed. code=%d", mod, seq, code)
 	}
 
 	return t.Assert(ctx, cs, sc)

@@ -230,15 +230,15 @@ func (m *Manager) statisticTick(_ context.Context) {
 	}
 }
 
-func (m *Manager) notifyWorkerStopped(id int64, index uint64) {
-	m.stoppedWorkerChan <- stoppedWorkerKey(id, index)
+func (m *Manager) notifyWorkerStopped(id int64, unique uint64) {
+	m.stoppedWorkerChan <- stoppedWorkerKey(id, unique)
 }
 
-func stoppedWorkerKey(id int64, index uint64) string {
-	return fmt.Sprintf("%d#%d", id, index)
+func stoppedWorkerKey(id int64, unique uint64) string {
+	return fmt.Sprintf("%d#%d", id, unique)
 }
 
-func parseStoppedWorkerKey(key string) (id int64, index uint64, err error) {
+func parseStoppedWorkerKey(key string) (id int64, unique uint64, err error) {
 	parts := strings.Split(key, "#")
 	if len(parts) != 2 {
 		return 0, 0, errors.New("invalid key")
@@ -249,16 +249,16 @@ func parseStoppedWorkerKey(key string) (id int64, index uint64, err error) {
 		return 0, 0, err
 	}
 
-	index, err = strconv.ParseUint(parts[1], 10, 64)
+	unique, err = strconv.ParseUint(parts[1], 10, 64)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	return id, index, nil
+	return id, unique, nil
 }
 
 func (m *Manager) removeStoppedWorker(ctx context.Context, key string) {
-	id, index, err := parseStoppedWorkerKey(key)
+	id, unique, err := parseStoppedWorkerKey(key)
 	if err != nil {
 		m.log.WithContext(ctx).Errorf("life.Manager.remove failed, invalid key. key=%s", key)
 		return
@@ -269,7 +269,7 @@ func (m *Manager) removeStoppedWorker(ctx context.Context, key string) {
 		return
 	}
 
-	if w.Index() != index {
+	if w.Unique() != unique {
 		return
 	}
 

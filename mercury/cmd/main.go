@@ -90,7 +90,7 @@ func main() {
 var workshopCompletedFlag = errors.Errorf("mercury completed")
 
 func run(logger log.Logger) error {
-	ws := newWorkshop(logger)
+	ws := newNormalWorkshop(logger)
 
 	eg, ctx := errgroup.WithContext(context.Background())
 

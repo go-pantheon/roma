@@ -46,7 +46,7 @@ func {{.UpperCamelGroup}}Handle(ctx context.Context, s *service.{{.UpperCamelGro
 		return nil, err
 	}
 
-	return TakeProto{{.UpperCamelGroup}}TunnelResponse(in.GetMod(), in.GetSeq(), in.GetObj(), sc)
+	return TakeProto{{.UpperCamelGroup}}TunnelResponse(in.GetIndex(), in.GetMod(), in.GetSeq(), in.GetObj(), sc)
 }
 
 `

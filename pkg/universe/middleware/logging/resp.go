@@ -62,7 +62,7 @@ func Resp(ctx context.Context, log *log.Helper, uid int64, out xnet.TunnelMessag
 		tag = "RESP"
 	}
 
-	msg := fmt.Sprintf("[%s] uid=%d color=%s i=%d seq=<%d-%d> oid=%d delay=%d", tag, uid, xcontext.Color(ctx), out.GetIndex(), out.GetMod(), out.GetSeq(), out.GetObj(), delay.Milliseconds())
+	msg := fmt.Sprintf("[%s] uid=%d color=%s i=%d seq=<%d-%d> oid=%d delay=%.2fms", tag, uid, xcontext.Color(ctx), out.GetIndex(), out.GetMod(), out.GetSeq(), out.GetObj(), delay.Seconds()*1000)
 
 	if err != nil {
 		log.WithContext(ctx).Debugf("%s err=%s", msg, err.Error())

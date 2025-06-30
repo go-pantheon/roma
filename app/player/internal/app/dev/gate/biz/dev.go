@@ -5,7 +5,7 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/app/dev/gate/cmds"
 	"github.com/go-pantheon/roma/app/player/internal/core"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
-	"github.com/pkg/errors"
+	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 type DevUseCase struct {
@@ -40,20 +40,23 @@ func (uc *DevUseCase) Register(cmd cmds.Commandable) {
 	uc.listMsg.Commands = append(uc.listMsg.Commands, cmd.EncodeClient())
 }
 
-func (uc *DevUseCase) Execute(ctx core.Context, mod, name string, args map[string]string) (sc *climsg.SCDevExecute, err error) {
-	sc = &climsg.SCDevExecute{}
+func (uc *DevUseCase) Execute(ctx core.Context, mod, name string, args map[string]string) (*climsg.SCDevExecute, error) {
+	sc := &climsg.SCDevExecute{}
 
 	s := uc.cmds[mod]
 	if s == nil {
-		err = errors.Errorf("dev mod not exist. mod=%s", mod)
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		return
+		sc.Message = life.Message("mod=%s", mod)
+
+		return sc, nil
 	}
+
 	cmd := s[name]
 	if cmd == nil {
-		err = errors.WithMessagef(err, "dev name not exist. name=%s", name)
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
-		return
+		sc.Message = life.Message("name=%s", name)
+
+		return sc, nil
 	}
 
 	return cmd.Func(ctx, args)

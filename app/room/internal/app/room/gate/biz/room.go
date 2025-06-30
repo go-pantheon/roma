@@ -27,6 +27,7 @@ func NewRoomUseCase(mgr *core.Manager,
 	mgr.RegisterOnCreatedEvent(uc.onCreated)
 	mgr.RegisterMinuteTick(uc.onMinuteTick)
 	mgr.RegisterSecondTick(uc.onSecondTick)
+
 	return uc
 }
 
@@ -45,13 +46,14 @@ func (uc *RoomUseCase) onSecondTick(ctx core.Context) error {
 	return nil
 }
 
-func (uc *RoomUseCase) RoomList(ctx core.Context, cs *climsg.CSRoomList) (sc *climsg.SCRoomList, err error) {
-	sc = &climsg.SCRoomList{}
-	return
+func (uc *RoomUseCase) RoomList(ctx core.Context, cs *climsg.CSRoomList) (*climsg.SCRoomList, error) {
+	sc := &climsg.SCRoomList{}
+
+	return sc, nil
 }
 
-func (uc *RoomUseCase) CreateRoom(ctx core.Context, cs *climsg.CSCreateRoom) (sc *climsg.SCCreateRoom, err error) {
-	sc = &climsg.SCCreateRoom{}
+func (uc *RoomUseCase) CreateRoom(ctx core.Context, cs *climsg.CSCreateRoom) (*climsg.SCCreateRoom, error) {
+	sc := &climsg.SCCreateRoom{}
 
 	room := ctx.Room()
 
@@ -59,7 +61,10 @@ func (uc *RoomUseCase) CreateRoom(ctx core.Context, cs *climsg.CSCreateRoom) (sc
 	sc.Code = climsg.SCCreateRoom_Succeeded
 
 	uc.updateRoomInfo(ctx, room)
-	return
+
+	ctx.Changed()
+
+	return sc, nil
 }
 
 func (uc *RoomUseCase) updateRoomInfo(c core.Context, room *object.Room) {

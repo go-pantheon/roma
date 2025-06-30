@@ -130,7 +130,7 @@ func (w *Worker) Run(ctx context.Context, jobs []*job.Job) error {
 }
 
 func (w *Worker) assign(ctx context.Context, jobs []*job.Job) error {
-	dealTicker := time.NewTimer(core.AppConf().WorkMinInterval.AsDuration())
+	dealTicker := time.NewTicker(core.AppConf().WorkMinInterval.AsDuration())
 	defer dealTicker.Stop()
 
 	heartbeatTicker := time.NewTicker(core.AppConf().HeartbeatInterval.AsDuration())
@@ -163,7 +163,9 @@ func (w *Worker) work(ctx context.Context) error {
 					return err
 				}
 
-				return w.receive(ctx, t)
+				if err := w.receive(ctx, t); err != nil {
+					return err
+				}
 			}
 		}
 	})
@@ -183,7 +185,7 @@ func (w *Worker) send(pkt *clipkt.Packet) (err error) {
 	}
 
 	w.SentMsgCount.Add(1)
-	task.LogCS(w.log, pkt)
+	task.LogCS(w.log, w.UID(), pkt)
 
 	return w.tcpCli.Send(in)
 }
@@ -215,7 +217,7 @@ func (w *Worker) receive(ctx context.Context, t task.Taskable) (err error) {
 		w.RecvMsgCount.Add(1)
 	}
 
-	task.LogSC(w.log, resp)
+	task.LogSC(w.log, w.UID(), resp)
 
 	return t.Receive(w, resp)
 }

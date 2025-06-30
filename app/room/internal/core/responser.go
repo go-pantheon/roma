@@ -9,15 +9,15 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func NewResponser(respFunc life.ReplyFunc) life.Responsive {
-	return life.NewResponser(respFunc,
+func NewResponser(sendFunc life.SendFunc) life.Responsive {
+	return life.NewResponser(sendFunc,
 		func(mod int32, seq int32, obj int64, sc proto.Message) (xnet.TunnelMessage, error) {
-			return handler.TakeProtoRoomTunnelResponse(mod, seq, obj, sc)
+			return handler.TakeProtoRoomTunnelResponse(0, mod, seq, obj, sc)
 		},
 	)
 }
 
-func ReplyFunc(stream intrav1.TunnelService_TunnelServer, p xnet.TunnelMessage) error {
+func SendFunc(stream intrav1.TunnelService_TunnelServer, p xnet.TunnelMessage) error {
 	msg, ok := p.(*intrav1.TunnelResponse)
 	if !ok {
 		return errors.New("intrav1.TunnelResponse proto type conversion failed")
@@ -32,7 +32,7 @@ func ReplyFunc(stream intrav1.TunnelService_TunnelServer, p xnet.TunnelMessage) 
 	return nil
 }
 
-func mockResponseFunc(out xnet.TunnelMessage) error {
+func mockSendFunc(out xnet.TunnelMessage) error {
 	handler.PutRoomTunnelResponse(out.(*intrav1.TunnelResponse))
 	return nil
 }

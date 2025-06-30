@@ -55,11 +55,11 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) (err e
 		return err
 	}
 
-	replyFunc := func(p xnet.TunnelMessage) error {
-		return core.ReplyFunc(stream, p)
+	sendFunc := func(p xnet.TunnelMessage) error {
+		return core.SendFunc(stream, p)
 	}
 
-	w, err := s.mgr.Worker(ctx, oid, core.NewResponser(replyFunc))
+	w, err := s.mgr.Worker(ctx, oid, core.NewResponser(sendFunc))
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (s *TunnelService) handle(wctx core.Context, in *intrav1.TunnelRequest) err
 		}
 	}
 
-	wctx.ReplyTunnelMessage(out)
+	wctx.Reply(out)
 
 	logging.Resp(wctx, s.log, wctx.UID(), out, time.Since(st), logging.DefaultFilter)
 
@@ -141,6 +141,7 @@ func (s *TunnelService) handle(wctx core.Context, in *intrav1.TunnelRequest) err
 
 func (s *TunnelService) handleError(in *intrav1.TunnelRequest) (xnet.TunnelMessage, error) {
 	return handler.TakeProtoRoomTunnelResponse(
+		in.Index,
 		int32(climod.ModuleID_System),
 		int32(cliseq.SystemSeq_ServerUnexpectedErr),
 		in.Obj,

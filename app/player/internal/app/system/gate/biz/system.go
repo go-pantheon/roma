@@ -16,11 +16,12 @@ func NewSystemUseCase(mgr *core.Manager, logger log.Logger) *SystemUseCase {
 	uc := &SystemUseCase{
 		log: log.NewHelper(log.With(logger, "module", "player/system/gate/biz")),
 	}
+
 	return uc
 }
 
-func (uc *SystemUseCase) Heartbeat(ctx core.Context, cs *climsg.CSHeartbeat) (sc *climsg.SCHeartbeat, nil error) {
-	sc = &climsg.SCHeartbeat{}
+func (uc *SystemUseCase) Heartbeat(ctx core.Context, cs *climsg.CSHeartbeat) (*climsg.SCHeartbeat, error) {
+	sc := &climsg.SCHeartbeat{}
 
 	u := ctx.User()
 	t := ctx.User().Now().Unix()
@@ -29,12 +30,15 @@ func (uc *SystemUseCase) Heartbeat(ctx core.Context, cs *climsg.CSHeartbeat) (sc
 		if cs.ClientTime+MaxOffsetSec < t || cs.ClientTime-MaxOffsetSec > t {
 			sc.Code = climsg.SCHeartbeat_ErrTime
 			sc.ServerTime = t
-			return
+
+			return sc, nil
 		}
 	}
 
 	u.System().SetFirstHeartBeatCompleted()
+
 	sc.ServerTime = t
 	sc.Code = climsg.SCHeartbeat_Succeeded
-	return
+
+	return sc, nil
 }

@@ -14,7 +14,7 @@ func NewDevExec() *job.Job {
 	}
 
 	j.Tasks = append(j.Tasks, dev.NewDevExecuteTask(&climsg.CSDevExecute{
-		Mod:  "hero",
+		Mod:  "Hero",
 		Cmd:  "level_up",
 		Args: map[string]string{"hero_id": "1", "target_level": "10"},
 	}, assertDevExec))
