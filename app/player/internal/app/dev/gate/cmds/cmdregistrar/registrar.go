@@ -18,6 +18,7 @@ func NewRegistrar(
 	_ *storage.SubItemCommander,
 	_ *storage.AddPackCommander,
 	_ *storage.SubPackCommander,
+	_ *storage.ClearCommander,
 
 	_ *user.SimulateRechargeCommander,
 	_ *user.CreateAdminPlayerCommander,

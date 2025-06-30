@@ -45,7 +45,7 @@ func (uc *DevUseCase) Execute(ctx core.Context, mod, name string, args map[strin
 
 	s := uc.cmds[mod]
 	if s == nil {
-		sc.Code = climsg.SCDevExecute_ErrArgFormat
+		sc.Code = climsg.SCDevExecute_ErrModNotExist
 		sc.Message = life.Message("mod=%s", mod)
 
 		return sc, nil
@@ -53,7 +53,7 @@ func (uc *DevUseCase) Execute(ctx core.Context, mod, name string, args map[strin
 
 	cmd := s[name]
 	if cmd == nil {
-		sc.Code = climsg.SCDevExecute_ErrArgFormat
+		sc.Code = climsg.SCDevExecute_ErrNameNotExist
 		sc.Message = life.Message("name=%s", name)
 
 		return sc, nil

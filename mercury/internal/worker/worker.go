@@ -42,9 +42,11 @@ type Worker struct {
 	hsInfo     *HandshakeInfo
 	clientUser *climsg.UserProto
 
+	startTime    time.Time
+	workDuration time.Duration
+
 	CompletedChan chan struct{}
-	Completed     atomic.Bool
-	WorkingTime   time.Duration
+	completed     atomic.Bool
 	SentMsgCount  atomic.Uint32
 	RecvMsgCount  atomic.Uint32
 	PushMsgCount  atomic.Uint32
@@ -108,6 +110,8 @@ func (w *Worker) Run(ctx context.Context, jobs []*job.Job) error {
 		return err
 	}
 
+	w.startTime = time.Now()
+
 	w.log.Infof("[worker-%d] connect to gate: %s", w.userId, w.tcpCli.Bind())
 
 	eg, ctx := errgroup.WithContext(ctx)
@@ -149,6 +153,8 @@ func (w *Worker) assign(ctx context.Context, jobs []*job.Job) error {
 		}
 	}
 
+	close(w.taskChan)
+
 	return nil
 }
 
@@ -159,12 +165,23 @@ func (w *Worker) work(ctx context.Context) error {
 			case <-ctx.Done():
 				return ctx.Err()
 			case t := <-w.taskChan:
+				if t == nil {
+					w.complete()
+					return w.Stop(ctx)
+				}
+
 				if err := w.send(t.CSPacket()); err != nil {
 					return err
 				}
 
-				if err := w.receive(ctx, t); err != nil {
-					return err
+				for {
+					done, err := w.receive(ctx, t)
+					if err != nil {
+						return err
+					}
+					if done {
+						break
+					}
 				}
 			}
 		}
@@ -190,7 +207,7 @@ func (w *Worker) send(pkt *clipkt.Packet) (err error) {
 	return w.tcpCli.Send(in)
 }
 
-func (w *Worker) receive(ctx context.Context, t task.Taskable) (err error) {
+func (w *Worker) receive(ctx context.Context, t task.Taskable) (done bool, err error) {
 	var resp *clipkt.Packet
 
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
@@ -198,20 +215,21 @@ func (w *Worker) receive(ctx context.Context, t task.Taskable) (err error) {
 
 	select {
 	case <-w.StopTriggered():
-		return xsync.ErrStopByTrigger
+		return false, xsync.ErrStopByTrigger
 	case <-ctx.Done():
-		return ctx.Err()
+		return false, ctx.Err()
 	case bytes, ok := <-w.tcpCli.Receive():
 		if !ok {
-			return errors.Errorf("tcp client disconnected")
+			return false, errors.Errorf("tcp client disconnected")
 		}
 
 		if resp, err = w.decode(bytes); err != nil {
-			return err
+			return false, err
 		}
 	}
 
-	if codec.IsPushSC(climod.ModuleID(resp.Mod), resp.Seq) {
+	isPush := codec.IsPushSC(climod.ModuleID(resp.Mod), resp.Seq)
+	if isPush {
 		w.PushMsgCount.Add(1)
 	} else {
 		w.RecvMsgCount.Add(1)
@@ -219,7 +237,11 @@ func (w *Worker) receive(ctx context.Context, t task.Taskable) (err error) {
 
 	task.LogSC(w.log, w.UID(), resp)
 
-	return t.Receive(w, resp)
+	if isPush {
+		return false, nil
+	}
+
+	return true, t.Receive(w, resp)
 }
 
 func (w *Worker) decode(pack []byte) (p *clipkt.Packet, err error) {
@@ -238,6 +260,8 @@ func (w *Worker) Stop(ctx context.Context) error {
 		if err = w.tcpCli.Stop(ctx); err != nil {
 			return err
 		}
+
+		w.workDuration = time.Since(w.startTime)
 
 		w.log.Infof("[worker-%d] closed", w.UID())
 		w.log.Infof(w.Output())
@@ -263,15 +287,20 @@ func (w *Worker) Output() string {
 	var s strings.Builder
 
 	s.WriteString(fmt.Sprintf("[worker-%d] ", w.UID()))
-	if w.Completed.Load() {
-		s.WriteString("completed. ")
+	if w.completed.Load() {
+		s.WriteString("completed.")
 	} else {
-		s.WriteString("not completed. ")
+		s.WriteString("not completed.")
 	}
-	s.WriteString(fmt.Sprintf(" time: %.4fs", w.WorkingTime.Seconds()))
+	
+	s.WriteString(fmt.Sprintf(" spent: %.4fs", w.workDuration.Seconds()))
 	s.WriteString(fmt.Sprintf(" sent: %d", w.SentMsgCount.Load()))
 	s.WriteString(fmt.Sprintf(" recv: %d", w.RecvMsgCount.Load()))
 	s.WriteString(fmt.Sprintf(" push: %d", w.PushMsgCount.Load()))
 
 	return s.String()
+}
+
+func (w *Worker) complete() {
+	w.completed.Store(true)
 }

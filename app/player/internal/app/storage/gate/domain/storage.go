@@ -93,7 +93,7 @@ func (do *StorageDomain) UsePack(ctx core.Context, packData *gamedata.ResourcePa
 	}
 
 	if len(prizes.Items()) == 0 {
-		do.log.WithContext(ctx).Errorf("pack prize is empty. uid=%d pack=%d", ctx.UID(), packData.Id())
+		do.log.WithContext(ctx).Errorf("%s. uid=%d pack=%d", zerrors.ErrEmptyPrize, ctx.UID(), packData.Id())
 		return prizes, nil
 	}
 
@@ -124,8 +124,5 @@ func (do *StorageDomain) Recover(ctx core.Context) error {
 		return nil
 	}
 
-	if err := do.Add(ctx, WithItems(prizeList...), WithSilent(true)); err != nil {
-		return err
-	}
-	return nil
+	return do.Add(ctx, WithItems(prizeList...), WithSilent(true))
 }

@@ -122,13 +122,14 @@ type ItemPrize struct {
 
 func TryNewItemPrize(itemId int64, amount uint64) (*ItemPrize, error) {
 	if amount == 0 {
-		return nil, errors.Wrapf(zerrors.ErrEmptyPrize, "id=%d", itemId)
+		return nil, errors.Wrapf(zerrors.ErrEmptyPrize, "itemID=%d, amount=%d", itemId, amount)
 	}
 
 	itemData := GetResourceItemData(itemId)
 	if itemData == nil {
-		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", itemId)
+		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "itemID=%d", itemId)
 	}
+
 	return NewItemPrize(itemData, amount), nil
 }
 

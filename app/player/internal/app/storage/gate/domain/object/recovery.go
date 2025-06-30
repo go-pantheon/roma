@@ -27,6 +27,7 @@ func newRecoveryInfo(d *gamedata.ResourceItemData, ctime time.Time) *RecoveryInf
 		updatedAt:     ctime,
 		max:           d.Max(),
 	}
+
 	return item
 }
 
@@ -53,12 +54,15 @@ func (o *RecoveryInfo) Recover(ctime time.Time) (toAdd uint64) {
 	}
 
 	seconds := int64(ctime.Sub(o.updatedAt).Seconds())
+
 	toAdd = uint64(float64(seconds) * o.recoverPerSec)
 	if toAdd <= 0 {
 		return
 	}
+
 	toAdd = u64.Min(toAdd, o.max)
 	o.updatedAt = ctime
+
 	return
 }
 

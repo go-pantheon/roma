@@ -28,14 +28,26 @@ type Receiver interface {
 	Receive(ctx core.Worker, sc *clipkt.Packet) (err error)
 }
 
-func LogCS(l *log.Helper, uid int64, cs *clipkt.Packet) {
-	l.Infof("[REQU] uid=%d i=%d seq=<%d-%d> oid=%d len=%d", uid, cs.Index, cs.Mod, cs.Seq, cs.Obj, len(cs.Data))
+func LogCS(l *log.Helper, uid int64, p *clipkt.Packet) {
+	if cs, err := codec.UnmarshalCS(p.Mod, p.Seq, p.Data); err != nil {
+		l.Errorf("[REQU] uid=%d i=%d seq=<%d-%d> oid=%d err=%s", uid, p.Index, p.Mod, p.Seq, p.Obj, err)
+	} else {
+		l.Infof("[REQU] uid=%d i=%d seq=<%d-%d> oid=%d body=%+v", uid, p.Index, p.Mod, p.Seq, p.Obj, cs)
+	}
 }
 
-func LogSC(l *log.Helper, uid int64, sc *clipkt.Packet) {
-	if codec.IsPushSC(climod.ModuleID(sc.Mod), sc.Seq) {
-		l.Infof("[PUSH] uid=%d i=%d seq=<%d-%d> oid=%d len=%d", uid, sc.Index, sc.Mod, sc.Seq, sc.Obj, len(sc.Data))
+func LogSC(l *log.Helper, uid int64, p *clipkt.Packet) {
+	var tag string
+
+	if codec.IsPushSC(climod.ModuleID(p.Mod), p.Seq) {
+		tag = "PUSH"
 	} else {
-		l.Infof("[RESP] uid=%d i=%d seq=<%d-%d> oid=%d len=%d", uid, sc.Index, sc.Mod, sc.Seq, sc.Obj, len(sc.Data))
+		tag = "RESP"
+	}
+
+	if sc, err := codec.UnmarshalSC(p.Mod, p.Seq, p.Data); err != nil {
+		l.Errorf("[%s] uid=%d i=%d seq=<%d-%d> oid=%d err=%s", tag, uid, p.Index, p.Mod, p.Seq, p.Obj, err)
+	} else {
+		l.Infof("[%s] uid=%d i=%d seq=<%d-%d> oid=%d body=%+v", tag, uid, p.Index, p.Mod, p.Seq, p.Obj, sc)
 	}
 }

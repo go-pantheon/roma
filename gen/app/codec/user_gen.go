@@ -75,5 +75,5 @@ func UnmarshalSCUser(seq int32, data []byte) (p proto.Message, err error) {
 
 func IsPushSCUser(seq int32) bool {
 	name := cliseq.UserSeq_name[seq]
-	return strings.Index(name, "Push_") == 0
+	return strings.Index(name, "Push") == 0
 }

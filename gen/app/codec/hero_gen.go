@@ -55,5 +55,5 @@ func UnmarshalSCHero(seq int32, data []byte) (p proto.Message, err error) {
 
 func IsPushSCHero(seq int32) bool {
 	name := cliseq.HeroSeq_name[seq]
-	return strings.Index(name, "Push_") == 0
+	return strings.Index(name, "Push") == 0
 }

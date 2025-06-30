@@ -9,4 +9,5 @@ var ProviderSet = wire.NewSet(
 	NewSubItemCommander,
 	NewAddPackCommander,
 	NewSubPackCommander,
+	NewClearCommander,
 )

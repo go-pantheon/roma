@@ -54,13 +54,16 @@ func (c *AddItemCommander) Func(ctx core.Context, args map[string]string) (*clim
 		count  uint64
 	)
 
-	if itemId, err := i64.ToI64(args[AddItemArgItemId]); err != nil {
+	itemId, err := i64.ToI64(args[AddItemArgItemId])
+	if err != nil || itemId <= 0 {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
 		sc.Message = life.ErrorMessagef(err, "itemId=%d", itemId)
 
 		return sc, nil
 	}
-	if count, err := u64.ToU64(args[AddItemArgAmount]); err != nil {
+
+	count, err = u64.ToU64(args[AddItemArgAmount])
+	if err != nil || count == 0 {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
 		sc.Message = life.ErrorMessagef(err, "count=%d", count)
 

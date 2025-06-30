@@ -135,12 +135,12 @@ type RadioPrize struct {
 
 func TryNewRadioPrize(radioId int64, amount uint64) (*RadioPrize, error) {
 	if amount == 0 {
-		return nil, errors.Wrapf(zerrors.ErrEmptyPrize, "id=%d", radioId)
+		return nil, errors.Wrapf(zerrors.ErrEmptyPrize, "radioID=%d, amount=%d", radioId, amount)
 	}
 
 	radioData := GetResourceRadioData(radioId)
 	if radioData == nil {
-		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", radioId)
+		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "radioID=%d", radioId)
 	}
 	return NewRadioPrize(radioData, amount), nil
 }

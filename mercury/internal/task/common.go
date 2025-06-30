@@ -9,7 +9,6 @@ import (
 	clipkt "github.com/go-pantheon/roma/gen/api/client/packet"
 	"github.com/go-pantheon/roma/mercury/internal/core"
 	"github.com/pkg/errors"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -43,8 +42,6 @@ func (t *CommonTask) Receive(ctx core.Worker, p *clipkt.Packet) (err error) {
 	if err != nil {
 		return
 	}
-
-	slog.Info("receive message", "msg", protojson.Format(sc))
 
 	return t.CommonAssert(ctx, climod.ModuleID(p.Mod), p.Seq, t.CS, sc)
 }

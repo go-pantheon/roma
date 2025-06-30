@@ -17,13 +17,13 @@ func NewStorageJob() *job.Job {
 
 	j.Tasks = append(j.Tasks, dev.NewDevExecuteTask(&climsg.CSDevExecute{
 		Mod:  "Storage",
-		Cmd:  "add",
-		Args: map[string]string{"item_id": "1", "num": "100"},
+		Cmd:  "Add Item",
+		Args: map[string]string{"ItemID": "1", "Amount": "100"},
 	}, assert))
 
 	j.Tasks = append(j.Tasks, dev.NewDevExecuteTask(&climsg.CSDevExecute{
 		Mod:  "Storage",
-		Cmd:  "clear",
+		Cmd:  "Clear",
 		Args: map[string]string{},
 	}, assert))
 

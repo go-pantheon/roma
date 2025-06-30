@@ -60,5 +60,5 @@ func UnmarshalSCDev(seq int32, data []byte) (p proto.Message, err error) {
 
 func IsPushSCDev(seq int32) bool {
 	name := cliseq.DevSeq_name[seq]
-	return strings.Index(name, "Push_") == 0
+	return strings.Index(name, "Push") == 0
 }

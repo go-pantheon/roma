@@ -150,5 +150,5 @@ func UnmarshalSCRoom(seq int32, data []byte) (p proto.Message, err error) {
 
 func IsPushSCRoom(seq int32) bool {
 	name := cliseq.RoomSeq_name[seq]
-	return strings.Index(name, "Push_") == 0
+	return strings.Index(name, "Push") == 0
 }
