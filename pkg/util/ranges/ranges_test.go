@@ -1,13 +1,15 @@
 package ranges
 
 import (
-	"math/rand"
+	"math/rand/v2"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTryNewPair(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name      string
 		start     uint64
@@ -54,6 +56,8 @@ func TestTryNewPair(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			pair, err := TryNewPair(tt.start, tt.end, tt.value)
 			if tt.expectErr {
 				assert.Error(t, err)
@@ -70,6 +74,8 @@ func TestTryNewPair(t *testing.T) {
 }
 
 func TestPair_IsValid(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		pair     *Pair
@@ -94,12 +100,16 @@ func TestPair_IsValid(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, tt.pair.IsValid())
 		})
 	}
 }
 
 func TestPair_Contains(t *testing.T) {
+	t.Parallel()
+
 	pair := &Pair{Start: 10, End: 20, Value: 5}
 
 	tests := []struct {
@@ -136,12 +146,16 @@ func TestPair_Contains(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, pair.Contains(tt.value))
 		})
 	}
 }
 
 func TestTryNewRange(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name      string
 		coords    []uint64
@@ -194,6 +208,8 @@ func TestTryNewRange(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			r, err := TryNewRange(tt.coords, tt.values)
 			if tt.expectErr {
 				assert.Error(t, err)
@@ -218,6 +234,8 @@ func TestTryNewRange(t *testing.T) {
 }
 
 func TestRange_Find(t *testing.T) {
+	t.Parallel()
+
 	// Create a test range
 	coords := []uint64{10, 20, 30, 40, 50, 60}
 	values := []int64{1, 2, 3}
@@ -283,6 +301,8 @@ func TestRange_Find(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			val, idx := r.Find(tt.value)
 			assert.Equal(t, tt.expectedVal, val)
 			assert.Equal(t, tt.expectedIdx, idx)
@@ -297,6 +317,8 @@ func TestRange_Find(t *testing.T) {
 }
 
 func TestRange_MinMax(t *testing.T) {
+	t.Parallel()
+
 	// Test with regular range
 	coords := []uint64{10, 20, 30, 40, 50, 60}
 	values := []int64{1, 2, 3}
@@ -322,6 +344,8 @@ func TestRange_MinMax(t *testing.T) {
 }
 
 func TestRange_Len(t *testing.T) {
+	t.Parallel()
+
 	// Test with regular range
 	coords := []uint64{10, 20, 30, 40, 50, 60}
 	values := []int64{1, 2, 3}
@@ -344,8 +368,9 @@ func TestRange_Len(t *testing.T) {
 }
 
 func TestRange_Rand(t *testing.T) {
+	t.Parallel()
+
 	// Mock random to make test deterministic
-	rand.Seed(42)
 
 	coords := []uint64{10, 20, 30, 40, 50, 60}
 	values := []int64{1, 2, 3}
@@ -368,6 +393,8 @@ func TestRange_Rand(t *testing.T) {
 }
 
 func TestRange_validate(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name      string
 		pairs     []*Pair
@@ -415,8 +442,11 @@ func TestRange_validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			r := &Range{Pairs: tt.pairs}
 			err := r.validate()
+
 			if tt.expectErr {
 				assert.Error(t, err)
 			} else {
@@ -444,20 +474,24 @@ func BenchmarkPair_Contains(b *testing.B) {
 func BenchmarkTryNewRange(b *testing.B) {
 	coords := []uint64{10, 20, 30, 40, 50, 60}
 	values := []int64{1, 2, 3}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, _ = TryNewRange(coords, values)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = TryNewRange(coords, values)
+		}
+	})
 }
 
 func BenchmarkRange_Find(b *testing.B) {
 	coords := []uint64{10, 20, 30, 40, 50, 60}
 	values := []int64{1, 2, 3}
 	r, _ := TryNewRange(coords, values)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, _ = r.Find(35)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = r.Find(35)
+		}
+	})
 }
 
 func BenchmarkRange_Find_Large(b *testing.B) {
@@ -472,18 +506,22 @@ func BenchmarkRange_Find_Large(b *testing.B) {
 	}
 
 	r, _ := TryNewRange(coords, values)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, _ = r.Find(uint64(rand.Intn(10000)))
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = r.Find(uint64(rand.IntN(10000)))
+		}
+	})
 }
 
 func BenchmarkRange_Rand(b *testing.B) {
 	coords := []uint64{10, 20, 30, 40, 50, 60}
 	values := []int64{1, 2, 3}
 	r, _ := TryNewRange(coords, values)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, _ = r.Rand()
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = r.Rand()
+		}
+	})
 }

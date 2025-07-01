@@ -46,7 +46,7 @@ func newUserPostgresRepo(data *postgresdb.DB, logger log.Logger, _ []life.Module
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := migrate.Migrate(ctx, r.data.DB, &dbv1.UserProto{}, userregister.AllModuleDBColumnsString()); err != nil {
+	if err := migrate.Migrate(ctx, r.data.DB, _tableName, &dbv1.UserProto{}, userregister.AllModuleDBColumnsString()); err != nil {
 		return nil, err
 	}
 
@@ -65,17 +65,17 @@ func newUserPostgresRepo(data *postgresdb.DB, logger log.Logger, _ []life.Module
 	return r, nil
 }
 
-func (r *userPostgresRepo) Create(ctx context.Context, uid int64, user *dbv1.UserProto, ctime time.Time) error {
+func (r *userPostgresRepo) Create(ctx context.Context, user *dbv1.UserProto, ctime time.Time) error {
 	if user == nil {
 		return errors.New("user proto is nil")
 	}
 
-	modcols, modvals, modsigns, err := pguser.ParseUpsertModuleSQLParam(user, 4)
+	modcols, modvals, modsigns, err := pguser.ParseUpsertModuleSQLParam(user, 5)
 	if err != nil {
 		return errors.Wrapf(err, "parsing module sql param")
 	}
 
-	vals := []any{uid, user.Version, user.ServerVersion}
+	vals := []any{user.Id, user.Sid, user.Version, user.ServerVersion}
 	vals = append(vals, modvals...)
 
 	sqlbuilder := strings.Builder{}
@@ -83,14 +83,14 @@ func (r *userPostgresRepo) Create(ctx context.Context, uid int64, user *dbv1.Use
 	sqlbuilder.WriteString(`"` + _tableName + `"`)
 	sqlbuilder.WriteString(" (")
 
-	sqlbuilder.WriteString("id, version, server_version")
+	sqlbuilder.WriteString("id, sid, version, server_version")
 
 	if len(modcols) > 0 {
 		sqlbuilder.WriteString(", ")
 		sqlbuilder.WriteString(strings.Join(modcols, ", "))
 	}
 
-	sqlbuilder.WriteString(") VALUES ($1, $2, $3")
+	sqlbuilder.WriteString(") VALUES ($1, $2, $3, $4")
 
 	if len(modsigns) > 0 {
 		sqlbuilder.WriteString(", ")
@@ -100,7 +100,7 @@ func (r *userPostgresRepo) Create(ctx context.Context, uid int64, user *dbv1.Use
 	sqlbuilder.WriteString(")")
 
 	if _, err = r.data.DB.Exec(ctx, sqlbuilder.String(), vals...); err != nil {
-		return errors.Wrapf(err, "inserting user %d", uid)
+		return errors.Wrapf(err, "inserting user uid=%d", user.Id)
 	}
 
 	return nil
@@ -111,8 +111,8 @@ func (r *userPostgresRepo) QueryByID(ctx context.Context, uid int64, user *dbv1.
 		return errors.New("user proto is nil")
 	}
 
-	scanargs := make([]any, 0, len(mods)+3)
-	scanargs = append(scanargs, &user.Id, &user.Version, &user.ServerVersion)
+	scanargs := make([]any, 0, len(mods)+4)
+	scanargs = append(scanargs, &user.Id, &user.Sid, &user.Version, &user.ServerVersion)
 
 	modcols, modvals, err := pguser.ParseQueryModuleSQLParam(mods)
 	if err != nil {
@@ -124,7 +124,7 @@ func (r *userPostgresRepo) QueryByID(ctx context.Context, uid int64, user *dbv1.
 	}
 
 	sqlbuilder := strings.Builder{}
-	sqlbuilder.WriteString("SELECT id, version, server_version")
+	sqlbuilder.WriteString("SELECT id, sid, version, server_version")
 
 	if len(modcols) > 0 {
 		sqlbuilder.WriteString(", ")
@@ -224,6 +224,7 @@ func (r *userPostgresRepo) UpdateSID(ctx context.Context, uid int64, sid int64, 
 
 func (r *userPostgresRepo) IncVersion(ctx context.Context, uid int64, newVersion int64) error {
 	sql := `UPDATE "user" SET version = $1 WHERE id = $2 AND version = $3;`
+
 	_, err := r.data.DB.Exec(ctx, sql, newVersion, uid, newVersion-1)
 	if err != nil {
 		return errors.Wrapf(err, "incrementing user %d version", uid)

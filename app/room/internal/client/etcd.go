@@ -14,10 +14,12 @@ func NewDiscovery(conf *conf.Registry) (registry.Discovery, error) {
 		Username:  conf.Etcd.Username,
 		Password:  conf.Etcd.Password,
 	})
+
 	if err != nil {
 		return nil, errors.Wrapf(err, "new etcdclient failed")
 	}
 
 	r := etcd.New(client)
+
 	return r, nil
 }

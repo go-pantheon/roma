@@ -127,7 +127,7 @@ mercury-log:
 	cd mercury && echo "log: mercury" && tail -f bin/mercury/debug.log
 
 .PHONY: tools
-# Build all tools to directory:bin/tools 
+# Build all tools to directory:bin/tools
 tools:
 	@rm -rf bin/tools
 	@mkdir -p bin/tools
@@ -165,7 +165,7 @@ gen-data-base:
 
 .PHONY: gen-datas
 # Generate data code
-gen-datas: 
+gen-datas:
 	@echo "run: gen-datas" && bin/tools/gen-datas
 
 .PHONY: gen-all-data
@@ -175,7 +175,7 @@ gen-all-data: gen-data-json gen-data-base gen-datas
 .PHONY: test
 # Run test and show coverage
 test:
-	go test -v ./... -cover
+	go test -race ./...
 
 .PHONY: vet
 # Run vet

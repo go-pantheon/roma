@@ -37,6 +37,7 @@ func (s *AdminOrderRepoSuite) SetupTest() {
 	s.repo = repo
 }
 
+//nolint:paralleltest
 func TestAdminOrderRepoSuite(t *testing.T) {
 	suite.Run(t, new(AdminOrderRepoSuite))
 }
@@ -48,6 +49,7 @@ func (s *AdminOrderRepoSuite) TestGetByID() {
 
 	s.T().Run("GetSuccess", func(t *testing.T) {
 		s.SetupTest()
+
 		info := &dbv1.OrderInfoProto{ProductId: "test_product"}
 		infoJson, err := json.Marshal(info)
 		require.NoError(t, err)
@@ -113,6 +115,7 @@ func (s *AdminOrderRepoSuite) TestGetList() {
 
 	s.T().Run("GetListNoConditions", func(t *testing.T) {
 		s.SetupTest()
+
 		countQuery := `SELECT COUNT(*) FROM "orders"`
 		listQuery := `SELECT info, uid, store, trans_id, ack, ack_at FROM "orders"  ORDER BY ack_at DESC LIMIT 10 OFFSET 0`
 
@@ -128,6 +131,7 @@ func (s *AdminOrderRepoSuite) TestGetList() {
 
 	s.T().Run("GetListWithUidCondition", func(t *testing.T) {
 		s.SetupTest()
+
 		cond := &dbv1.OrderProto{Uid: 123}
 		where := "WHERE uid = $1"
 		countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM "orders" %s`, where)
@@ -149,6 +153,7 @@ func (s *AdminOrderRepoSuite) TestGetList() {
 
 	s.T().Run("GetListWithInfoCondition", func(t *testing.T) {
 		s.SetupTest()
+
 		cond := &dbv1.OrderProto{
 			Info: &dbv1.OrderInfoProto{
 				ProductId: "test_product_id",

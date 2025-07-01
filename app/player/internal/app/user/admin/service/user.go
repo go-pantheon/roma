@@ -67,8 +67,10 @@ func (s *UserAdmin) UserList(ctx context.Context, req *adminv1.UserListRequest) 
 			s.log.WithContext(ctx).Errorf("user proto convert failed. %+v", err)
 			continue
 		}
+
 		reply.Users = append(reply.Users, u)
 	}
+
 	return reply, nil
 }
 
@@ -78,7 +80,7 @@ func buildGetUserListCond(req *adminv1.UserListRequest) (conds map[life.ModuleKe
 	conds = make(map[life.ModuleKey]*dbv1.UserModuleProto)
 
 	if req.Cond == nil {
-		return conds, start, limit, nil
+		return nil, 0, 0, xerrors.APIPageParamInvalid("cond is nil")
 	}
 
 	if req.Cond.Name != "" {
@@ -91,7 +93,7 @@ func buildGetUserListCond(req *adminv1.UserListRequest) (conds map[life.ModuleKe
 		}
 	}
 
-	return
+	return conds, start, limit, nil
 }
 
 func toUserProto(p *dbv1.UserProto) (*adminv1.UserProto, error) {
@@ -110,5 +112,6 @@ func toUserProto(p *dbv1.UserProto) (*adminv1.UserProto, error) {
 		IdStr:  idStr,
 		Detail: string(bytes),
 	}
+
 	return u, nil
 }

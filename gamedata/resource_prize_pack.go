@@ -23,11 +23,13 @@ func TryNewPackPrizes(packs map[int64]uint64) (*PackPrizes, error) {
 
 	packDatas := make(map[int64]*PackPrize, len(packs))
 	packList := make([]*PackPrize, 0, len(packs))
+
 	for packId, amount := range packs {
 		packPrize, err := TryNewPackPrize(packId, amount)
 		if err != nil {
 			return nil, err
 		}
+
 		packDatas[packId] = packPrize
 		packList = append(packList, packPrize)
 	}
@@ -52,6 +54,7 @@ func (p *PackPrizes) CloneWith(others ...*PackPrizes) *PackPrizes {
 		if packPrize == nil || packPrize.packData == nil || packPrize.amount == 0 {
 			continue
 		}
+
 		ret.packs[packId] = NewPackPrize(packPrize.packData, packPrize.amount)
 	}
 
@@ -59,10 +62,12 @@ func (p *PackPrizes) CloneWith(others ...*PackPrizes) *PackPrizes {
 		if other == nil {
 			continue
 		}
+
 		for packId, packPrize := range other.packs {
 			if packPrize == nil || packPrize.packData == nil || packPrize.amount == 0 {
 				continue
 			}
+
 			if _, ok := ret.packs[packId]; ok {
 				ret.packs[packId].amount += packPrize.amount
 			} else {
@@ -70,6 +75,7 @@ func (p *PackPrizes) CloneWith(others ...*PackPrizes) *PackPrizes {
 			}
 		}
 	}
+
 	return ret
 }
 
@@ -99,6 +105,7 @@ func TryNewPackPrize(packId int64, amount uint64) (*PackPrize, error) {
 	if packData == nil {
 		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "packID=%d", packId)
 	}
+
 	return NewPackPrize(packData, amount), nil
 }
 

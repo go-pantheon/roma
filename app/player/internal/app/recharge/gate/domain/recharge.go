@@ -53,6 +53,7 @@ func NewRechargeDomain(logger log.Logger, label *conf.Label, c *conf.Recharge, r
 
 	do.apple = newAppleCli(logger, repo, c.Apple)
 	do.google, err = newGoogleCli(logger, label, c.Google, repo)
+
 	if err != nil {
 		return
 	}
@@ -62,24 +63,23 @@ func NewRechargeDomain(logger log.Logger, label *conf.Label, c *conf.Recharge, r
 
 func (do *RechargeDomain) VerifyRecharge(ctx core.Context, arg *climsg.RechargeParamProto, productId int64) (reset *ResetOrderInfo, err error) {
 	if arg == nil {
-		err = errors.Errorf("recharge arg is nil")
-		return
+		return nil, errors.Errorf("recharge arg is nil")
 	}
 
 	var cli Verifiable
+
 	switch pkg.Store(arg.Store) {
 	case pkg.StoreGoogle:
 		cli = do.google
 	case pkg.StoreApple:
 		cli = do.apple
 	default:
-		err = errors.Wrapf(rechargeerrs.ErrRechargeType, "store=%s", arg.Store)
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrRechargeType, "store=%s", arg.Store)
 	}
 
 	if profile.IsDev() {
 		if err = do.AddUserRecharge(ctx, productId); err != nil {
-			return
+			return nil, err
 		}
 		// return if dev
 		return &ResetOrderInfo{
@@ -88,10 +88,15 @@ func (do *RechargeDomain) VerifyRecharge(ctx core.Context, arg *climsg.RechargeP
 	}
 
 	reset, err = cli.verifyReceipt(ctx, arg.Payload, productId)
-	if err == nil {
-		err = do.AddUserRecharge(ctx, productId)
+	if err != nil {
+		return nil, err
 	}
-	return
+
+	if err = do.AddUserRecharge(ctx, productId); err != nil {
+		return nil, err
+	}
+
+	return reset, nil
 }
 
 func (do *RechargeDomain) ResetOrderAck(ctx core.Context, reset *ResetOrderInfo) {
@@ -115,11 +120,14 @@ func checkOrder(ctx context.Context, repo OrderRepo, store pkg.Store, transId st
 		if errors.Is(err, xerrors.ErrDBRecordNotFound) {
 			return nil
 		}
+
 		return err
 	}
+
 	if order == nil {
 		return nil
 	}
+
 	return errors.Wrapf(rechargeerrs.ErrExisted, "store=%s transId=%s", store, transId)
 }
 
@@ -134,5 +142,6 @@ func (do *RechargeDomain) AddUserRecharge(ctx core.Context, productId int64) err
 	}
 
 	ctx.Changed(object.ModuleKey)
+
 	return nil
 }

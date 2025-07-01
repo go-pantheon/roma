@@ -35,7 +35,7 @@ func newUserPersister(ctx context.Context, do *domain.UserDomain, uid int64, all
 
 	defer dbv1.UserProtoPool.Put(p)
 
-	user := userobj.NewUser(uid, p.ServerVersion)
+	user := userobj.NewUser(uid)
 	if err = user.DecodeServer(p); err != nil {
 		return
 	}
@@ -58,18 +58,22 @@ func (s *UserPersister) Refresh(ctx context.Context) (err error) {
 }
 
 func (s *UserPersister) PrepareToPersist(ctx context.Context, modules []life.ModuleKey) (ret life.VersionProto, err error) {
-	err = s.Lock(func() error {
+	if err = s.Lock(func() error {
 		s.user.Version += 1 // update version first
 
 		p := dbv1.UserProtoPool.Get()
-		s.user.EncodeServer(p, modules)
+		if err = s.user.EncodeServer(p, modules); err != nil {
+			return err
+		}
 
 		ret = p
 
 		return nil
-	})
+	}); err != nil {
+		return nil, err
+	}
 
-	return
+	return ret, nil
 }
 
 func (s *UserPersister) Persist(ctx context.Context, uid int64, proto life.VersionProto) (err error) {
@@ -84,19 +88,21 @@ func (s *UserPersister) Persist(ctx context.Context, uid int64, proto life.Versi
 
 func (s *UserPersister) IncVersion(ctx context.Context, uid int64) (err error) {
 	var newVersion int64
-	s.Lock(func() error {
+
+	if err := s.Lock(func() error {
 		s.user.Version += 1
 		newVersion = s.user.Version
+
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
 
 	return s.do.IncVersion(ctx, uid, newVersion)
 }
 
 func (s *UserPersister) OnStop(ctx context.Context, id int64, p life.VersionProto) (err error) {
-	cp := proto.Clone(p).(*dbv1.UserProto)
-
-	s.do.OnLogout(ctx, s.uid, cp)
+	s.do.OnLogout(ctx, s.uid, proto.Clone(p).(*dbv1.UserProto))
 	return nil
 }
 

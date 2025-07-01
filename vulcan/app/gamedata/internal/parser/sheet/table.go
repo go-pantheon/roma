@@ -38,6 +38,7 @@ func newTable(md *Metadata, rows [][]string) (*Table, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	o.lines = lines
 
 	if len(lines) == 0 {
@@ -46,12 +47,15 @@ func newTable(md *Metadata, rows [][]string) (*Table, error) {
 
 	l := lines[0]
 	o.idFieldMetadata = l.IdField.Metadata
+
 	for _, f := range l.Fields {
 		o.fieldMetadatas = append(o.fieldMetadatas, f.Metadata)
 	}
+
 	if len(l.SubLines) > 0 {
 		sl := l.SubLines[0]
 		o.subIdFieldMetadata = sl.IdField.Metadata
+
 		for _, f := range sl.Fields {
 			o.subFieldMetadatas = append(o.subFieldMetadatas, f.Metadata)
 		}
@@ -59,7 +63,7 @@ func newTable(md *Metadata, rows [][]string) (*Table, error) {
 
 	for _, md := range mds {
 		if md.FormulaValue != "" {
-			o.Metadata.HasFormulaField = true
+			o.HasFormulaField = true
 			break
 		}
 	}
@@ -84,15 +88,17 @@ func (t *Table) GetSubIdFieldMetadata() *field.Metadata {
 }
 
 func (t *Table) EncodeToJson() (string, error) {
-	var parts []string
+	parts := make([]string, 0, len(t.lines))
 
 	for _, l := range t.lines {
 		jsonData, err := l.EncodeToJson()
 		if err != nil {
 			return "", errors.WithMessagef(err, "table=%s", t.FullName())
 		}
+
 		parts = append(parts, jsonData)
 	}
+
 	return fmt.Sprintf("[%s]", strings.Join(parts, ",")), nil
 }
 
@@ -102,6 +108,7 @@ func (t *Table) WalkLine(f func(l *line.Line) (err error)) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -111,10 +118,12 @@ func (t *Table) WalkLineField(fieldName string, f func(l *field.Field) error) er
 		if field == nil {
 			continue
 		}
+
 		if err := f(field); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -124,6 +133,7 @@ func (t *Table) WalkFieldMetadata(f func(md *field.Metadata) error) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -133,5 +143,6 @@ func (t *Table) WalkSubFieldMetadata(f func(md *field.Metadata) error) error {
 			return err
 		}
 	}
+
 	return nil
 }

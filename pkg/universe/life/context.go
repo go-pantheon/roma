@@ -31,10 +31,11 @@ type Context interface {
 var _ Context = (*workerContext)(nil)
 
 type workerContext struct {
-	sync.Once
 	context.Context
 	EventManageable
 	Responsive
+
+	once sync.Once
 
 	persister Persistent
 	ctime     time.Time
@@ -104,7 +105,7 @@ func (c *workerContext) ChangedImmediately(modules ...ModuleKey) {
 }
 
 func (c *workerContext) Now() time.Time {
-	c.Once.Do(func() {
+	c.once.Do(func() {
 		c.ctime = time.Now()
 	})
 

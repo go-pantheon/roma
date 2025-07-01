@@ -35,20 +35,25 @@ func main() {
 	destDir := path.Join(baseDir, destPath)
 
 	excelDir := path.Join(baseDir, excelPath)
+
 	sheets, err := parser.Parse(excelDir)
 	if err != nil {
 		panic(err)
 	}
 
-	shs := []sheet.Sheet{}
+	var shs []sheet.Sheet
+
 	sheets.Walk(func(sh sheet.Sheet) bool {
 		if err := genData(destDir, sh); err != nil {
 			panic(err)
 		}
+
 		if err := genSpecialFormula(destDir, sh); err != nil {
 			panic(err)
 		}
+
 		shs = append(shs, sh)
+
 		return true
 	})
 
@@ -60,6 +65,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	slog.Info("=== gamedata directory generated.", "dir", destPath)
 }
 
@@ -73,8 +79,10 @@ func genData(dir string, sh sheet.Sheet) (err error) {
 	if err = filewriter.GenFile(to, s); err != nil {
 		return
 	}
+
 	slog.Info("generated data", "file", filewriter.SprintGenPath(to))
-	return
+
+	return nil
 }
 
 func genSpecialFormula(dir string, sh sheet.Sheet) (err error) {
@@ -91,8 +99,10 @@ func genSpecialFormula(dir string, sh sheet.Sheet) (err error) {
 	if err = filewriter.GenFile(to, s); err != nil {
 		return
 	}
+
 	slog.Info("generated data special formula", "file", filewriter.SprintGenPath(to))
-	return
+
+	return nil
 }
 
 func removeFile(filePath string) (err error) {
@@ -103,6 +113,7 @@ func removeFile(filePath string) (err error) {
 	} else if !os.IsNotExist(err) {
 		return errors.Wrapf(err, "please manually delete the file: %s", filePath)
 	}
+
 	return nil
 }
 
@@ -111,10 +122,14 @@ func genLoader(dir string, shs []sheet.Sheet) (err error) {
 	if err = removeFile(to); err != nil {
 		return
 	}
+
 	s := dataload.NewService(project, shs)
+
 	if err = filewriter.GenFile(to, s); err != nil {
 		return
 	}
+
 	slog.Info("generated data loader", "file", filewriter.SprintGenPath(to))
+
 	return
 }

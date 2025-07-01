@@ -1,7 +1,6 @@
 package filewriter
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -25,17 +24,17 @@ func WriteFile(filename string, content []byte) error {
 		return errors.Wrapf(err, "%s already exists", filename)
 	}
 
-	subDir := strings.Replace(filename, filepath.Base(filename), "", -1)
+	subDir := strings.ReplaceAll(filename, filepath.Base(filename), "")
 	if !PathExists(subDir) {
-		if err := os.MkdirAll(subDir, 0755); err != nil {
+		if err := os.MkdirAll(subDir, 0750); err != nil {
 			return errors.Wrapf(err, "create directory failed. dir: %s file: %s", subDir, filename)
 		}
 	}
 
-	err := os.WriteFile(filename, content, 0644)
-	if err != nil {
+	if err := os.WriteFile(filename, content, 0600); err != nil {
 		return errors.Wrapf(err, "write file failed. file: %s", filename)
 	}
+
 	return nil
 }
 
@@ -43,9 +42,11 @@ func RebuildDir(dir string) error {
 	if err := os.RemoveAll(dir); err != nil {
 		return errors.Wrapf(err, "remove directory failed. dir: %s", dir)
 	}
-	if err := os.MkdirAll(dir, 0755); err != nil {
+
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return errors.Wrapf(err, "create directory failed. dir: %s", dir)
 	}
+
 	return nil
 }
 
@@ -53,9 +54,11 @@ func CreateDir(path string) (existed bool, err error) {
 	if _, err := os.Stat(path); err == nil || !os.IsNotExist(err) {
 		return true, nil
 	}
-	if err := os.MkdirAll(path, 0755); err != nil {
+
+	if err := os.MkdirAll(path, 0750); err != nil {
 		return false, errors.Wrapf(err, "create directory failed. path: %s", path)
 	}
+
 	return false, nil
 }
 
@@ -64,10 +67,8 @@ func PathExists(path string) bool {
 	if err != nil {
 		return false
 	}
-	if os.IsNotExist(err) {
-		return false
-	}
-	return true
+
+	return !os.IsNotExist(err)
 }
 
 func BasePath() string {
@@ -75,36 +76,52 @@ func BasePath() string {
 	if len(baseDir) == 0 {
 		baseDir, _ = os.Getwd()
 	}
+
 	return filepath.FromSlash(filepath.Clean(baseDir))
 }
 
-func GetCurrentAbPath() string {
-	baseDir := getCurrentAbPathByExecutable()
-	tmpDir, _ := filepath.EvalSymlinks(os.TempDir())
-	if strings.Contains(baseDir, tmpDir) {
-		return getCurrentAbPathByCaller()
+func GetCurrentAbPath() (string, error) {
+	baseDir, err := getCurrentAbPathByExecutable()
+	if err != nil {
+		return "", err
 	}
-	baseDir = filepath.Clean(baseDir)
-	return filepath.FromSlash(baseDir)
+
+	tmpDir, err := filepath.EvalSymlinks(os.TempDir())
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to get temp dir")
+	}
+
+	if strings.Contains(baseDir, tmpDir) {
+		return getCurrentAbPathByCaller(), nil
+	}
+
+	return filepath.FromSlash(filepath.Clean(baseDir)), nil
 }
 
 // get current executable file absolute path
-func getCurrentAbPathByExecutable() string {
+func getCurrentAbPathByExecutable() (string, error) {
 	exePath, err := os.Executable()
 	if err != nil {
-		log.Fatal(err)
+		return "", errors.Wrapf(err, "failed to get executable path")
 	}
-	res, _ := filepath.EvalSymlinks(filepath.Dir(exePath))
-	return res
+
+	res, err := filepath.EvalSymlinks(filepath.Dir(exePath))
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to get executable path")
+	}
+
+	return res, nil
 }
 
 // get current executable file absolute path on executing 'go run'
 func getCurrentAbPathByCaller() string {
 	var abPath string
+
 	_, filename, _, ok := runtime.Caller(0)
 	if ok {
 		abPath = filepath.Dir(filename)
 	}
+
 	return abPath
 }
 

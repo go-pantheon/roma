@@ -13,6 +13,8 @@ import (
 )
 
 func TestJsonExample(t *testing.T) {
+	t.Parallel()
+
 	baseDir := filewriter.BasePath()
 
 	xlsxBaseDir := "../../../../fixtures/excel"
@@ -38,6 +40,7 @@ func TestJsonExample(t *testing.T) {
 		jsonFilePath := filepath.FromSlash(path.Join(jsonBaseDir, sh.FullName()+".json"))
 		err = filewriter.WriteFile(jsonFilePath, []byte(content))
 		require.NoError(t, err)
+
 		return true
 	})
 }

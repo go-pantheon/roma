@@ -16,7 +16,7 @@ var codecTemplate = `
 
 package codec
 
-import (	
+import (
 	"{{.Org}}/fabrica-util/errors"
 	climod "{{.Project}}/gen/api/client/module"
 	clipkt "{{.Project}}/gen/api/client/packet"

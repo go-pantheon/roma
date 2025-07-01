@@ -8,6 +8,8 @@ import (
 )
 
 func TestMax(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     uint64
@@ -23,12 +25,16 @@ func TestMax(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Max(tt.x, tt.y))
 		})
 	}
 }
 
 func TestMin(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     uint64
@@ -44,12 +50,16 @@ func TestMin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Min(tt.x, tt.y))
 		})
 	}
 }
 
 func TestReduce(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     uint64
@@ -64,12 +74,16 @@ func TestReduce(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Sub(tt.x, tt.y))
 		})
 	}
 }
 
 func TestAdd(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     uint64
@@ -83,12 +97,16 @@ func TestAdd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Add(tt.x, tt.y))
 		})
 	}
 }
 
 func TestRandom(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    uint64
@@ -101,6 +119,8 @@ func TestRandom(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got := Random(tt.v)
 			if tt.v == 0 {
 				assert.Equal(t, uint64(0), got)
@@ -112,6 +132,8 @@ func TestRandom(t *testing.T) {
 }
 
 func TestDivide2f64(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     uint64
@@ -127,12 +149,16 @@ func TestDivide2f64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Divide2f64(tt.x, tt.y))
 		})
 	}
 }
 
 func TestF64WithDigits(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		v        float64
@@ -148,12 +174,16 @@ func TestF64WithDigits(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, F64WithDigits(tt.v, tt.dig))
 		})
 	}
 }
 
 func TestPow(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		a, n     uint64
@@ -168,12 +198,16 @@ func TestPow(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Pow(tt.a, tt.n))
 		})
 	}
 }
 
 func TestExp(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x        uint64
@@ -187,12 +221,16 @@ func TestExp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Exp(tt.x))
 		})
 	}
 }
 
 func TestCeilDivide(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     uint64
@@ -208,12 +246,16 @@ func TestCeilDivide(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, CeilDivide(tt.x, tt.y))
 		})
 	}
 }
 
 func TestToU32(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x        uint64
@@ -228,12 +270,16 @@ func TestToU32(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, ToU32(tt.x))
 		})
 	}
 }
 
 func TestToU64(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		s        string
@@ -250,6 +296,8 @@ func TestToU64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := ToU64(tt.s)
 			assert.Equal(t, tt.wantErr, err != nil)
 			assert.Equal(t, tt.expected, got)
@@ -325,7 +373,9 @@ func BenchmarkToU32(b *testing.B) {
 }
 
 func BenchmarkToU64(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		ToU64("12345")
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = ToU64("12345")
+		}
+	})
 }

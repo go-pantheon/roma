@@ -29,11 +29,13 @@ func NewLines(mds []*field.Metadata, values [][]string) ([]*Line, error) {
 	}
 
 	lines := make([]*Line, 0, len(rows))
+
 	for _, rs := range rows {
 		line, err := newLine(mds, rs)
 		if err != nil {
 			return nil, err
 		}
+
 		lines = append(lines, line)
 	}
 
@@ -54,6 +56,7 @@ func newSubLine(subIdField *field.Field) *Line {
 		IdField:  subIdField,
 		FieldMap: make(map[string]*field.Field),
 	}
+
 	return sl
 }
 
@@ -72,46 +75,30 @@ func newLine(mds []*field.Metadata, rg *RowGroup) (*Line, error) {
 	mergeFields := make([]string, 0, len(mds))
 
 	for _, r := range rg.rows {
-		subId, ok := r.subId()
-		if ok {
-			sl := newSubLine(r.SubIdField)
-			if err := l.addSubLine(sl); err != nil {
+		subId, isSubLine := r.subId()
+		if isSubLine {
+			if err := l.addSubLine(newSubLine(r.SubIdField)); err != nil {
 				return nil, err
 			}
 		}
+
 		for _, f := range r.Fields {
-			switch f.Type {
-			case field.SharedType:
-				l.addSharedField(f.Metadata, f)
-			case field.MergedListType, field.MergedListNonNilType, field.MergedMapType:
-				if _, ok := mergeFieldNames[f.Metadata.FieldName]; !ok {
-					mergeFields = append(mergeFields, f.Metadata.FieldName)
-					mergeFieldNames[f.Metadata.FieldName] = struct{}{}
-				}
-			default:
-				if ok {
-					if err := l.SubLineMap[subId].addField(f.Metadata, f); err != nil {
-						return nil, err
-					}
-					continue
-				}
-				if err := l.addField(f.Metadata, f); err != nil {
-					return nil, err
+			mergeField, err := praseField(l, isSubLine, subId, f)
+			if err != nil {
+				return nil, err
+			}
+
+			if mergeField != "" {
+				if _, ok := mergeFieldNames[mergeField]; !ok {
+					mergeFields = append(mergeFields, mergeField)
+					mergeFieldNames[mergeField] = struct{}{}
 				}
 			}
 		}
 	}
 
 	for _, name := range mergeFields {
-		fds := make([]*field.Field, 0, len(rg.rows))
-		for _, row := range rg.rows {
-			fds = append(fds, row.FieldMap[name])
-		}
-		mf, err := field.Merge(fds)
-		if err != nil {
-			return nil, err
-		}
-		if err := l.addField(mf.Metadata, mf); err != nil {
+		if err := l.addMergeField(rg, name); err != nil {
 			return nil, err
 		}
 	}
@@ -120,19 +107,60 @@ func newLine(mds []*field.Metadata, rg *RowGroup) (*Line, error) {
 		return nil, errors.Errorf("line fields cannot be empty. id=%d", l.Id())
 	}
 
-	// remove empty sublines
+	l.removeEmptySubLines()
+
+	return l, nil
+}
+
+func praseField(l *Line, isSubLine bool, subId int64, f *field.Field) (mergeField string, err error) {
+	if f.IsMerged() {
+		return f.FieldName, nil
+	}
+
+	if f.Type == field.SharedType {
+		l.addSharedField(f.Metadata, f)
+		return "", nil
+	}
+
+	if isSubLine {
+		return "", l.SubLineMap[subId].addField(f.Metadata, f)
+	}
+
+	return "", l.addField(f.Metadata, f)
+}
+
+func (l *Line) addMergeField(rg *RowGroup, name string) error {
+	fds := make([]*field.Field, 0, len(rg.rows))
+
+	for _, row := range rg.rows {
+		if f, ok := row.FieldMap[name]; ok && f.IsMerged() {
+			fds = append(fds, f)
+		} else {
+			return errors.Errorf("field not found or not merged. field=%s", name)
+		}
+	}
+
+	mf, err := field.Merge(fds)
+	if err != nil {
+		return err
+	}
+
+	return l.addField(mf.Metadata, mf)
+}
+
+func (l *Line) removeEmptySubLines() {
 	newSubLines := make([]*Line, 0, len(l.SubLines))
 	newSubLineMap := make(map[int64]*Line, len(l.SubLines))
+
 	for _, sl := range l.SubLines {
 		if len(sl.Fields) > 0 {
 			newSubLines = append(newSubLines, sl)
 			newSubLineMap[sl.Id()] = sl
 		}
 	}
+
 	l.SubLines = newSubLines
 	l.SubLineMap = newSubLineMap
-
-	return l, nil
 }
 
 func (l *Line) addSharedField(md *field.Metadata, fd *field.Field) {
@@ -148,8 +176,10 @@ func (l *Line) addField(md *field.Metadata, fd *field.Field) error {
 	if _, ok := l.FieldMap[md.FieldName]; ok {
 		return errors.Errorf("field name duplicated. field=%s name1=%s name2=%s", md.FieldName, md.Name, l.FieldMap[md.FieldName].Name)
 	}
+
 	l.Fields = append(l.Fields, fd)
 	l.FieldMap[md.FieldName] = fd
+
 	return nil
 }
 
@@ -157,8 +187,10 @@ func (l *Line) addSubLine(sl *Line) error {
 	if _, ok := l.SubLineMap[sl.Id()]; ok {
 		return errors.Errorf("subId duplicated. subId=%d", sl.Id())
 	}
+
 	l.SubLines = append(l.SubLines, sl)
 	l.SubLineMap[sl.Id()] = sl
+
 	return nil
 }
 
@@ -171,33 +203,39 @@ func (l *Line) EncodeToJson() (string, error) {
 		return "", errors.Errorf("fields and sublines cannot be empty. id=%d", l.Id())
 	}
 
-	var parts []string
+	parts := make([]string, 0, len(l.Fields)+len(l.SubLines))
 
 	idJson, err := l.IdField.EncodeToJson()
 	if err != nil {
 		return "", errors.Wrapf(err, "line=%d encode id failed", l.Id())
 	}
+
 	parts = append(parts, idJson)
 
 	for _, f := range l.Fields {
 		jsonData, err := f.EncodeToJson()
 		if err != nil {
-			return "", errors.Wrapf(err, "field=%s", f.Metadata.FieldName)
+			return "", errors.Wrapf(err, "field=%s", f.FieldName)
 		}
+
 		parts = append(parts, jsonData)
 	}
 
 	subJsonBuilders := &strings.Builder{}
+
 	if len(l.SubLines) > 0 {
 		for _, sl := range l.SubLines {
 			sj, err := sl.EncodeToJson()
 			if err != nil {
 				return "", errors.WithMessagef(err, "subline=%d", sl.Id())
 			}
+
 			subJsonBuilders.WriteString(sj)
 			subJsonBuilders.WriteRune(',')
 		}
+
 		subJson := fmt.Sprintf("[%s]", strings.TrimSuffix(subJsonBuilders.String(), ","))
+
 		parts = append(parts, fmt.Sprintf(`"%s": %s`, JsonSubLineName, subJson))
 	}
 

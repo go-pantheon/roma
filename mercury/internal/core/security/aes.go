@@ -24,7 +24,7 @@ func DecryptAccountToken(str string) (ret []byte, err error) {
 	tokenAESCipher := manager.tokenAES
 	manager.mu.RUnlock()
 
-	secret, err := base64.StdEncoding.DecodeString(str)
+	secret, err := base64.URLEncoding.DecodeString(str)
 	if err != nil {
 		return nil, errors.Wrap(err, "base64 DecodeString failed")
 	}

@@ -43,6 +43,7 @@ func NewAddPackCommander(uc *biz.DevUseCase, storageDo *domain.StorageDomain) *A
 	}
 
 	uc.Register(c)
+
 	return c
 }
 
@@ -60,6 +61,7 @@ func (c *AddPackCommander) Func(ctx core.Context, args map[string]string) (*clim
 
 		return sc, nil
 	}
+
 	if count, err := u64.ToU64(args[AddPackArgAmount]); err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
 		sc.Message = life.ErrorMessagef(err, "count=%d", count)

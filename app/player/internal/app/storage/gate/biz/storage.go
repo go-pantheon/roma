@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/go-kratos/kratos/v2/log"
-
 	plunderdo "github.com/go-pantheon/roma/app/player/internal/app/plunder/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/app/storage/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/core"
@@ -28,6 +27,7 @@ func NewStorageUseCase(mgr *core.Manager, logger log.Logger, storageDo *domain.S
 
 	mgr.RegisterOnCreatedEvent(uc.onCreated)
 	mgr.RegisterSecondTick(uc.onSecondTick)
+
 	return uc
 }
 
@@ -43,9 +43,7 @@ func (uc *StorageUseCase) onCreated(ctx core.Context) error {
 }
 
 func (uc *StorageUseCase) onSecondTick(ctx core.Context) error {
-	uc.do.Recover(ctx)
-
-	return nil
+	return uc.do.Recover(ctx)
 }
 
 func (uc *StorageUseCase) UsePack(ctx core.Context, cs *climsg.CSUsePack) (*climsg.SCUsePack, error) {
@@ -63,6 +61,7 @@ func (uc *StorageUseCase) UsePack(ctx core.Context, cs *climsg.CSUsePack) (*clim
 			sc.Code = climsg.SCUsePack_ErrPackNotExist
 		} else {
 			uc.log.WithContext(ctx).Errorf("use pack failed. uid=%d %+v", ctx.UID(), err)
+
 			sc.Code = climsg.SCUsePack_ErrUnspecified
 		}
 

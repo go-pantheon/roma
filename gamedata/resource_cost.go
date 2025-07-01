@@ -18,11 +18,13 @@ func TryNewCosts(itemAmounts map[int64]uint64) (*Costs, error) {
 	}
 
 	items := make([]*ItemCost, 0, len(itemAmounts))
+
 	for itemId, amount := range itemAmounts {
 		itemCost, err := TryNewItemCost(itemId, amount)
 		if err != nil {
 			return nil, err
 		}
+
 		items = append(items, itemCost)
 	}
 
@@ -46,6 +48,7 @@ func (c *Costs) CloneWith(others ...*Costs) *Costs {
 		if itemCost == nil || itemCost.itemData == nil || itemCost.amount == 0 {
 			continue
 		}
+
 		items[itemCost.itemData.ID] = NewItemCost(itemCost.itemData, itemCost.amount)
 	}
 
@@ -109,7 +112,7 @@ func TryNewItemCost(itemId int64, amount uint64) (*ItemCost, error) {
 	if itemData == nil {
 		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "id=%d", itemId)
 	}
-	
+
 	return NewItemCost(itemData, amount), nil
 }
 

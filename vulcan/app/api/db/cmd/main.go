@@ -31,7 +31,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := os.MkdirAll(destDir, 0755); err != nil {
+	if err := os.MkdirAll(destDir, 0750); err != nil {
 		panic(err)
 	}
 
@@ -55,7 +55,7 @@ func main() {
 
 		destFilePath := filepath.Join(destDir, file.Dir, file.FileName+"_pool.go")
 
-		if err := os.WriteFile(destFilePath, formatted, 0644); err != nil {
+		if err := os.WriteFile(destFilePath, formatted, 0600); err != nil {
 			panic(err)
 		}
 
@@ -69,7 +69,7 @@ func main() {
 
 			destFilePath = filepath.Join(destDir, file.Dir, file.FileName+"_codec.go")
 
-			if err := os.WriteFile(destFilePath, formatted, 0644); err != nil {
+			if err := os.WriteFile(destFilePath, formatted, 0600); err != nil {
 				panic(err)
 			}
 

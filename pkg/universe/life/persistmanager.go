@@ -42,7 +42,10 @@ func (s *PersistManager) Persister() Persistent {
 
 func (s *PersistManager) Change(ctx context.Context, modules []ModuleKey, immediately bool) {
 	s.changedModules.Add(modules)
-	s.persister.Refresh(ctx)
+
+	if err := s.persister.Refresh(ctx); err != nil {
+		s.log.WithContext(ctx).Errorf("persister refresh failed. oid=%d %+v", s.ID(), err)
+	}
 
 	if immediately {
 		s.immediatelyChan <- struct{}{}
@@ -134,9 +137,9 @@ type ChangedModules struct {
 	modules []ModuleKey
 }
 
-func NewChangedModules(cap int) *ChangedModules {
+func NewChangedModules(cp int) *ChangedModules {
 	return &ChangedModules{
-		modules: make([]ModuleKey, 0, cap),
+		modules: make([]ModuleKey, 0, cp),
 	}
 }
 

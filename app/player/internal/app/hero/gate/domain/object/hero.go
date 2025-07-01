@@ -33,18 +33,18 @@ func NewHero(dataId int64) (*Hero, error) {
 	return r, nil
 }
 
-func (o *Hero) decodeServer(p *dbv1.UserHeroProto) (*Hero, error) {
+func (o *Hero) decodeServer(p *dbv1.UserHeroProto) *Hero {
 	if p == nil {
-		return o, nil
+		return o
 	}
 
-	o.Level = int64(p.Level)
+	o.Level = p.Level
 	o.Equips = slices.Clone(p.Equips)
 
 	o.Skills = make(map[int64]int64, len(p.Skills))
 	maps.Copy(o.Skills, p.Skills)
 
-	return o, nil
+	return o
 }
 
 func (o *Hero) encodeServer() *dbv1.UserHeroProto {

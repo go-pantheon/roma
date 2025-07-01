@@ -25,10 +25,10 @@ type User struct {
 	modules map[life.ModuleKey]life.Module
 }
 
-func NewUser(id int64, serverVersion string) *User {
+func NewUser(id int64) *User {
 	u := &User{
 		ID:            id,
-		ServerVersion: serverVersion,
+		ServerVersion: profile.Version(),
 		modules:       make(map[life.ModuleKey]life.Module, 16),
 	}
 
@@ -40,11 +40,13 @@ func NewUser(id int64, serverVersion string) *User {
 }
 
 func (o *User) DecodeServer(p *dbv1.UserProto) error {
-	userVersion, err := checkServerVersion(o.ServerVersion, p.ServerVersion)
+	userVersion, err := checkServerVersion(p.ServerVersion)
 	if err != nil {
 		return err
 	}
 
+	o.ID = p.Id
+	o.SID = p.Sid
 	o.Version = p.Version
 	o.ServerVersion = userVersion
 
@@ -76,35 +78,32 @@ func (o *User) EncodeServer(p *dbv1.UserProto, modules []life.ModuleKey) (err er
 	return nil
 }
 
-func checkServerVersion(serverVersion, userVersion string) (newUserVersion string, err error) {
-	az1, ssv, isRelease := version.GetSubVersion(profile.Version())
-	if !isRelease {
-		newUserVersion = userVersion
-		return
+func checkServerVersion(userVersion string) (validUserVersion string, err error) {
+	az1, psv, isProfileRelease := version.GetSubVersion(profile.Version())
+	if !isProfileRelease {
+		return userVersion, nil
 	}
+
 	az2, usv, isRelease := version.GetSubVersion(userVersion)
 	if !isRelease {
-		newUserVersion = serverVersion
-		return
+		return profile.Version(), nil
 	}
 
 	if az1 != az2 {
-		err = errors.Errorf("userVersion is not equal to serverVersion. userVersion=%s serverVersion=%s", userVersion, serverVersion)
-		return
+		return "", errors.Errorf("userVersion is not equal to profileVersion. userVersion=%s profileVersion=%s", userVersion, profile.Version())
 	}
 
-	for i := 0; i < len(ssv); i++ {
-		if ssv[i] < usv[i] {
-			err = errors.Errorf("userVersion is greater than serverVersion. userVersion=%s serverVersion=%s", userVersion, serverVersion)
-			return
+	for i := range psv {
+		if psv[i] < usv[i] {
+			return "", errors.Errorf("userVersion is greater than profileVersion. userVersion=%s profileVersion=%s", userVersion, profile.Version())
 		}
-		if ssv[i] > usv[i] {
-			newUserVersion = serverVersion
-			return
+
+		if psv[i] > usv[i] {
+			return profile.Version(), nil
 		}
 	}
-	newUserVersion = userVersion
-	return
+
+	return userVersion, nil
 }
 
 func (o *User) EncodeClient() (*message.UserProto, error) {
@@ -147,6 +146,7 @@ func (o *User) SetNewborn(b bool) {
 func (o *User) GetAndResetNewborn() bool {
 	b := o.newborn
 	o.newborn = false
+
 	return b
 }
 
@@ -154,5 +154,6 @@ func (o *User) Now() time.Time {
 	if profile.IsDev() {
 		return time.Now().Add(o.Dev().TimeOffset())
 	}
+
 	return time.Now()
 }

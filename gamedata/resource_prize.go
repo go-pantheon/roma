@@ -28,6 +28,7 @@ func (p *Prizes) Merge(others ...*Prizes) *Prizes {
 		if other == nil {
 			continue
 		}
+
 		p.items = p.items.CloneWith(other.items)
 		p.packs = p.packs.CloneWith(other.packs)
 	}

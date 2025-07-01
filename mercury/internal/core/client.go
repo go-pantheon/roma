@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/go-pantheon/roma/gen/api/server/player/admin/user/v1"
+	adminv1 "github.com/go-pantheon/roma/gen/api/server/player/admin/user/v1"
 	gg "google.golang.org/grpc"
 )
 

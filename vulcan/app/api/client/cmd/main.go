@@ -40,6 +40,7 @@ func main() {
 	}
 
 	scs := make([]*compilers.SeqCompiler, 0, 32)
+
 	for _, mc := range mcs {
 		for _, mod := range mc.Mods {
 			seqFile := path.Join(seqDirPath, fmt.Sprintf("%s.proto", mod))
@@ -49,6 +50,7 @@ func main() {
 				scs = append(scs, sc)
 			}
 		}
+
 		slog.Info("=== prepare to generate api:", "mods", mc.Mods)
 	}
 
@@ -70,7 +72,8 @@ func gen(base string, mcs []*compilers.ModsCompiler, scs []*compilers.SeqCompile
 	} else if !os.IsNotExist(err) {
 		return errors.Wrapf(err, "failed to remove tmp dir: %s", tmpDir)
 	}
-	if err := os.Mkdir(tmpDir, 0755); err != nil {
+
+	if err := os.Mkdir(tmpDir, 0750); err != nil {
 		return errors.Wrapf(err, "failed to create tmp dir: %s", tmpDir)
 	}
 
@@ -81,13 +84,14 @@ func gen(base string, mcs []*compilers.ModsCompiler, scs []*compilers.SeqCompile
 
 	for _, mc := range mcs {
 		tmpGroupDir := path.Join(tmpDir, string(mc.Group))
-		if err := os.Mkdir(tmpGroupDir, 0755); err != nil {
+		if err := os.Mkdir(tmpGroupDir, 0750); err != nil {
 			return errors.Wrapf(err, "failed to create tmp group dir: %s", tmpGroupDir)
 		}
 		// generate to tmp dir
 		if err := service.Gen(project, tmpGroupDir, mc); err != nil {
 			return err
 		}
+
 		if err := handler.Gen(project, tmpGroupDir, mc, scs); err != nil {
 			return err
 		}

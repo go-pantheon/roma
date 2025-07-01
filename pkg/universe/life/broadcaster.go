@@ -62,6 +62,7 @@ func (w *WorkerBroadcaster) Multicast(wctx Context, mod climod.ModuleID, seq int
 	}
 
 	w.msgs <- newBroadcastMessage(false, uids, buildPushBody(mod, seq, obj, bytes))
+
 	return
 }
 
@@ -101,6 +102,7 @@ func newBroadcastMessage(all bool, uids []int64, out *servicev1.PushBody) *Broad
 	msg.all = all
 	msg.uids = uids
 	msg.out = out
+
 	return msg
 }
 
@@ -144,6 +146,7 @@ func buildPushBody(mod climod.ModuleID, seq int32, obj int64, data []byte) *serv
 	body.Seq = seq
 	body.Obj = obj
 	body.Data = data
+
 	return body
 }
 

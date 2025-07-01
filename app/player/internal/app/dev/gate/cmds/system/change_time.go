@@ -38,6 +38,7 @@ func NewChangeTimeCommander(uc *biz.DevUseCase) *ChangeTimeCommander {
 	}
 
 	uc.Register(cmd)
+
 	return cmd
 }
 

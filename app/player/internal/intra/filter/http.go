@@ -19,6 +19,7 @@ func NewHttpFilter(mgr *core.Manager) *HttpFilter {
 	md := &HttpFilter{
 		mgr: mgr,
 	}
+
 	return md
 }
 

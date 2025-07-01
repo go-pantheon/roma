@@ -27,14 +27,16 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, userDo *domain.UserD
 	}
 
 	return m, func() {
-		stopFunc()
+		if err := stopFunc(); err != nil {
+			log.Errorf("stop manager failed. %+v", err)
+		}
 	}
 }
 
 type eventFunc func(wctx Context, arg *life.EventArg) (err error)
 
 func (m *Manager) RegisterEvent(et life.WorkerEventType, f eventFunc) {
-	m.Manager.RegisterCustomEvent(et, func(wctx life.Context, arg *life.EventArg) (err error) {
+	m.RegisterCustomEvent(et, func(wctx life.Context, arg *life.EventArg) (err error) {
 		return f(wctx.(Context), arg)
 	})
 }

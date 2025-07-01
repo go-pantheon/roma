@@ -69,5 +69,6 @@ func relativePath(path string) string {
 	if len(parts) != 2 {
 		return path
 	}
+
 	return parts[1]
 }

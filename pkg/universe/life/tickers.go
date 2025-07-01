@@ -26,7 +26,7 @@ func newTickers() *Tickers {
 	return t
 }
 
-func (t *Tickers) stop() {
+func (t *Tickers) Stop() {
 	t.renewalTicker.Stop()
 	t.persistTicker.Stop()
 	t.secondTicker.Stop()

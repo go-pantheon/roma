@@ -42,6 +42,7 @@ func (r *userMongoRepo) GetByID(ctx context.Context, user *dbv1.UserProto, mods 
 
 	filter := bson.M{"id": user.Id}
 	projection := bson.D{}
+
 	if len(mods) == 0 {
 		projection = append(projection, bson.E{Key: "_id", Value: 0})
 	} else {
@@ -65,7 +66,7 @@ func (r *userMongoRepo) GetByID(ctx context.Context, user *dbv1.UserProto, mods 
 	return nil
 }
 
-func (r *userMongoRepo) GetList(ctx context.Context, start, limit int64, conds map[life.ModuleKey]*dbv1.UserModuleProto, mods []life.ModuleKey) ([]*dbv1.UserProto, int64, error) {
+func (r *userMongoRepo) GetList(ctx context.Context, start, limit int64, conds map[life.ModuleKey]*dbv1.UserModuleProto, mods []life.ModuleKey) (ret []*dbv1.UserProto, total int64, err error) {
 	filter := bson.M{}
 	for modKey, modProto := range conds {
 		// This logic assumes we are filtering based on fields within a module.
@@ -74,7 +75,7 @@ func (r *userMongoRepo) GetList(ctx context.Context, start, limit int64, conds m
 		filter["modules."+string(modKey)] = modProto
 	}
 
-	total, err := r.coll.CountDocuments(ctx, filter)
+	total, err = r.coll.CountDocuments(ctx, filter)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "counting users failed")
 	}
@@ -88,9 +89,11 @@ func (r *userMongoRepo) GetList(ctx context.Context, start, limit int64, conds m
 
 	if len(mods) > 0 {
 		projection := bson.D{bson.E{Key: "id", Value: 1}} // Always include ID
+
 		for _, mod := range mods {
 			projection = append(projection, bson.E{Key: "modules." + string(mod), Value: 1})
 		}
+
 		findOptions.SetProjection(projection)
 	}
 
@@ -99,10 +102,15 @@ func (r *userMongoRepo) GetList(ctx context.Context, start, limit int64, conds m
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return []*dbv1.UserProto{}, 0, nil
 		}
+
 		return nil, 0, errors.Wrap(err, "finding users failed")
 	}
 
-	defer cursor.Close(ctx)
+	defer func() {
+		if closeErr := cursor.Close(ctx); closeErr != nil {
+			err = errors.Join(err, closeErr)
+		}
+	}()
 
 	var users []*dbv1.UserProto
 	if err = cursor.All(ctx, &users); err != nil {

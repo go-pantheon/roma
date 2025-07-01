@@ -33,7 +33,7 @@ type DataBaseField struct {
 	Comment string
 }
 
-func newService(project string, sh sheet.Sheet) (*service, error) {
+func newService(project string, sh sheet.Sheet) *service {
 	md := sh.GetMetadata()
 	s := &service{}
 	s.Org = filepath.Clean(strings.Replace(project, filepath.Base(project), "", 1))
@@ -66,7 +66,7 @@ func newService(project string, sh sheet.Sheet) (*service, error) {
 		s.Sub = true
 	}
 
-	return s, nil
+	return s
 }
 
 func newDataBaseField(md *field.Metadata) *DataBaseField {
@@ -75,5 +75,6 @@ func newDataBaseField(md *field.Metadata) *DataBaseField {
 		Type:    md.FieldType.String(),
 		Comment: md.Comment,
 	}
+
 	return ret
 }

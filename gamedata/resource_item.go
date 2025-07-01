@@ -29,7 +29,7 @@ type ResourceItemData struct {
 func (d *ResourceItemData) build() {
 	d.ResourceItemDataGen.build()
 
-	d.Type = ItemType(d.ResourceItemDataGen.ItemTypeInt)
+	d.Type = ItemType(d.ItemTypeInt)
 }
 
 func (d *ResourceItemData) Max() uint64 {

@@ -50,8 +50,10 @@ func (s *RechargeAdmin) GetOrderList(ctx context.Context, req *adminv1.GetOrderL
 			s.log.WithContext(ctx).Errorf("proto to order proto failed. %+v", err)
 			continue
 		}
+
 		reply.Orders = append(reply.Orders, u)
 	}
+
 	return reply, nil
 }
 
@@ -59,30 +61,35 @@ func buildGetOrderListCond(req *adminv1.GetOrderListRequest) (cond *dbv1.OrderPr
 	start, limit = profile.PageStartLimit(req.Page, req.PageSize)
 
 	cond = &dbv1.OrderProto{}
+
 	if req.Cond == nil {
-		err = xerrors.APIParamInvalid("condition is empty")
-		return
+		return nil, 0, 0, xerrors.APIParamInvalid("condition is empty")
 	}
 
 	if len(req.Cond.Store) > 0 {
 		cond.Store = req.Cond.Store
 	}
+
 	if len(req.Cond.TransId) > 0 {
 		cond.TransId = req.Cond.TransId
 	}
+
 	if req.Cond.Uid > 0 {
 		cond.Uid = req.Cond.Uid
 	}
+
 	if req.Cond.Ack > 0 {
 		cond.Ack = req.Cond.Ack
 	}
-	return
+
+	return cond, start, limit, nil
 }
 
 func (s *RechargeAdmin) GetOrderById(ctx context.Context, req *adminv1.GetOrderByIdRequest) (*adminv1.GetOrderByIdResponse, error) {
 	if req.TransId == "" {
 		return nil, xerrors.APIParamInvalid("transId is empty")
 	}
+
 	if req.Store == "" {
 		return nil, xerrors.APIParamInvalid("store is empty")
 	}
@@ -112,6 +119,7 @@ func (s *RechargeAdmin) UpdateOrderAckStateById(ctx context.Context, req *adminv
 	if req.TransId == "" {
 		return nil, xerrors.APIParamInvalid("transId is empty")
 	}
+
 	if req.Store == "" {
 		return nil, xerrors.APIParamInvalid("store is empty")
 	}
@@ -156,5 +164,6 @@ func toOrderProto(p *dbv1.OrderProto) (*adminv1.OrderProto, error) {
 		AckAt:       p.AckAt,
 		Detail:      string(bytes),
 	}
+
 	return u, nil
 }

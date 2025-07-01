@@ -27,6 +27,7 @@ func NewHeroList() life.Module {
 	o := &HeroList{
 		Heroes: make(map[int64]*Hero, 8),
 	}
+
 	return o
 }
 
@@ -61,10 +62,7 @@ func (o *HeroList) DecodeServer(p proto.Message) error {
 			return err
 		}
 
-		o.Heroes[ph.Id], err = h.decodeServer(ph)
-		if err != nil {
-			return err
-		}
+		o.Heroes[ph.Id] = h.decodeServer(ph)
 	}
 
 	return nil

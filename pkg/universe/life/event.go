@@ -40,6 +40,7 @@ func newCustomEventMap() *eventFuncMap {
 	m := &eventFuncMap{
 		funcs: make(map[WorkerEventType][]eventFunc, 32),
 	}
+
 	return m
 }
 

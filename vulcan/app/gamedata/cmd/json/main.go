@@ -53,7 +53,9 @@ func main() {
 		if err = filewriter.WriteFile(jsonFilePath, []byte(content)); err != nil {
 			panic(err)
 		}
+
 		slog.Info("generated json", "path", filewriter.SprintGenPath(jsonFilePath))
+
 		return true
 	})
 

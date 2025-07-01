@@ -1,9 +1,8 @@
 package u64
 
 import (
-	"sync"
-
 	"maps"
+	"sync"
 
 	"github.com/go-pantheon/roma/pkg/util/sorts"
 	"github.com/pkg/errors"
@@ -25,11 +24,14 @@ func IsElementRepeat(array []uint64, except uint64) bool {
 		if a == except {
 			continue
 		}
+
 		if _, ok := m[a]; ok {
 			return true
 		}
+
 		m[a] = _emptyStruct
 	}
+
 	return false
 }
 
@@ -39,6 +41,7 @@ func Index(array []uint64, v uint64) int {
 			return i
 		}
 	}
+
 	return -1
 }
 
@@ -49,6 +52,7 @@ func Copy(a []uint64) []uint64 {
 
 	out := make([]uint64, len(a))
 	copy(out, a)
+
 	return out
 }
 
@@ -56,8 +60,10 @@ func CopyMap(a map[uint64]uint64) map[uint64]uint64 {
 	if a == nil {
 		return make(map[uint64]uint64, 0)
 	}
+
 	out := make(map[uint64]uint64, len(a))
 	maps.Copy(out, a)
+
 	return out
 }
 
@@ -72,9 +78,10 @@ func Rand(a []uint64, count uint64) []uint64 {
 	sorts.U64Mix(b)
 
 	c := CeilDivide(count, uint64(len(b)))
-	for i := uint64(0); i < c; i++ {
+	for range c {
 		r = append(r, b...)
 	}
+
 	return r[:count]
 }
 
@@ -84,12 +91,8 @@ func Cycle(i uint64, array []uint64) (uint64, error) {
 	if l <= 0 {
 		return 0, errors.New("array cannot be empty")
 	}
-	if i == 0 {
-		return array[0], nil
-	}
 
-	b := i % l
-	return array[b], nil
+	return array[i%l], nil
 }
 
 // ToKVMap convert the given slice to a kv map. The length of the slice must be even
@@ -102,6 +105,7 @@ func ToKVMap(s []uint64) (map[uint64]uint64, error) {
 	for i := 0; i < len(s); i += 2 {
 		r[s[i]] += s[i+1] // +=, prevent the same key from appearing
 	}
+
 	return r, nil
 }
 
@@ -113,6 +117,7 @@ func F64ArraysToI64Arrays(f64Arrays [][]float64) [][]uint64 {
 		for _, f64 := range f64Arr {
 			i64Arr = append(i64Arr, uint64(f64))
 		}
+
 		result = append(result, i64Arr)
 	}
 
@@ -127,12 +132,15 @@ func Value(array []uint64, index int) (uint64, error) {
 	if array == nil {
 		return 0, errors.New("array is nil")
 	}
+
 	if len(array) == 0 {
 		return 0, errors.New("array is empty")
 	}
+
 	if index >= len(array) {
 		return 0, errors.New("index out of range")
 	}
+
 	return array[index], nil
 }
 
@@ -140,34 +148,42 @@ func CheckSize(array []uint64, size int) error {
 	if array == nil {
 		return errors.New("array is nil")
 	}
+
 	if len(array) == 0 {
 		return errors.New("array is empty")
 	}
+
 	if size > len(array) {
 		return errors.New("array size not enough")
 	}
+
 	return nil
 }
 
 func DelElement(array []uint64, delId uint64) []uint64 {
 	j := 0
+
 	for _, id := range array {
-		if id != delId {
-			array[j] = id
-			j++
+		if id == delId {
+			continue
 		}
+
+		array[j] = id
+		j++
 	}
+
 	return array[:j]
 }
 
-func GetNotZeroCount(array []uint64) uint64 {
-	var count uint64
+func GetNotZeroCount(array []uint64) (count uint64) {
 	for _, a := range array {
 		if a == 0 {
 			continue
 		}
+
 		count++
 	}
+
 	return count
 }
 
@@ -187,5 +203,6 @@ func putMap(m map[uint64]struct{}) {
 	for k := range m {
 		delete(m, k)
 	}
+
 	_pool.Put(m)
 }

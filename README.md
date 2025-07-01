@@ -74,19 +74,19 @@ The Roma framework is built on the Go-Kratos microservice framework, supporting 
 
 Roma utilizes the following core technologies:
 
-| Technology/Component | Purpose | Version |
-|---------|------|------|
-| Go | Primary development language | 1.24+ |
-| go-kratos | Microservice framework | v2.8.4 |
-| gRPC | Inter-service communication | v1.71.1 |
-| Protobuf | Data serialization | v1.36.6 |
-| etcd | Service discovery & registry | v3.5.21 |
-| Redis | Caching | v9.7.3 |
-| MongoDB | Data storage | v2.1.0 |
-| OpenTelemetry | Distributed tracing | v1.35.0 |
-| Prometheus | Monitoring system | v1.22.0 |
-| Google Wire | Dependency injection | v0.6.0 |
-| Buf | API management | Latest |
+| Technology/Component | Purpose                      | Version |
+| -------------------- | ---------------------------- | ------- |
+| Go                   | Primary development language | 1.24+   |
+| go-kratos            | Microservice framework       | v2.8.4  |
+| gRPC                 | Inter-service communication  | v1.71.1 |
+| Protobuf             | Data serialization           | v1.36.6 |
+| etcd                 | Service discovery & registry | v3.5.21 |
+| Redis                | Caching                      | v9.7.3  |
+| MongoDB              | Data storage                 | v2.1.0  |
+| OpenTelemetry        | Distributed tracing          | v1.35.0 |
+| Prometheus           | Monitoring system            | v1.22.0 |
+| Google Wire          | Dependency injection         | v0.6.0  |
+| Buf                  | API management               | Latest  |
 
 ## Key Features
 

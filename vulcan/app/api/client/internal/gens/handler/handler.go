@@ -14,7 +14,7 @@ import (
 
 func Gen(project, base string, mc *compilers.ModsCompiler, scs []*compilers.SeqCompiler) error {
 	dir := path.Join(base, "handler/")
-	if err := os.Mkdir(dir, 0755); err != nil {
+	if err := os.Mkdir(dir, 0750); err != nil {
 		return errors.Wrapf(err, "failed to create tmp dir: %s", dir)
 	}
 

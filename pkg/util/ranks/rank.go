@@ -24,6 +24,7 @@ func (h *minHeap) Pop() interface{} {
 	n := len(old)
 	x := old[n-1]
 	h.items = old[0 : n-1]
+
 	return x
 }
 
@@ -46,12 +47,15 @@ func SortTopN(arr []int64, top int, less func(a, b int64) bool) []int64 {
 	if len(arr) <= defaultTopN || float64(len(arr)) < float64(top)*defaultThreshold {
 		sorted := make([]int64, len(arr))
 		copy(sorted, arr)
+
 		sort.Slice(sorted, func(i, j int) bool {
 			return less(sorted[i], sorted[j])
 		})
+
 		if top > len(arr) {
 			return sorted
 		}
+
 		return sorted[:top]
 	}
 
@@ -73,6 +77,7 @@ func SortTopN(arr []int64, top int, less func(a, b int64) bool) []int64 {
 			if !less(num, h.items[0]) {
 				continue
 			}
+
 			heap.Pop(h)
 			heap.Push(h, num)
 		}
@@ -83,6 +88,7 @@ func SortTopN(arr []int64, top int, less func(a, b int64) bool) []int64 {
 	for h.Len() > 0 {
 		result = append(result, heap.Pop(h).(int64))
 	}
+
 	sort.Slice(result, func(i, j int) bool {
 		return less(result[i], result[j])
 	})
@@ -120,6 +126,7 @@ func InsertIntoSortedArray(arr []int64, val int64, maxLen int, less func(i, j in
 		// Shift elements to make room for new value
 		copy(arr[pos+1:], arr[pos:len(arr)-1])
 		arr[pos] = val
+
 		return arr
 	}
 
@@ -127,5 +134,6 @@ func InsertIntoSortedArray(arr []int64, val int64, maxLen int, less func(i, j in
 	arr = append(arr, 0) // Extend slice by one
 	copy(arr[pos+1:], arr[pos:])
 	arr[pos] = val
+
 	return arr
 }

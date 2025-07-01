@@ -31,6 +31,7 @@ func newKv(tmd *Metadata, rows [][]string) (*Kv, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if len(l.SubLines) > 0 {
 		return nil, errors.New("kv sheet cannot have sub lines")
 	}
@@ -40,7 +41,7 @@ func newKv(tmd *Metadata, rows [][]string) (*Kv, error) {
 
 	for _, md := range mds {
 		if md.FormulaValue != "" {
-			kv.Metadata.HasFormulaField = true
+			kv.HasFormulaField = true
 			break
 		}
 	}
@@ -69,6 +70,7 @@ func (kv *Kv) EncodeToJson() (string, error) {
 	if err != nil {
 		return "", errors.WithMessagef(err, "kv=%s", kv.FullName())
 	}
+
 	return json, nil
 }
 
@@ -81,6 +83,7 @@ func (kv *Kv) WalkLineField(fieldName string, f func(l *field.Field) error) erro
 	if field == nil {
 		return nil
 	}
+
 	return f(field)
 }
 
@@ -90,6 +93,7 @@ func (kv *Kv) WalkFieldMetadata(f func(md *field.Metadata) error) error {
 			return err
 		}
 	}
+
 	return nil
 }
 

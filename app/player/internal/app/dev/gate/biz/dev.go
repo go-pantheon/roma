@@ -22,20 +22,24 @@ func NewDevUseCase(mgr *core.Manager, logger log.Logger,
 		mgr:  mgr,
 		cmds: make(map[string]map[string]cmds.Commandable),
 	}
+
 	uc.listMsg = &climsg.SCDevList{
 		Code:     climsg.SCDevList_Succeeded,
 		Commands: []*climsg.DevCmdProto{},
 	}
+
 	return uc
 }
 
 func (uc *DevUseCase) Register(cmd cmds.Commandable) {
 	mod := cmd.Mod()
+
 	s := uc.cmds[mod]
 	if s == nil {
 		s = make(map[string]cmds.Commandable)
 		uc.cmds[mod] = s
 	}
+
 	s[cmd.Cmd()] = cmd
 	uc.listMsg.Commands = append(uc.listMsg.Commands, cmd.EncodeClient())
 }

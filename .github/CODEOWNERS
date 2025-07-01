@@ -1,0 +1,17 @@
+# Global owners for all files
+* @luffy050596
+
+# Workflow files require additional review
+.github/workflows/ @luffy050596
+
+# Go modules and dependencies
+go.mod @luffy050596
+go.sum @luffy050596
+
+# Configuration files
+*.yml @luffy050596
+*.yaml @luffy050596
+.golangci.yml @luffy050596
+
+# Documentation
+*.md @luffy050596

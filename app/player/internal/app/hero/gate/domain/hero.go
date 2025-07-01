@@ -18,19 +18,19 @@ func NewHeroDomain(logger log.Logger) *HeroDomain {
 	}
 }
 
-func (do *HeroDomain) UnlockHero(ctx core.Context, d *gamedata.HeroBaseData) (hero *object.Hero, err error) {
+func (do *HeroDomain) UnlockHero(ctx core.Context, d *gamedata.HeroBaseData) (*object.Hero, error) {
 	heroList := ctx.User().HeroList()
 	if heroList.Heroes[d.ID] != nil {
-		err = errors.Errorf("hero already unlocked. id=%d", d.ID)
-		return
+		return nil, errors.Errorf("hero already unlocked. id=%d", d.ID)
 	}
 
-	hero, err = object.NewHero(d.ID)
+	hero, err := object.NewHero(d.ID)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	hero.Level = d.Level
 	heroList.Heroes[d.ID] = hero
-	return
+
+	return hero, nil
 }

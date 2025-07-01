@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+//nolint:paralleltest
 func TestSignECDHCliPubKey(t *testing.T) {
 	cliPub := initTest(t)
 

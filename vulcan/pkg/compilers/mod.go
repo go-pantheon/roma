@@ -2,11 +2,12 @@ package compilers
 
 import (
 	"bufio"
-	"github.com/pkg/errors"
 	"os"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type ModsCompiler struct {
@@ -46,13 +47,10 @@ func NewModCompilers(filename string) ([]*ModsCompiler, error) {
 func (c *ModsCompiler) Compile() error {
 	f, err := os.Open(c.filename)
 	if err != nil {
-		return errors.Wrapf(err, "加载mod文件错误。文件<%s>", c.filename)
+		return errors.Wrapf(err, "load mod file failed. file=%s", c.filename)
 	}
 
-	modReg, err := regexp.Compile(`\s*=\s*[1-9]([0-9])*;`)
-	if err != nil {
-		return errors.Wrapf(err, "正则错误。文件<%s>", c.filename)
-	}
+	modReg := regexp.MustCompile(`\s*=\s*[1-9]([0-9])*;`)
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -62,14 +60,17 @@ func (c *ModsCompiler) Compile() error {
 		if !modReg.MatchString(text) {
 			continue
 		}
+
 		subs := strings.Split(text, equalTag)
 		c.Mods = append(c.Mods, ModType(strings.ToLower(strings.TrimSpace(subs[0]))))
 	}
+
 	sort.Sort(ModSlice(c.Mods))
 
 	if err = scanner.Err(); err != nil {
-		return errors.Wrapf(err, "读取api文件错误。文件<%s>", c.filename)
+		return errors.Wrapf(err, "failed to read api file. file=%s", c.filename)
 	}
+
 	return nil
 }
 

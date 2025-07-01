@@ -27,6 +27,7 @@ func (s *RoomAdmin) GetById(ctx context.Context, req *adminv1.GetByIdRequest) (*
 	if err != nil {
 		return nil, err
 	}
+
 	return &adminv1.GetByIdResponse{
 		Item: p,
 	}, nil

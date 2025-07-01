@@ -38,12 +38,15 @@ func NewGRPCServer(
 	if c.Grpc.Network != "" {
 		opts = append(opts, kgrpc.Network(c.Grpc.Network))
 	}
+
 	if c.Grpc.Addr != "" {
 		opts = append(opts, kgrpc.Address(c.Grpc.Addr))
 	}
+
 	if c.Grpc.Timeout != nil {
 		opts = append(opts, kgrpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
+
 	opts = append(opts, kgrpc.Options(
 		grpc.InitialConnWindowSize(1<<30),
 		grpc.InitialWindowSize(1<<30),
@@ -51,11 +54,14 @@ func NewGRPCServer(
 	))
 
 	svr := kgrpc.NewServer(opts...)
+
 	for _, r := range svcRg.Rgs {
 		r.GrpcRegister(svr)
 	}
+
 	for _, r := range adminRg.Rgs {
 		r.GrpcRegister(svr)
 	}
+
 	return svr
 }

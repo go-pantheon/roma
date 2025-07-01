@@ -78,11 +78,15 @@ func (s *RoomPersister) Persist(ctx context.Context, uid int64, proto life.Versi
 
 func (s *RoomPersister) IncVersion(ctx context.Context, uid int64) (err error) {
 	var newVersion int64
-	s.Lock(func() error {
+
+	if err := s.Lock(func() error {
 		s.room.Version += 1
 		newVersion = s.room.Version
+
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
 
 	return s.do.IncVersion(ctx, uid, newVersion)
 }

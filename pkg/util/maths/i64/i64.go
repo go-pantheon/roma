@@ -2,7 +2,7 @@ package i64
 
 import (
 	"math"
-	"math/rand"
+	"math/rand/v2"
 	"strconv"
 )
 
@@ -40,7 +40,7 @@ func Add(x, y int64) int64 {
 	if x == 0 {
 		return y
 	}
-	
+
 	if y == 0 {
 		return x
 	}
@@ -64,11 +64,11 @@ func Add(x, y int64) int64 {
 // Note: Call rand.Seed() before using this function
 // to ensure proper randomness
 func Random(v int64) int64 {
-	if v == 0 {
+	if v <= 0 {
 		return 0
 	}
 
-	return rand.Int63n(v)
+	return rand.Int64N(v)
 }
 
 func Divide2f64(x, y int64) float64 {
@@ -182,7 +182,7 @@ func ToI32(x int64) int32 {
 	if x > math.MaxInt32 {
 		return math.MaxInt32
 	}
-	
+
 	return int32(x)
 }
 

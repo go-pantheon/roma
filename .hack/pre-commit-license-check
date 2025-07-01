@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+# pre-commit hook script for checking license compliance
+# This script will be called by the pre-commit framework
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+cd "${PROJECT_ROOT}"
+
+echo "🔍 Checking licenses..."
+"${SCRIPT_DIR}/licenses-check" 2> >(grep -v "has empty version, defaults to HEAD" >&2 || true)
+
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+    echo "❌ License check failed! Some dependencies have disallowed licenses."
+    echo "   Please run './.hack/licenses-check' for more details."
+    exit 1
+fi
+
+echo "✅ License check passed."
+exit 0

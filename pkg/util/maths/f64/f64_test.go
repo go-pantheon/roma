@@ -8,6 +8,8 @@ import (
 )
 
 func TestMax(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     float64
@@ -23,6 +25,8 @@ func TestMax(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got := Max(tt.x, tt.y)
 
 			if math.IsNaN(tt.expected) {
@@ -35,6 +39,8 @@ func TestMax(t *testing.T) {
 }
 
 func TestMin(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     float64
@@ -53,6 +59,8 @@ func TestMin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got := Min(tt.x, tt.y)
 
 			if math.IsNaN(tt.expected) {
@@ -65,6 +73,8 @@ func TestMin(t *testing.T) {
 }
 
 func TestReduce(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     float64
@@ -86,6 +96,8 @@ func TestReduce(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got := Reduce(tt.x, tt.y)
 
 			if math.IsNaN(tt.expected) {
@@ -98,6 +110,8 @@ func TestReduce(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     float64
@@ -122,6 +136,8 @@ func TestAdd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got := Add(tt.x, tt.y)
 
 			if math.IsNaN(got) {

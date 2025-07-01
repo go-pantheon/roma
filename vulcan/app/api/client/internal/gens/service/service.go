@@ -13,7 +13,7 @@ import (
 
 func Gen(project, base string, modCompiler *compilers.ModsCompiler) error {
 	dir := path.Join(base, "service/")
-	if err := os.Mkdir(dir, 0755); err != nil {
+	if err := os.Mkdir(dir, 0750); err != nil {
 		return errors.Wrapf(err, "failed to create tmp dir: %s", dir)
 	}
 

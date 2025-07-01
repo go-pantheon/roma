@@ -12,14 +12,18 @@ import (
 )
 
 func TestWorkMap_Basic(t *testing.T) {
+	t.Parallel()
+
 	goroutines := 10
 	iterations := 100
 
 	m := NewWorkerMap()
 
 	// Test Set and Get concurrently
+	//nolint:paralleltest
 	t.Run("Set and Get", func(t *testing.T) {
 		var wg sync.WaitGroup
+
 		wg.Add(goroutines)
 
 		for i := range goroutines {
@@ -42,8 +46,10 @@ func TestWorkMap_Basic(t *testing.T) {
 	})
 
 	// Test Remove concurrently
+	//nolint:paralleltest
 	t.Run("Remove", func(t *testing.T) {
 		var wg sync.WaitGroup
+
 		wg.Add(goroutines)
 
 		for i := range goroutines {
@@ -63,12 +69,15 @@ func TestWorkMap_Basic(t *testing.T) {
 }
 
 func TestWorkMap_Concurrent(t *testing.T) {
+	t.Parallel()
+
 	count := 1000
 	m := NewWorkerMap()
 
 	var wg sync.WaitGroup
 
 	// Concurrent Set
+	//nolint:paralleltest
 	t.Run("Concurrent Set", func(t *testing.T) {
 		wg.Add(count)
 
@@ -80,10 +89,11 @@ func TestWorkMap_Concurrent(t *testing.T) {
 		}
 
 		wg.Wait()
-		assert.Equal(t, m.Count(), count)
+		assert.Equal(t, m.SimilarCount(), count)
 	})
 
 	// Concurrent Get
+	//nolint:paralleltest
 	t.Run("Concurrent Get", func(t *testing.T) {
 		wg.Add(count)
 
@@ -103,13 +113,17 @@ func TestWorkMap_Concurrent(t *testing.T) {
 }
 
 func TestWorkMap_BatchOperations(t *testing.T) {
+	t.Parallel()
+
 	goroutines := 10
 	batchSize := 100
 
 	m := NewWorkerMap()
 
+	//nolint:paralleltest
 	t.Run("Set", func(t *testing.T) {
 		var wg sync.WaitGroup
+
 		wg.Add(goroutines)
 
 		for i := range goroutines {
@@ -121,12 +135,15 @@ func TestWorkMap_BatchOperations(t *testing.T) {
 				}
 			}(i)
 		}
+
 		wg.Wait()
-		assert.Equal(t, m.Count(), goroutines*batchSize)
+		assert.Equal(t, m.SimilarCount(), goroutines*batchSize)
 	})
 
+	//nolint:paralleltest
 	t.Run("Get", func(t *testing.T) {
 		var wg sync.WaitGroup
+
 		wg.Add(goroutines)
 
 		for i := range goroutines {
@@ -144,18 +161,22 @@ func TestWorkMap_BatchOperations(t *testing.T) {
 		wg.Wait()
 	})
 
+	//nolint:paralleltest
 	t.Run("Remove", func(t *testing.T) {
 		var wg sync.WaitGroup
+
 		wg.Add(goroutines)
 
 		for i := range goroutines {
 			go func(base int) {
 				defer wg.Done()
+
 				keys := make([]int64, batchSize)
 
 				for j := range batchSize {
 					keys[j] = int64(base*batchSize + j)
 				}
+
 				for _, k := range keys {
 					m.Remove(k)
 					assert.Nil(t, m.Get(k))

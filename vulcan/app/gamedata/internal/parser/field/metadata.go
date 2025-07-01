@@ -1,7 +1,6 @@
 package field
 
 import (
-	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -82,8 +81,7 @@ type Metadata struct {
 
 func NewMetadataList(rows [][]string) (mds []*Metadata, err error) {
 	if len(rows) != TableMetadataLineSize {
-		err = fmt.Errorf("field rows length is not %d", TableMetadataLineSize)
-		return
+		return nil, errors.Errorf("field rows length is not %d", TableMetadataLineSize)
 	}
 
 	typeRow := rows[TypeRowIndex]
@@ -116,44 +114,42 @@ func NewMetadataList(rows [][]string) (mds []*Metadata, err error) {
 
 		md, err = newMetadata(typ, name, protoName, condition, comment)
 		if err != nil {
-			err = errors.WithMessagef(err, "field=%s", name)
-			return
+			return nil, errors.WithMessagef(err, "field=%s", name)
 		}
 
 		switch md.Type {
 		case IdType, SharedIdType:
 			if idFieldName != "" {
-				err = fmt.Errorf("fieldName=%s is duplicated with %s", md.Name, idFieldName)
-				return
+				return nil, errors.Errorf("fieldName=%s is duplicated with %s", md.Name, idFieldName)
 			}
+
 			idFieldName = md.Name
 		case SharedSubIdType:
 			if subIdFieldName != "" {
-				err = fmt.Errorf("second primary field name=%s is duplicated with %s", md.Name, subIdFieldName)
-				return
+				return nil, errors.Errorf("second primary field name=%s is duplicated with %s", md.Name, subIdFieldName)
 			}
+
 			subIdFieldName = md.Name
 		default:
 			if _, ok := names[md.FieldName]; ok {
-				err = fmt.Errorf("fieldName=%s is duplicated", md.FieldName)
-				return
+				return nil, errors.Errorf("fieldName=%s is duplicated", md.FieldName)
 			}
+
 			names[md.FieldName] = md
 		}
-		if md.JoinedType != "" {
-			if md.JoinedName == "" {
-				err = fmt.Errorf("joined name is empty")
-				return
-			}
+
+		if md.JoinedType != "" && md.JoinedName == "" {
+			return nil, errors.Errorf("joined name is empty")
 		}
+
 		mds = append(mds, md)
 	}
 
 	if idFieldName == "" {
-		err = fmt.Errorf("primary field (%s or %s) is not exist", IdType, SharedIdType)
-		return
+		return nil, errors.Errorf("primary field (%s or %s) is not exist", IdType, SharedIdType)
 	}
-	return
+
+	return mds, nil
 }
 
 func newMetadata(typ, name, protoName, condition, comment string) (*Metadata, error) {
@@ -217,32 +213,34 @@ func parseName(name string) (info *NameInfo, err error) {
 	info = &NameInfo{}
 
 	defer func() {
-		if matched, _ := regexp.MatchString("^[a-zA-Z]+$", info.JoinedName+info.FieldName); !matched {
-			err = fmt.Errorf("joined name must be all alphabet. joinedName=%s", info.JoinedName)
+		if info != nil {
+			if matched, _ := regexp.MatchString("^[a-zA-Z]+$", info.JoinedName+info.FieldName); !matched {
+				err = errors.Errorf("joined name must be all alphabet. joinedName=%s", info.JoinedName)
+			}
 		}
 	}()
 
 	if name == "" {
-		err = fmt.Errorf("field name is empty")
-		return
+		return nil, errors.Errorf("field name is empty")
 	}
 
 	if name == string(IdType) {
 		info.Type = IdType
 		info.FieldName = camelcase.ToUpperCamel(name)
-		return
+
+		return info, nil
 	}
 
 	parts := strings.Split(name, sep)
 	if len(parts) > 3 {
-		err = errors.Errorf("field name must have at most 3 parts. name=%s", name)
-		return
+		return nil, errors.Errorf("field name must have at most 3 parts. name=%s", name)
 	}
 
 	if len(parts) == 1 {
 		info.Type = NormalType
 		info.FieldName = camelcase.ToUpperCamel(name)
-		return
+
+		return info, nil
 	}
 
 	var specialPart string
@@ -252,7 +250,7 @@ func parseName(name string) (info *NameInfo, err error) {
 		info.FieldName = camelcase.ToUpperCamel(parts[1])
 		switch info.Type {
 		case NormalType, SharedIdType, SharedSubIdType, SharedType, MergedMapType, MergedListNonNilType, MergedListType:
-			return
+			return info, nil
 		default:
 			info.Type = NormalType
 			specialPart = parts[0]
@@ -265,15 +263,13 @@ func parseName(name string) (info *NameInfo, err error) {
 		case SharedType, MergedMapType, MergedListNonNilType, MergedListType:
 			specialPart = parts[1]
 		default:
-			err = errors.Errorf("field name must have 2 parts when first prefix is %s. name=%s", info.Type, name)
-			return
+			return nil, errors.Errorf("field name must have 2 parts when first prefix is %s. name=%s", info.Type, name)
 		}
 	}
 
 	subParts := strings.Split(specialPart, joinedSep)
 	if len(subParts) != 2 {
-		err = errors.Errorf("joined part must have 2 parts. part=%s", specialPart)
-		return
+		return nil, errors.Errorf("joined part must have 2 parts. part=%s", specialPart)
 	}
 
 	pt := MetadataType(subParts[0])
@@ -286,25 +282,27 @@ func parseName(name string) (info *NameInfo, err error) {
 	case GameStructType:
 		info.GameStructName = camelcase.ToUpperCamel(subParts[1])
 		if info.GameStructName == "" {
-			err = errors.Errorf("game struct name is empty. part=%s", specialPart)
-			return
+			return nil, errors.Errorf("game struct name is empty. part=%s", specialPart)
 		}
 	case GameStructListType:
 		info.GameStructListName = camelcase.ToUpperCamel(subParts[1])
 		if info.GameStructListName == "" {
-			err = errors.Errorf("game struct list name is empty. part=%s", specialPart)
-			return
+			return nil, errors.Errorf("game struct list name is empty. part=%s", specialPart)
 		}
 	case JoinedType, JoinedListType, JoinedMapType:
 		info.JoinedType = MetadataType(subParts[0])
 		info.JoinedName = camelcase.ToUpperCamel(subParts[1])
+
 		if info.JoinedName == "" {
-			err = errors.Errorf("joined name is empty. part=%s", specialPart)
-			return
+			return nil, errors.Errorf("joined name is empty. part=%s", specialPart)
 		}
 	default:
-		err = errors.Errorf("special type must be sepcial or joined type. part=%s", specialPart)
-		return
+		return nil, errors.Errorf("special type must be sepcial or joined type. part=%s", specialPart)
 	}
-	return
+
+	return info, nil
+}
+
+func (md *Metadata) IsMerged() bool {
+	return md.Type == MergedMapType || md.Type == MergedListType || md.Type == MergedListNonNilType
 }

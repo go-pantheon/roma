@@ -7,6 +7,8 @@ import (
 )
 
 func TestContains(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		array    []uint64
@@ -35,6 +37,8 @@ func TestContains(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := Contains(tt.array, tt.value)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -42,6 +46,8 @@ func TestContains(t *testing.T) {
 }
 
 func TestIsElementRepeat(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		array    []uint64
@@ -76,6 +82,8 @@ func TestIsElementRepeat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := IsElementRepeat(tt.array, tt.except)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -83,6 +91,8 @@ func TestIsElementRepeat(t *testing.T) {
 }
 
 func TestIndex(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		array    []uint64
@@ -111,6 +121,8 @@ func TestIndex(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := Index(tt.array, tt.value)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -118,6 +130,8 @@ func TestIndex(t *testing.T) {
 }
 
 func TestRand(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		array    []uint64
@@ -146,6 +160,8 @@ func TestRand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := Rand(tt.array, tt.count)
 			assert.Equal(t, tt.expected, len(result))
 		})
@@ -153,6 +169,8 @@ func TestRand(t *testing.T) {
 }
 
 func TestCycle(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		i           uint64
@@ -184,6 +202,8 @@ func TestCycle(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result, err := Cycle(tt.i, tt.array)
 			if tt.expectError {
 				assert.Error(t, err)
@@ -196,6 +216,8 @@ func TestCycle(t *testing.T) {
 }
 
 func TestToKVMap(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		input       []uint64
@@ -231,6 +253,8 @@ func TestToKVMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result, err := ToKVMap(tt.input)
 			if tt.expectError {
 				assert.Error(t, err)
@@ -243,6 +267,8 @@ func TestToKVMap(t *testing.T) {
 }
 
 func TestF64ArraysToI64Arrays(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		input    [][]float64
@@ -268,6 +294,8 @@ func TestF64ArraysToI64Arrays(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := F64ArraysToI64Arrays(tt.input)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -275,6 +303,8 @@ func TestF64ArraysToI64Arrays(t *testing.T) {
 }
 
 func TestFirst(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		array       []uint64
@@ -301,6 +331,8 @@ func TestFirst(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result, err := First(tt.array)
 			if tt.expectError {
 				assert.Error(t, err)
@@ -313,6 +345,8 @@ func TestFirst(t *testing.T) {
 }
 
 func TestValue(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		array       []uint64
@@ -349,6 +383,8 @@ func TestValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result, err := Value(tt.array, tt.index)
 			if tt.expectError {
 				assert.Error(t, err)
@@ -361,6 +397,8 @@ func TestValue(t *testing.T) {
 }
 
 func TestCheckSize(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		array       []uint64
@@ -395,6 +433,8 @@ func TestCheckSize(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			err := CheckSize(tt.array, tt.size)
 			if tt.expectError {
 				assert.Error(t, err)
@@ -406,6 +446,8 @@ func TestCheckSize(t *testing.T) {
 }
 
 func TestDelElement(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		array    []uint64
@@ -434,6 +476,8 @@ func TestDelElement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := DelElement(tt.array, tt.delId)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -441,6 +485,8 @@ func TestDelElement(t *testing.T) {
 }
 
 func TestGetNotZeroCount(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		array    []uint64
@@ -465,6 +511,8 @@ func TestGetNotZeroCount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := GetNotZeroCount(tt.array)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -474,51 +522,65 @@ func TestGetNotZeroCount(t *testing.T) {
 // Benchmark tests
 func BenchmarkContains(b *testing.B) {
 	array := []uint64{1, 2, 3, 4, 5}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		Contains(array, 3)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			Contains(array, 3)
+		}
+	})
 }
 
 func BenchmarkIsElementRepeat(b *testing.B) {
 	array := []uint64{1, 2, 2, 3, 4, 5}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		IsElementRepeat(array, 0)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			IsElementRepeat(array, 0)
+		}
+	})
 }
 
 func BenchmarkIndex(b *testing.B) {
 	array := []uint64{1, 2, 3, 4, 5}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		Index(array, 3)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			Index(array, 3)
+		}
+	})
 }
 
 func BenchmarkCopy(b *testing.B) {
 	array := []uint64{1, 2, 3, 4, 5}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		Copy(array)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			Copy(array)
+		}
+	})
 }
 
 func BenchmarkRand(b *testing.B) {
 	array := []uint64{1, 2, 3, 4, 5}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		Rand(array, 3)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			Rand(array, 3)
+		}
+	})
 }
 
 func BenchmarkDelElement(b *testing.B) {
 	array := []uint64{1, 2, 3, 4, 5}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		b.StopTimer()
-		testArray := Copy(array)
-		b.StartTimer()
-		DelElement(testArray, 3)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			b.StopTimer()
+
+			testArray := Copy(array)
+
+			b.StartTimer()
+			DelElement(testArray, 3)
+		}
+	})
 }

@@ -1,0 +1,96 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+CHECK_DIR="${PROJECT_ROOT}"
+
+cd "${PROJECT_ROOT}"
+
+MODULE_NAME=$(grep -E "^module " go.mod | awk '{print $2}')
+echo "Project module: ${MODULE_NAME}"
+
+if ! command -v go-licenses &>/dev/null; then
+    echo "Installing go-licenses..."
+    go install github.com/google/go-licenses@latest
+fi
+
+ALLOWED_LICENSES=(
+    "MIT"
+    "Apache-2.0"
+    "BSD-2-Clause"
+    "BSD-3-Clause"
+    "ISC"
+    "MPL-2.0"
+)
+
+EXCEPTIONS_FILE="${SCRIPT_DIR}/license-exceptions.txt"
+EXCEPTIONS=()
+if [[ -f "${EXCEPTIONS_FILE}" ]]; then
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ -z "$line" || "$line" =~ ^# ]]; then
+            continue
+        fi
+        EXCEPTIONS+=("$line")
+    done <"${EXCEPTIONS_FILE}"
+fi
+
+echo "License exceptions: ${#EXCEPTIONS[@]}"
+
+WARNING_FILE="${CHECK_DIR}/license-check-warnings.log"
+echo "Checking licenses..."
+DEPENDENCIES=$(go-licenses report ./... 2> >(grep -v "has empty version, defaults to HEAD" >"${WARNING_FILE}" || true))
+
+if [ -s "${WARNING_FILE}" ]; then
+    echo "Some warnings were generated during license check. See ${WARNING_FILE} for details."
+fi
+
+# Check for disallowed licenses
+EXIT_CODE=0
+while IFS=, read -r package license_url license_type; do
+    if [ -z "$package" ]; then
+        continue
+    fi
+
+    # Automatically skip project's own packages
+    if [[ "$package" == "${MODULE_NAME}" || "$package" == "${MODULE_NAME}/"* ]]; then
+        echo "SKIPPED (self-module): $package"
+        continue
+    fi
+
+    IN_EXCEPTIONS=0
+    for exception in "${EXCEPTIONS[@]}"; do
+        if [[ "$package" == "$exception" || "$package" == "$exception/"* ]]; then
+            echo "SKIPPED (exception): $package ($license_type)"
+            IN_EXCEPTIONS=1
+            break
+        fi
+    done
+
+    if [ $IN_EXCEPTIONS -eq 1 ]; then
+        continue
+    fi
+
+    ALLOWED=0
+    for allowed in "${ALLOWED_LICENSES[@]}"; do
+        if [ "$license_type" == "$allowed" ]; then
+            ALLOWED=1
+            break
+        fi
+    done
+
+    if [ $ALLOWED -eq 0 ]; then
+        echo "ERROR: Package $package uses disallowed license: $license_type"
+        EXIT_CODE=1
+    fi
+done <<<"$DEPENDENCIES"
+
+# Generate dependency license report
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "All dependencies use allowed licenses."
+
+    echo "Generating license report..."
+    go-licenses report --template .github/licenses.tmpl ./... >DEPENDENCIES.md 2> >(grep -v "has empty version, defaults to HEAD" >/dev/null || true)
+fi
+
+exit $EXIT_CODE

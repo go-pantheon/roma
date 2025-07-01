@@ -30,6 +30,7 @@ func newRowGroup(idField *field.Field, subIdField *field.Field, rows []*Row) *Ro
 	if subIdField != nil {
 		rg.subIdName = subIdField.Name
 	}
+
 	return rg
 }
 
@@ -47,11 +48,9 @@ func newRows(mds []*field.Metadata, values [][]string) (rows []*RowGroup, err er
 			continue
 		}
 
-		var row *Row
-		row, err = newRow(mds, vs)
+		row, err := newRow(mds, vs)
 		if err != nil {
-			err = errors.WithMessagef(err, "values<%+v>", vs)
-			return
+			return nil, errors.WithMessagef(err, "values<%+v>", vs)
 		}
 
 		id := row.id()
@@ -65,24 +64,27 @@ func newRows(mds []*field.Metadata, values [][]string) (rows []*RowGroup, err er
 			rg = newRowGroup(row.IdField, row.SubIdField, []*Row{})
 			rowGroups[id] = rg
 		}
+
 		rg.rows = append(rg.rows, row)
 	}
 
 	for _, id := range rowIdOrders {
 		rg := rowGroups[id]
 		subIdMap := make(map[int64]struct{}, len(rg.rows))
+
 		for _, row := range rg.rows {
 			subId, _ := row.subId()
 			if _, ok := subIdMap[subId]; ok {
-				err = errors.Errorf("sub id already exists. sub id=%d", subId)
-				return
+				return nil, errors.Errorf("sub id already exists. sub id=%d", subId)
 			}
+
 			subIdMap[subId] = struct{}{}
 		}
+
 		rows = append(rows, rg)
 	}
 
-	return
+	return rows, nil
 }
 
 func newRow(mds []*field.Metadata, values []string) (row *Row, err error) {
@@ -96,55 +98,53 @@ func newRow(mds []*field.Metadata, values []string) (row *Row, err error) {
 	for i, md := range mds {
 		f, e := field.NewField(md, values[i])
 		if e != nil {
-			err = errors.WithMessagef(e, "field=%s", md.FieldName)
-			return
+			return nil, errors.WithMessagef(e, "field=%s", md.FieldName)
 		}
 
 		switch md.Type {
 		case field.IdType, field.SharedIdType:
 			if row.IdField != nil {
-				err = errors.Errorf("id field already exists. field=%s", md.FieldName)
-				return
+				return nil, errors.Errorf("id field already exists. field=%s", md.FieldName)
 			}
+
 			if md.FieldType != reflect.TypeOf(int64(0)) {
-				err = errors.Errorf("id field type must be int64. field=%s", md.FieldName)
-				return
+				return nil, errors.Errorf("id field type must be int64. field=%s", md.FieldName)
 			}
+
 			if f.Value.(int64) <= 0 {
-				err = errors.Errorf("id field value cannot be 0. field=%s", md.FieldName)
-				return
+				return nil, errors.Errorf("id field value cannot be 0. field=%s", md.FieldName)
 			}
+
 			row.IdField = f
 		case field.SharedSubIdType:
 			if row.SubIdField != nil {
-				err = errors.Errorf("sub id field already exists. field=%s", md.FieldName)
-				return
+				return nil, errors.Errorf("sub id field already exists. field=%s", md.FieldName)
 			}
+
 			if md.FieldType != reflect.TypeOf(int64(0)) {
-				err = errors.Errorf("sub id field type must be int64. field=%s", md.FieldName)
-				return
+				return nil, errors.Errorf("sub id field type must be int64. field=%s", md.FieldName)
 			}
+
 			if f.Value.(int64) <= 0 {
-				err = errors.Errorf("sub id field value cannot be 0. field=%s", md.FieldName)
-				return
+				return nil, errors.Errorf("sub id field value cannot be 0. field=%s", md.FieldName)
 			}
+
 			row.SubIdField = f
 		default:
 			if _, ok := row.FieldMap[md.FieldName]; ok {
-				err = errors.Errorf("field already exists. field=%s", md.FieldName)
-				return
+				return nil, errors.Errorf("field already exists. field=%s", md.FieldName)
 			}
+
 			row.FieldMap[md.FieldName] = f
 			row.Fields = append(row.Fields, f)
 		}
 	}
 
 	if row.IdField == nil {
-		err = errors.New("id field not found")
-		return
+		return nil, errors.New("id field not found")
 	}
 
-	return
+	return row, nil
 }
 
 func (r *Row) id() int64 {
@@ -155,5 +155,6 @@ func (r *Row) subId() (v int64, ok bool) {
 	if r.SubIdField == nil {
 		return 0, false
 	}
+
 	return r.SubIdField.Value.(int64), true
 }

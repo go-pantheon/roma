@@ -29,7 +29,7 @@ import (
 		{{- if .IsOneof }}
 			func Encode{{ $msgName }}(module life.Module) *{{ $msgName }} {
 				p := module.EncodeServer()
-        
+
 				switch p.(type) {
 				{{- range .OneofElements }}
 				case *{{ .Type }}:
@@ -100,7 +100,7 @@ import (
 				return nil
 			}
 		{{- end }}
-	{{ end }}	 
+	{{ end }}
 {{- end }}
 {{- end }}
 `

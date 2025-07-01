@@ -44,9 +44,11 @@ func Parse(path string) (*Sheets, error) {
 			err = errors.Wrapf(err, "load excel file failed. file=%s", filePath)
 			return err
 		}
+
 		if info.IsDir() {
 			return nil
 		}
+
 		if !excelFileNameReg.MatchString(filepath.Base(filePath)) {
 			slog.Info("ignore file", "path", filePath)
 			return nil
@@ -56,18 +58,22 @@ func Parse(path string) (*Sheets, error) {
 		if err != nil {
 			return err
 		}
+
 		for _, s := range sheets {
 			if _, ok := dir.sheets[s.FullName()]; ok {
 				return errors.Errorf("Sheet duplicated. sheet=%s", s.FullName())
 			}
+
 			dir.sheets[s.FullName()] = s
 		}
+
 		return nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
+
 	return dir, nil
 }
 

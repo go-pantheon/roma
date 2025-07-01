@@ -21,6 +21,7 @@ func NewProtoCache() domain.RoomProtoCache {
 		lru.WithCapacity(constants.WorkerSize),
 		lru.WithTTL(constants.CacheExpiredDuration),
 	)
+
 	return &protoCache{caches: caches}
 }
 
@@ -33,6 +34,7 @@ func (c *protoCache) Get(ctx context.Context, uid int64, ctime time.Time) *dbv1.
 	if !ok || o == nil {
 		return nil
 	}
+
 	return o.(*dbv1.RoomProto)
 }
 

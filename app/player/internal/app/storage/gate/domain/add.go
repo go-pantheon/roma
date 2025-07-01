@@ -67,11 +67,13 @@ func (do *StorageDomain) Add(ctx core.Context, opts ...WithAddArg) error {
 			return err
 		}
 	}
+
 	if len(arg.items) > 0 {
 		if err := do.CanAddItemPrizes(arg.items...); err != nil {
 			return err
 		}
 	}
+
 	if len(arg.packs) > 0 {
 		if err := do.CanAddPackPrizes(arg.packs...); err != nil {
 			return err
@@ -105,8 +107,8 @@ func (do *StorageDomain) Add(ctx core.Context, opts ...WithAddArg) error {
 	}
 
 	ctx.Changed(object.ModuleKey)
-
 	do.AfterUpdate(ctx, updateInfo, arg.itemSource, arg.silent)
+
 	return nil
 }
 
@@ -123,9 +125,12 @@ func (do *StorageDomain) addItems(ctx core.Context, prizes ...*gamedata.ItemPriz
 		if err := storage().AddItem(data, prize.Amount()); err != nil {
 			return nil, err
 		}
+
 		updateInfo.AddItem(data, prize.Amount())
 	}
+
 	ctx.Changed(object.ModuleKey)
+
 	return updateInfo, nil
 }
 
@@ -138,10 +143,12 @@ func (do *StorageDomain) CanAddItemPrizes(items ...*gamedata.ItemPrize) (err err
 		if item.Data() == nil {
 			return errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData")
 		}
+
 		if item.Amount() == 0 {
 			return errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", item.Data().Id(), item.Amount())
 		}
 	}
+
 	return nil
 }
 
@@ -157,9 +164,12 @@ func (do *StorageDomain) addPacks(ctx core.Context, packs ...*gamedata.PackPrize
 		if err := storage().AddPack(item.Data(), item.Amount()); err != nil {
 			return nil, err
 		}
+
 		updateInfo.AddPack(item.Data(), item.Amount())
 	}
+
 	ctx.Changed(object.ModuleKey)
+
 	return updateInfo, nil
 }
 
@@ -172,10 +182,12 @@ func (do *StorageDomain) CanAddPackPrizes(packs ...*gamedata.PackPrize) error {
 		if pack.Data() == nil {
 			return errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourcePackData")
 		}
+
 		if pack.Amount() == 0 {
 			return errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourcePackData id=%d, amount=%d", pack.Data().Id(), pack.Amount())
 		}
 	}
+
 	return nil
 }
 
@@ -185,19 +197,23 @@ func (do *StorageDomain) addPrizes(ctx core.Context, prizes ...*gamedata.Prizes)
 	}
 
 	updateInfo = object.NewUpdateInfo(ctx.Now(), object.UpdateTypeAdd)
+
 	for _, prize := range prizes {
 		if up, err := do.addItems(ctx, prize.ItemPrizes()...); err != nil {
 			return nil, err
 		} else {
 			_ = updateInfo.Merge(up)
 		}
+
 		if up, err := do.addPacks(ctx, prize.PackPrizes()...); err != nil {
 			return nil, err
 		} else {
 			_ = updateInfo.Merge(up)
 		}
 	}
+
 	ctx.Changed(object.ModuleKey)
+
 	return updateInfo, nil
 }
 
@@ -206,9 +222,11 @@ func (do *StorageDomain) CanAddPrizes(prizesList ...*gamedata.Prizes) error {
 		if err := do.CanAddItemPrizes(prizes.ItemPrizes()...); err != nil {
 			return err
 		}
+
 		if err := do.CanAddPackPrizes(prizes.PackPrizes()...); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }

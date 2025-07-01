@@ -33,11 +33,13 @@ func NewField(md *Metadata, raw string) (fd *Field, err error) {
 		RawValue: raw,
 		Value:    v,
 	}
+
 	return fd, nil
 }
 
 func (f *Field) EncodeToJson() (string, error) {
 	name := f.FieldName
+
 	if f.Value == nil {
 		return "", errors.Errorf("field value must not nil. field=%s", f.FieldName)
 	}
@@ -46,6 +48,7 @@ func (f *Field) EncodeToJson() (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to encode field to JSON. field=%s", f.FieldName)
 	}
+
 	return fmt.Sprintf("\"%s\": %s", name, string(jsonData)), nil
 }
 
@@ -95,81 +98,132 @@ func toReflectType(typeStr string) (reflect.Type, error) {
 func stringToValue(str string, t reflect.Type) (any, error) {
 	switch t.Kind() {
 	case reflect.Int64:
-		var v int64
-		if str == "" {
-			return int64(0), nil
-		}
-		_, err := fmt.Sscanf(str, "%d", &v)
-		return v, err
+		return stringToInt64(str)
 	case reflect.Uint64:
-		var v uint64
-		if str == "" {
-			return uint64(0), nil
-		}
-		_, err := fmt.Sscanf(str, "%d", &v)
-		return v, err
+		return stringToUint64(str)
 	case reflect.String:
 		return str, nil
 	case reflect.Bool:
-		var v bool
-		if str == "" {
-			return false, nil
-		}
-		_, err := fmt.Sscanf(str, "%t", &v)
-		return v, err
+		return stringToBool(str)
 	case reflect.Float64:
-		var v float64
-		if str == "" {
-			return float64(0), nil
-		}
-		_, err := fmt.Sscanf(str, "%f", &v)
-		return v, err
+		return stringToFloat64(str)
 	case reflect.Slice:
-		if str == "" {
-			return reflect.MakeSlice(t, 0, 0).Interface(), nil
-		}
-		elemType := t.Elem()
-		elements := strings.Split(str, SliceSep)
-		slice := reflect.MakeSlice(t, len(elements), len(elements))
-		for i, elemStr := range elements {
-			elemValue, err := stringToValue(elemStr, elemType)
-			if err != nil {
-				return nil, err
-			}
-			slice.Index(i).Set(reflect.ValueOf(elemValue))
-		}
-		return slice.Interface(), nil
+		return stringToSlice(str, t)
 	case reflect.Map:
-		if str == "" {
-			return reflect.MakeMap(t).Interface(), nil
-		}
-		mapType := t
-		keyType := mapType.Key()
-		elemType := mapType.Elem()
-		mapValue := reflect.MakeMap(mapType)
-		pairs := strings.Split(str, SliceSep)
-		for _, pair := range pairs {
-			kv := strings.Split(pair, KvSep)
-			if len(kv) != 2 {
-				return nil, fmt.Errorf("invalid key-value pair<%s>", pair)
-			}
-			key, err := stringToValue(kv[0], keyType)
-			if err != nil {
-				return nil, err
-			}
-			value, err := stringToValue(kv[1], elemType)
-			if err != nil {
-				return nil, err
-			}
-			if v := mapValue.MapIndex(reflect.ValueOf(key)); v.IsValid() {
-				return nil, fmt.Errorf("duplicate map key<%v> value<%v>", key, v)
-			}
-			mapValue.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf(value))
-		}
-		return mapValue.Interface(), nil
+		return stringToMap(str, t)
 	default:
 		return nil, fmt.Errorf("unsupported type: %s", t)
 	}
+}
+
+func stringToInt64(str string) (int64, error) {
+	if str == "" {
+		return 0, nil
+	}
+
+	var v int64
+	if _, err := fmt.Sscanf(str, "%d", &v); err != nil {
+		return 0, errors.Wrapf(err, "failed to parse int64 from string: %s", str)
+	}
+
+	return v, nil
+}
+
+func stringToUint64(str string) (uint64, error) {
+	if str == "" {
+		return 0, nil
+	}
+
+	var v uint64
+	if _, err := fmt.Sscanf(str, "%d", &v); err != nil {
+		return 0, errors.Wrapf(err, "failed to parse uint64 from string: %s", str)
+	}
+
+	return v, nil
+}
+
+func stringToBool(str string) (bool, error) {
+	if str == "" {
+		return false, nil
+	}
+
+	var v bool
+	if _, err := fmt.Sscanf(str, "%t", &v); err != nil {
+		return false, errors.Wrapf(err, "failed to parse bool from string: %s", str)
+	}
+
+	return v, nil
+}
+
+func stringToFloat64(str string) (float64, error) {
+	if str == "" {
+		return 0.0, nil
+	}
+
+	var v float64
+	if _, err := fmt.Sscanf(str, "%f", &v); err != nil {
+		return 0.0, errors.Wrapf(err, "failed to parse float64 from string: %s", str)
+	}
+
+	return v, nil
+}
+
+func stringToSlice(str string, t reflect.Type) (any, error) {
+	if str == "" {
+		return reflect.MakeSlice(t, 0, 0).Interface(), nil
+	}
+
+	elemType := t.Elem()
+	elements := strings.Split(str, SliceSep)
+	slice := reflect.MakeSlice(t, len(elements), len(elements))
+
+	for i, elemStr := range elements {
+		elemValue, err := stringToValue(elemStr, elemType)
+		if err != nil {
+			return nil, err
+		}
+
+		slice.Index(i).Set(reflect.ValueOf(elemValue))
+	}
+
+	return slice.Interface(), nil
+}
+
+func stringToMap(str string, t reflect.Type) (any, error) {
+	if str == "" {
+		return reflect.MakeMap(t).Interface(), nil
+	}
+
+	mapType := t
+	keyType := mapType.Key()
+	elemType := mapType.Elem()
+	mapValue := reflect.MakeMap(mapType)
+	pairs := strings.Split(str, SliceSep)
+
+	for _, pair := range pairs {
+		kv := strings.Split(pair, KvSep)
+		if len(kv) != 2 {
+			return nil, fmt.Errorf("invalid key-value pair<%s>", pair)
+		}
+
+		key, err := stringToValue(kv[0], keyType)
+		if err != nil {
+			return nil, err
+		}
+
+		value, err := stringToValue(kv[1], elemType)
+		if err != nil {
+			return nil, err
+		}
+
+		if v := mapValue.MapIndex(reflect.ValueOf(key)); v.IsValid() {
+			return nil, fmt.Errorf("duplicate map key<%v> value<%v>", key, v)
+		}
+
+		mapValue.SetMapIndex(reflect.ValueOf(key), reflect.ValueOf(value))
+	}
+
+	return mapValue.Interface(), nil
 }
 
 func IsZeroValue(v any) bool {

@@ -13,6 +13,8 @@ import (
 )
 
 func TestMain(t *testing.T) {
+	t.Parallel()
+
 	baseDir := filewriter.BasePath()
 
 	excelPath := "../../../../fixtures/excel"
@@ -36,6 +38,7 @@ func TestMain(t *testing.T) {
 	excel.Walk(func(sh sheet.Sheet) bool {
 		err = genBase(destPath, sh)
 		require.NoError(t, err)
+
 		return true
 	})
 }

@@ -40,6 +40,7 @@ func newAppleCli(logger log.Logger, repo OrderRepo, c *conf.Recharge_Apple) (do 
 		conf:  proto.Clone(c).(*conf.Recharge_Apple),
 		repo:  repo,
 	}
+
 	return do
 }
 
@@ -55,76 +56,71 @@ func (do *appleCli) verifyReceipt(ctx core.Context, receipt []byte, productId in
 	)
 
 	if err = do.cli.Verify(ctx0, req, resp); err != nil {
-		err = errors.Wrapf(rechargeerrs.ErrApiVerify, "%s", err.Error())
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrApiVerify, "%s", err.Error())
 	}
+
 	if resp.Status != 0 {
-		err = errors.Wrapf(rechargeerrs.ErrApiVerify, "status=%d", resp.Status)
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrApiVerify, "status=%d", resp.Status)
 	}
 
 	transIds, err := do.createOrder(ctx, req.ReceiptData, &resp.Receipt, resp.LatestReceiptInfo, productId)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	reset = &ResetOrderInfo{
 		Store:    do.store,
 		TransIds: transIds,
 	}
-	return
+
+	return reset, nil
 }
 
 func (do *appleCli) createOrder(ctx core.Context, token string, receipt *appstore.Receipt, latestReceiptInfo []appstore.InApp, productId int64) (transIds []string, err error) {
 	if receipt == nil {
-		err = errors.Wrapf(rechargeerrs.ErrApiVerify, "receipt is nil")
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrApiVerify, "receipt is nil")
 	}
 
 	if receipt.BundleID != do.conf.BundleId {
-		err = errors.Wrapf(rechargeerrs.ErrPackageName, "bundleId:%s", receipt.BundleID)
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrPackageName, "bundleId:%s", receipt.BundleID)
 	}
 
 	for _, inApp := range receipt.InApp {
 		if transId, err0 := do.createOrder0(ctx, productId, token, inApp); err0 != nil {
 			do.log.WithContext(ctx).Errorf("verify receipt.inApp failed. %+v", err0)
-		} else {
-			if len(transId) > 0 {
-				transIds = append(transIds, transId)
-			}
+		} else if len(transId) > 0 {
+			transIds = append(transIds, transId)
 		}
 	}
+
 	for _, inApp := range latestReceiptInfo {
-		if transId, err0 := do.createOrder0(ctx, productId, token, inApp); err0 != nil {
+		transId, err0 := do.createOrder0(ctx, productId, token, inApp)
+		if err0 != nil {
 			do.log.WithContext(ctx).Errorf("verify latestReceiptInfo failed. %+v", err0)
-			continue
-		} else {
-			if len(transId) > 0 {
-				transIds = append(transIds, transId)
-			}
+		} else if len(transId) > 0 {
+			transIds = append(transIds, transId)
 		}
 	}
 
 	if len(transIds) == 0 {
-		err = errors.Wrapf(rechargeerrs.ErrProductId, "no valid transaction")
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrProductId, "no valid transaction")
 	}
-	return
+
+	return transIds, nil
 }
 
 func (do *appleCli) createOrder0(ctx core.Context, productId int64, token string, inapp appstore.InApp) (transId string, err error) {
 	if inapp.ProductID != fmt.Sprintf("%s.%d", do.conf.BundleId, productId) {
-		err = errors.Wrapf(rechargeerrs.ErrProductId, "ProductID=%s expect=%d", inapp.ProductID, productId)
-		return
+		return "", errors.Wrapf(rechargeerrs.ErrProductId, "ProductID=%s expect=%d", inapp.ProductID, productId)
 	}
+
 	if inapp.InAppOwnershipType != "PURCHASED" {
-		err = errors.Wrapf(rechargeerrs.ErrNotPurchased, "InAppOwnershipType=%s", inapp.InAppOwnershipType)
-		return
+		return "", errors.Wrapf(rechargeerrs.ErrNotPurchased, "InAppOwnershipType=%s", inapp.InAppOwnershipType)
 	}
+
 	// api verify succeeded, check order is existed
 	if err = checkOrder(ctx, do.repo, do.store, inapp.TransactionID); err != nil {
-		return
+		return "", err
 	}
 
 	order := do.createOrderProto(ctx, ctx.UID(), token, &inapp, ctx.Now())
@@ -132,8 +128,7 @@ func (do *appleCli) createOrder0(ctx core.Context, productId int64, token string
 		return
 	}
 
-	transId = order.TransId
-	return
+	return order.TransId, nil
 }
 
 func (do *appleCli) createOrderProto(_ context.Context, uid int64, token string, inApp *appstore.InApp, ctime time.Time) *dbv1.OrderProto {
@@ -156,5 +151,6 @@ func (do *appleCli) createOrderProto(_ context.Context, uid int64, token string,
 
 	p.Ack = int32(dbv1.OrderAckState_ORDER_ACK_STATE_SUCCEEDED)
 	p.AckAt = ctime.Unix()
+
 	return p
 }

@@ -21,12 +21,8 @@ func EmptyFilter(mod, seq int32) bool {
 }
 
 func DefaultFilter(mod, seq int32) bool {
-	switch mod {
-	case int32(climod.ModuleID_System):
-		switch seq {
-		case int32(cliseq.SystemSeq_Heartbeat):
-			return false
-		}
+	if mod == int32(climod.ModuleID_System) && seq == int32(cliseq.SystemSeq_Heartbeat) {
+		return false
 	}
 
 	return true

@@ -14,7 +14,7 @@ func (do *StorageDomain) Cost(ctx core.Context, toCosts *gamedata.Costs) (err er
 	}
 
 	if err = do.CanCost(ctx, toCosts); err != nil {
-		return
+		return err
 	}
 
 	storage := ctx.User().Storage()
@@ -26,10 +26,13 @@ func (do *StorageDomain) Cost(ctx core.Context, toCosts *gamedata.Costs) (err er
 			err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
 			return false
 		}
+
 		item.Sub(itemCost.Amount())
 		updateInfo.AddItem(itemCost.Data(), itemCost.Amount())
+
 		return true
 	})
+
 	if err != nil {
 		return err
 	}
@@ -38,7 +41,7 @@ func (do *StorageDomain) Cost(ctx core.Context, toCosts *gamedata.Costs) (err er
 
 	do.AfterUpdate(ctx, updateInfo, 0, false)
 
-	return
+	return nil
 }
 
 func (do *StorageDomain) CanCost(ctx core.Context, toCosts *gamedata.Costs) (err error) {
@@ -50,15 +53,18 @@ func (do *StorageDomain) CanCost(ctx core.Context, toCosts *gamedata.Costs) (err
 			err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
 			return false
 		}
+
 		if item.Amount() < itemCost.Amount() {
 			err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d", itemCost.Data().Id())
 			return false
 		}
+
 		return true
 	})
 
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

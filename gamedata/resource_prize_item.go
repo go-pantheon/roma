@@ -13,10 +13,12 @@ var (
 
 func TryNewItemPrizesList(itemSlice []map[int64]uint64) ([]*ItemPrizes, error) {
 	ret := make([]*ItemPrizes, 0, len(itemSlice))
+
 	for _, items := range itemSlice {
 		if len(items) == 0 {
 			continue
 		}
+
 		itemPrizes, err := TryNewItemPrizes(items)
 		if err != nil {
 			if errors.Is(err, zerrors.ErrEmptyPrize) {
@@ -25,8 +27,10 @@ func TryNewItemPrizesList(itemSlice []map[int64]uint64) ([]*ItemPrizes, error) {
 				return nil, err
 			}
 		}
+
 		ret = append(ret, itemPrizes)
 	}
+
 	return ret, nil
 }
 
@@ -41,11 +45,13 @@ func TryNewItemPrizes(itemAmounts map[int64]uint64) (*ItemPrizes, error) {
 	}
 
 	items := make([]*ItemPrize, 0, len(itemAmounts))
+
 	for itemId, amount := range itemAmounts {
 		itemPrize, err := TryNewItemPrize(itemId, amount)
 		if err != nil {
 			return nil, err
 		}
+
 		items = append(items, itemPrize)
 	}
 
@@ -75,6 +81,7 @@ func (p *ItemPrizes) CloneWith(others ...*ItemPrizes) *ItemPrizes {
 		if itemPrize == nil || itemPrize.itemData == nil || itemPrize.amount == 0 {
 			continue
 		}
+
 		items[itemPrize.itemData.ID] = NewItemPrize(itemPrize.itemData, itemPrize.amount)
 	}
 
@@ -82,10 +89,12 @@ func (p *ItemPrizes) CloneWith(others ...*ItemPrizes) *ItemPrizes {
 		if other == nil {
 			continue
 		}
+
 		for _, itemPrize := range other.items {
 			if itemPrize == nil || itemPrize.itemData == nil || itemPrize.amount == 0 {
 				continue
 			}
+
 			if _, ok := items[itemPrize.itemData.ID]; ok {
 				items[itemPrize.itemData.ID].amount += itemPrize.amount
 			} else {
@@ -97,9 +106,11 @@ func (p *ItemPrizes) CloneWith(others ...*ItemPrizes) *ItemPrizes {
 	ret := &ItemPrizes{
 		items: make([]*ItemPrize, 0, len(items)),
 	}
+
 	for _, itemPrize := range items {
 		ret.items = append(ret.items, itemPrize)
 	}
+
 	return ret
 }
 

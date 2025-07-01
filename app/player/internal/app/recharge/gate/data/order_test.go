@@ -38,13 +38,17 @@ func (s *OrderRepoSuite) SetupTest() {
 	s.repo = repo
 }
 
+//nolint:paralleltest
 func TestOrderRepoSuite(t *testing.T) {
 	suite.Run(t, new(OrderRepoSuite))
 }
 
+//nolint:paralleltest
 func (s *OrderRepoSuite) TestCreate() {
+	//nolint:paralleltest
 	s.T().Run("CreateOrderSuccess", func(t *testing.T) {
 		s.SetupTest()
+
 		order := &dbv1.OrderProto{
 			Info:    &dbv1.OrderInfoProto{ProductId: "test_product"},
 			Uid:     12345,
@@ -64,8 +68,10 @@ func (s *OrderRepoSuite) TestCreate() {
 		require.NoError(t, s.mock.ExpectationsWereMet())
 	})
 
+	//nolint:paralleltest
 	s.T().Run("CreateOrderDBFail", func(t *testing.T) {
 		s.SetupTest()
+
 		order := &dbv1.OrderProto{
 			Info:    &dbv1.OrderInfoProto{ProductId: "test_product"},
 			Uid:     12345,
@@ -86,13 +92,16 @@ func (s *OrderRepoSuite) TestCreate() {
 	})
 }
 
+//nolint:paralleltest
 func (s *OrderRepoSuite) TestGetByTransId() {
 	store := pkg.Store("test-store")
 	transId := "test-trans-id"
 	query := `SELECT info, uid, store, trans_id, ack, ack_at FROM "orders" WHERE trans_id = $1 AND store = $2 LIMIT 1`
 
+	//nolint:paralleltest
 	s.T().Run("GetOrderSuccess", func(t *testing.T) {
 		s.SetupTest()
+
 		info := &dbv1.OrderInfoProto{ProductId: "test_product"}
 		infoJson, err := json.Marshal(info)
 		require.NoError(t, err)
@@ -109,6 +118,7 @@ func (s *OrderRepoSuite) TestGetByTransId() {
 		require.NoError(t, s.mock.ExpectationsWereMet())
 	})
 
+	//nolint:paralleltest
 	s.T().Run("GetOrderNotFound", func(t *testing.T) {
 		s.SetupTest()
 		s.mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(transId, store).WillReturnError(pgx.ErrNoRows)
@@ -119,8 +129,10 @@ func (s *OrderRepoSuite) TestGetByTransId() {
 		require.NoError(t, s.mock.ExpectationsWereMet())
 	})
 
+	//nolint:paralleltest
 	s.T().Run("GetOrderScanFail", func(t *testing.T) {
 		s.SetupTest()
+
 		rows := pgxmock.NewRows([]string{"info"}).AddRow([]byte("invalid-json"))
 		s.mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(transId, store).WillReturnRows(rows)
 
@@ -130,12 +142,14 @@ func (s *OrderRepoSuite) TestGetByTransId() {
 	})
 }
 
+//nolint:paralleltest
 func (s *OrderRepoSuite) TestUpdateAckState() {
 	store := pkg.Store("test-store")
 	transId := "test-trans-id"
 	ackState := dbv1.OrderAckState_ORDER_ACK_STATE_SUCCEEDED
 	query := `UPDATE orders SET ack = $1, ack_at = $2 WHERE trans_id = $3 AND store = $4`
 
+	//nolint:paralleltest
 	s.T().Run("UpdateAckSuccess", func(t *testing.T) {
 		s.SetupTest()
 		s.mock.ExpectExec(regexp.QuoteMeta(query)).

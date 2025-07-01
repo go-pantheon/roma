@@ -15,25 +15,20 @@ func Merge(fds []*Field) (mfd *Field, err error) {
 
 	switch fds[0].Type {
 	case MergedListNonNilType, MergedListType:
-		mg, err = buildFieldListMerger(fds[0])
+		mg = buildFieldListMerger(fds[0])
 	case MergedMapType:
-		mg, err = buildFieldMapMerger(fds[0])
+		mg = buildFieldMapMerger(fds[0])
 	default:
-		err = errors.Errorf("unsupported metadata type. type=%s", fds[0].Type)
-		return
-	}
-	if err != nil {
-		return
+		return nil, errors.Errorf("unsupported metadata type. type=%s", fds[0].Type)
 	}
 
 	for _, f := range fds {
 		if err = mg.merge(f); err != nil {
-			return
+			return nil, err
 		}
 	}
 
-	mfd = mg.toField()
-	return
+	return mg.toField(), nil
 }
 
 type merger interface {
@@ -55,20 +50,23 @@ func (mg *sliceMerger) toField() *Field {
 	}
 }
 
-func buildFieldListMerger(fd *Field) (merger, error) {
-	md := fd.Metadata.clone()
+func buildFieldListMerger(fd *Field) merger {
+	md := fd.clone()
 	md.FieldType = reflect.SliceOf(fd.FieldType)
+
 	mg := &sliceMerger{
 		Metadata: md,
 		value:    reflect.MakeSlice(md.FieldType, 0, 0),
 	}
-	return mg, nil
+
+	return mg
 }
 
 func (mg *sliceMerger) merge(fd *Field) error {
 	if mg.FieldName != fd.FieldName {
 		return errors.Errorf("metadata ServerName mismatch %v %v", mg.FieldName, fd.FieldName)
 	}
+
 	if mg.FieldType.Elem() != fd.FieldType {
 		return errors.Errorf("metadata FieldType mismatch %v %v", mg.FieldType, fd.FieldType)
 	}
@@ -83,6 +81,7 @@ func (mg *sliceMerger) merge(fd *Field) error {
 	default:
 		return errors.Errorf("unsupported metadata type. type=%s", mg.Type)
 	}
+
 	return nil
 }
 
@@ -100,19 +99,22 @@ func (mg *mapMerger) toField() *Field {
 	}
 }
 
-func buildFieldMapMerger(fd *Field) (merger, error) {
-	md := fd.Metadata.clone()
+func buildFieldMapMerger(fd *Field) merger {
+	md := fd.clone()
+
 	mg := &mapMerger{
 		Metadata: md,
 		value:    reflect.MakeMap(md.FieldType),
 	}
-	return mg, nil
+
+	return mg
 }
 
 func (mg *mapMerger) merge(fd *Field) error {
 	if mg.FieldName != fd.FieldName {
 		return errors.Errorf("metadata ServerName mismatch %v %v", mg.FieldName, fd.FieldName)
 	}
+
 	if mg.FieldType != fd.FieldType {
 		return errors.Errorf("metadata FieldType mismatch %v %v", mg.FieldType, fd.FieldType)
 	}
@@ -121,7 +123,9 @@ func (mg *mapMerger) merge(fd *Field) error {
 		if mg.value.MapIndex(k).IsValid() {
 			return errors.Errorf("key %v already exists", k)
 		}
+
 		mg.value.SetMapIndex(k, reflect.ValueOf(fd.Value).MapIndex(k))
 	}
+
 	return nil
 }

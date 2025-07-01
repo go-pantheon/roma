@@ -75,14 +75,14 @@ func (w *Worker) Auth(ctx context.Context, pack xnet.Pack) (xnet.Session, error)
 }
 
 func (w *Worker) handshakePack(ctx context.Context, token string, cliPub []byte) (ret xnet.Pack, err error) {
-	cliPubSign, err := security.SignECDHCliPubKey(cliPub[:])
+	cliPubSign, err := security.SignECDHCliPubKey(cliPub)
 	if err != nil {
 		return nil, err
 	}
 
 	cs := &climsg.CSHandshake{
 		Token:     token,
-		Pub:       cliPub[:],
+		Pub:       cliPub,
 		Sign:      cliPubSign,
 		ServerId:  1,
 		Timestamp: time.Now().Unix(),
@@ -90,22 +90,21 @@ func (w *Worker) handshakePack(ctx context.Context, token string, cliPub []byte)
 
 	data, err := proto.Marshal(cs)
 	if err != nil {
-		err = errors.Wrap(err, "CSHandshake encode failed")
-		return
+		return nil, errors.Wrap(err, "CSHandshake encode failed")
 	}
 
 	req := &clipkt.Packet{
-		Mod:   int32(climod.ModuleID_System),
-		Seq:   int32(cliseq.SystemSeq_Handshake),
-		Data:  data,
+		Mod:  int32(climod.ModuleID_System),
+		Seq:  int32(cliseq.SystemSeq_Handshake),
+		Data: data,
 	}
 
 	if ret, err = proto.Marshal(req); err != nil {
-		err = errors.Wrap(err, "proto marshal failed")
-		return
+		return nil, errors.Wrap(err, "proto marshal failed")
 	}
 
 	w.log.WithContext(ctx).Infof("send handshake. len=%d token=%s", len(ret), cs.Token)
+
 	return ret, nil
 }
 

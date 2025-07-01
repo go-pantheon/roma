@@ -65,7 +65,9 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) (err e
 	}
 
 	defer func() {
-		w.Stop(ctx)
+		if stopErr := w.Stop(ctx); stopErr != nil {
+			err = errors.Join(err, stopErr)
+		}
 	}()
 
 	return s.run(ctx, w, stream)

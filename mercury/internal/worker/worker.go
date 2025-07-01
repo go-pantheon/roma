@@ -179,6 +179,7 @@ func (w *Worker) work(ctx context.Context) error {
 					if err != nil {
 						return err
 					}
+
 					if done {
 						break
 					}
@@ -189,7 +190,7 @@ func (w *Worker) work(ctx context.Context) error {
 }
 
 func (w *Worker) send(pkt *clipkt.Packet) (err error) {
-	pkt.Index = int32(w.tcpCli.Session().IncreaseCSIndex())
+	pkt.Index = w.tcpCli.Session().IncreaseCSIndex()
 
 	if pkt.Obj == 0 {
 		pkt.Obj = w.UID()
@@ -287,12 +288,13 @@ func (w *Worker) Output() string {
 	var s strings.Builder
 
 	s.WriteString(fmt.Sprintf("[worker-%d] ", w.UID()))
+
 	if w.completed.Load() {
 		s.WriteString("completed.")
 	} else {
 		s.WriteString("not completed.")
 	}
-	
+
 	s.WriteString(fmt.Sprintf(" spent: %.4fs", w.workDuration.Seconds()))
 	s.WriteString(fmt.Sprintf(" sent: %d", w.SentMsgCount.Load()))
 	s.WriteString(fmt.Sprintf(" recv: %d", w.RecvMsgCount.Load()))

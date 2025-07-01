@@ -18,6 +18,5 @@ func NewDiscovery(conf *conf.Registry) (registry.Discovery, error) {
 		return nil, errors.Wrapf(err, "new etcdclient failed")
 	}
 
-	r := etcd.New(client)
-	return r, nil
+	return etcd.New(client), nil
 }

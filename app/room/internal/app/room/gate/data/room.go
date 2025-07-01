@@ -52,14 +52,17 @@ func (r *roomMongoRepo) Create(ctx context.Context, p *dbv1.RoomProto, ctime tim
 	if p == nil {
 		return errors.New("room proto is nil")
 	}
+
 	if p.Id == 0 {
 		return errors.New("room id is required for creation")
 	}
+
 	p.CreatedAt = ctime.Unix()
 
 	if err := r.repo.Create(ctx, p); err != nil {
 		return errors.Wrapf(err, "creating room %d", p.Id)
 	}
+
 	return nil
 }
 
@@ -67,9 +70,11 @@ func (r *roomMongoRepo) QueryByID(ctx context.Context, id int64, p *dbv1.RoomPro
 	if id == 0 {
 		return errors.New("room id is required")
 	}
+
 	if err := r.repo.FindByID(ctx, _roomIDField, id, p, nil); err != nil {
 		return errors.Wrapf(err, "querying room %d", id)
 	}
+
 	return nil
 }
 
@@ -77,6 +82,7 @@ func (r *roomMongoRepo) UpdateByID(ctx context.Context, id int64, room *dbv1.Roo
 	if room == nil {
 		return errors.New("room proto is nil")
 	}
+
 	if id == 0 {
 		return errors.New("room id is required for update")
 	}
@@ -93,6 +99,7 @@ func (r *roomMongoRepo) UpdateByID(ctx context.Context, id int64, room *dbv1.Roo
 	if err := r.repo.UpdateOne(ctx, _roomIDField, id, room.Version, update); err != nil {
 		return errors.Wrapf(err, "updating room %d", id)
 	}
+
 	return nil
 }
 
@@ -100,6 +107,7 @@ func (r *roomMongoRepo) Exist(ctx context.Context, id int64) (bool, error) {
 	if id == 0 {
 		return false, errors.New("room id is required")
 	}
+
 	return r.repo.Exists(ctx, _roomIDField, id)
 }
 
@@ -107,8 +115,10 @@ func (r *roomMongoRepo) IncVersion(ctx context.Context, id int64, newVersion int
 	if id == 0 {
 		return errors.New("room id is required")
 	}
+
 	if err := r.repo.IncrementVersion(ctx, _roomIDField, id, newVersion); err != nil {
 		return errors.Wrapf(err, "incrementing version for room %d", id)
 	}
+
 	return nil
 }

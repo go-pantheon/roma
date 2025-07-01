@@ -16,7 +16,7 @@ import (
 )
 
 func NewHTTPServer(
-	c *conf.Server, logger log.Logger, filter *filter.HttpFilter, 
+	c *conf.Server, logger log.Logger, filter *filter.HttpFilter,
 	svcRg *registry.ServiceRegistrars, gateRg *registry.GateRegistrars, adminRg *registry.AdminRegistrars,
 ) *http.Server {
 	var opts = []http.ServerOption{
@@ -45,7 +45,7 @@ func NewHTTPServer(
 	}
 
 	svr := http.NewServer(opts...)
-	
+
 	for _, r := range gateRg.Rgs {
 		r.HttpRegister(svr)
 	}

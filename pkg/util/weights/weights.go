@@ -20,21 +20,35 @@ func TryNewWeights(weights []uint64, values []int64) (*Weights, error) {
 	if len(weights) == 0 {
 		return nil, errors.New("new weights from ints failed: ints is empty")
 	}
+
 	if len(weights) != len(values) {
 		return nil, errors.New("new weights from ints failed: ints and values must have the same length")
 	}
 
 	coords := make([]uint64, 0, len(weights)*2)
-	start := uint64(0)
-	for _, weight := range weights {
-		coords = append(coords, start, start+weight)
-		start += weight
+	filteredValues := make([]int64, 0, len(values))
+
+	var totalWeight uint64
+
+	for i, weight := range weights {
+		if weight > 0 {
+			coords = append(coords, totalWeight, totalWeight+weight)
+			filteredValues = append(filteredValues, values[i])
+		}
+
+		totalWeight += weight
 	}
 
-	rgs, err := ranges.TryNewRange(coords, values)
+	// if all weights are 0, create an empty ranger
+	if len(coords) == 0 {
+		return &Weights{ranger: &ranges.Range{}}, nil
+	}
+
+	rgs, err := ranges.TryNewRange(coords, filteredValues)
 	if err != nil {
 		return nil, err
 	}
+
 	return &Weights{
 		ranger: rgs,
 	}, nil
@@ -50,57 +64,30 @@ func (ws *Weights) Rand() int64 {
 		return 0
 	}
 
-	if ret, i := ws.ranger.Find(u64.Random(uint64(ws.ranger.Max()))); i >= 0 {
+	if ret, i := ws.ranger.Find(u64.Random(ws.ranger.Max())); i >= 0 {
 		return ret
 	}
+
 	v, _ := ws.ranger.Rand()
+
 	return v
 }
 
-// RandList generates a random list based on weights, the result is not duplicated.
-// It will return less than count if there are not enough values.
 func (ws *Weights) RandList(count int) []int64 {
 	if count <= 0 || ws.ranger.Len() == 0 {
 		return make([]int64, 0)
 	}
 
-	result := make(map[int64]struct{}, count)
+	result := make([]int64, 0, count)
+	mx := ws.ranger.Max()
 
-	max := ws.ranger.Max()
-	for len(result) < count {
-		if max == 0 {
-			break
+	for range count {
+		w := u64.Random(mx)
+
+		if v, i := ws.ranger.Find(w); i != ranges.NotFound {
+			result = append(result, v)
 		}
-
-		w := u64.Random(max)
-
-		var (
-			v int64
-			i int
-		)
-		for j := 0; j < ws.ranger.Len(); j++ {
-			v, i = ws.ranger.Find(w)
-			if i == ranges.NotFound {
-				break
-			}
-			_, exist := result[v]
-			if !exist {
-				break
-			}
-			// step to next range
-			w += ws.ranger.Pairs[i].Len()
-		}
-		if i == ranges.NotFound {
-			break
-		}
-
-		result[v] = struct{}{}
-		max -= ws.ranger.Pairs[i].Len()
 	}
 
-	ret := make([]int64, 0, len(result))
-	for v := range result {
-		ret = append(ret, v)
-	}
-	return ret
+	return result
 }

@@ -36,6 +36,7 @@ func GroupByMod(mod ModType) GroupType {
 			}
 		}
 	}
+
 	return PlayerGroup
 }
 
@@ -43,15 +44,18 @@ func GroupMods(group GroupType) map[ModType]struct{} {
 	if mods, ok := groupModMap[group]; ok {
 		return mods
 	}
+
 	return nil
 }
 
 func Groups() []GroupType {
 	groups := make([]GroupType, 0, len(groupModMap)+1)
 	groups = append(groups, PlayerGroup)
+
 	for g := range groupModMap {
 		groups = append(groups, g)
 	}
+
 	return groups
 }
 

@@ -33,6 +33,7 @@ func main() {
 					msg = lines[0]
 				}
 			}
+
 			_, _ = fmt.Fprintf(os.Stderr, "%s\n", msg)
 			os.Exit(1)
 		}

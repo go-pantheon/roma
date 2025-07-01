@@ -39,9 +39,10 @@ func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.Update
 
 	storage := ctx.User().Storage()
 
-	updateInfo.WalkItem(func(d *gamedata.ResourceItemData, amount uint64) {
+	updateInfo.WalkItem(func(d *gamedata.ResourceItemData, _ uint64) {
 		id := d.Id()
 		itemIds = append(itemIds, id)
+
 		if item := storage.Items[id]; item != nil {
 			amountMsg.Items[id] = item.Amount()
 		} else {
@@ -49,9 +50,10 @@ func (do *StorageDomain) AfterUpdate(ctx core.Context, updateInfo *object.Update
 		}
 	})
 
-	updateInfo.WalkPack(func(d *gamedata.ResourcePackData, amount uint64) {
+	updateInfo.WalkPack(func(d *gamedata.ResourcePackData, _ uint64) {
 		id := d.Id()
 		packIds = append(packIds, id)
+
 		if pack := storage.Packs[id]; pack != nil {
 			amountMsg.Packs[id] = pack.Amount()
 		} else {
@@ -76,6 +78,7 @@ func (do *StorageDomain) UsePack(ctx core.Context, packData *gamedata.ResourcePa
 	if pack == nil {
 		return nil, zerrors.ErrStoragePackNotFound
 	}
+
 	if pack.Amount() == 0 {
 		return nil, zerrors.ErrStoragePackNotFound
 	}
@@ -85,7 +88,8 @@ func (do *StorageDomain) UsePack(ctx core.Context, packData *gamedata.ResourcePa
 	}
 
 	prizes := gamedata.NewEmptyItemPrizes()
-	for i := 0; i < int(pack.Amount()); i++ {
+
+	for range pack.Amount() {
 		prize := packData.Rand()
 		if gamedata.IsItemPrizesValid(prize) {
 			prizes = prizes.CloneWith(prize)
@@ -109,6 +113,7 @@ func (do *StorageDomain) Recover(ctx core.Context) error {
 	ctime := ctx.Now()
 
 	prizeList := make([]*gamedata.ItemPrize, 0, len(storage.RecoveryInfos))
+
 	for _, rec := range storage.RecoveryInfos {
 		toAdd := rec.Recover(ctime)
 		if toAdd > 0 {
@@ -116,6 +121,7 @@ func (do *StorageDomain) Recover(ctx core.Context) error {
 			if err != nil {
 				return err
 			}
+
 			prizeList = append(prizeList, prize)
 		}
 	}

@@ -26,7 +26,9 @@ func NewManager(logger log.Logger, rt *self.SelfRouteTable, roomDo *domain.RoomD
 	}
 
 	return m, func() {
-		stopFunc()
+		if err := stopFunc(); err != nil {
+			log.Errorf("stop manager failed. %+v", err)
+		}
 	}
 }
 
@@ -45,7 +47,7 @@ func (m *Manager) RegisterMinuteTick(f func(ctx Context) error) {
 }
 
 func (m *Manager) RegisterEvent(e life.WorkerEventType, f eventFunc) {
-	m.Manager.RegisterCustomEvent(e, func(wctx life.Context, arg *life.EventArg) (err error) {
+	m.RegisterCustomEvent(e, func(wctx life.Context, arg *life.EventArg) (err error) {
 		return f(wctx.(Context), arg)
 	})
 }

@@ -43,6 +43,7 @@ func NewAddItemCommander(uc *biz.DevUseCase, storageDo *domain.StorageDomain) *A
 	}
 
 	uc.Register(c)
+
 	return c
 }
 

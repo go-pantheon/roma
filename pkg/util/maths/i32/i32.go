@@ -2,7 +2,7 @@ package i32
 
 import (
 	"math"
-	"math/rand"
+	"math/rand/v2"
 )
 
 func Max(x, y int32) int32 {
@@ -27,6 +27,7 @@ func Reduce(x, y int32) int32 {
 	if x <= y {
 		return 0
 	}
+
 	return x - y
 }
 
@@ -62,11 +63,11 @@ func Add(x, y int32) int32 {
 // Note: Call rand.Seed() before using this function
 // to ensure proper randomness
 func Random(v int32) int32 {
-	if v == 0 {
+	if v <= 0 {
 		return 0
 	}
 
-	return rand.Int31n(v)
+	return rand.Int32N(v)
 }
 
 func Divide2f64(x, y int32) float64 {
@@ -121,6 +122,7 @@ func Pow(a, n int32) int32 {
 			if a > math.MaxInt32/a { // check overflow
 				return math.MaxInt32
 			}
+
 			a *= a
 		}
 	}

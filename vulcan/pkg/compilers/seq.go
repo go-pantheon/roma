@@ -31,9 +31,11 @@ func NewSeqCompilers(filename string, group GroupType) (*SeqCompiler, error) {
 		filename: filename,
 		Group:    group,
 	}
+
 	if err := c.Compile(); err != nil {
 		return nil, err
 	}
+
 	return c, nil
 }
 
@@ -62,12 +64,10 @@ func (c *SeqCompiler) Compile() error {
 		return errors.Wrapf(err, "load seq file failed. %s", c.filename)
 	}
 
-	seqReg, err := regexp.Compile(seqRegRule)
-	if err != nil {
-		return errors.Wrapf(err, "regex error. %s", c.filename)
-	}
+	seqReg := regexp.MustCompile(seqRegRule)
 
 	var seqComment string
+
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		text := strings.TrimSpace(scanner.Text())
@@ -76,9 +76,12 @@ func (c *SeqCompiler) Compile() error {
 			if len(c.mod) > 0 {
 				return errors.Wrapf(err, "multiple modules are defined in a file. %s %s %s", c.filename, c.mod, text)
 			}
+
 			c.mod = compileMod(text)
+
 			continue
 		}
+
 		if len(c.mod) == 0 {
 			continue
 		}
@@ -88,10 +91,13 @@ func (c *SeqCompiler) Compile() error {
 			if err != nil {
 				return err
 			}
+
 			if !ignore {
 				c.Apis = append(c.Apis, api)
 			}
+
 			seqComment = ""
+
 			continue
 		}
 
@@ -110,36 +116,36 @@ func (c *SeqCompiler) Compile() error {
 }
 
 func newApi(mod ModType, comment string, seqText string) (ignore bool, api *Api, err error) {
-	comment = strings.TrimSpace(comment)
 	subs := strings.Split(seqText, equalTag)
 	if len(subs) != 2 {
-		err = errors.Errorf("no enum value defined. %s", seqText)
-		return
+		return false, nil, errors.Errorf("no enum value defined. %s", seqText)
 	}
 
 	name := strings.TrimSpace(subs[0])
 
 	if mod == ModType(camelcase.ToUnderScore("System")) && name == camelcase.ToUpperCamel("Handshake") {
-		ignore = true
-		return
+		return true, nil, nil
 	}
 
 	api = &Api{
 		UpperCamelName: camelcase.ToUpperCamel(name),
-		Comment:        comment,
+		Comment:        strings.TrimSpace(comment),
 	}
 
 	api.SC = "SC" + api.UpperCamelName
+
 	if !strings.HasPrefix(comment, "@push") {
 		api.CS = "CS" + api.UpperCamelName
 	}
-	return
+
+	return false, api, nil
 }
 
 func compileMod(text string) (mod ModType) {
 	subs := strings.Split(text, blankTag)
-	if len(subs) > 1 {
-		mod = ModType(strings.ToLower(camelcase.ToUnderScore(strings.Replace(strings.TrimSpace(subs[1]), "Seq", "", -1))))
+	if len(subs) <= 1 {
+		return ""
 	}
-	return
+
+	return ModType(strings.ToLower(camelcase.ToUnderScore(strings.ReplaceAll(strings.TrimSpace(subs[1]), "Seq", ""))))
 }

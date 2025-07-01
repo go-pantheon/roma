@@ -195,6 +195,7 @@ func TestScanUserRow(t *testing.T) {
 		modulecolumn.ColumnTypeMap = map[life.ModuleKey]string{"module1": "JSONB"}
 		p := dbv1.UserModuleProtoPool.Get()
 		p.Module = &dbv1.UserModuleProto_Basic{Basic: &dbv1.UserBasicProto{}}
+
 		defer dbv1.UserModuleProtoPool.Put(p)
 
 		marshaled, err := MarshalUserModule("module1", p)

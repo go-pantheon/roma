@@ -11,7 +11,7 @@ func TryNewGroupWeights(ends []uint64) (*GroupWeights, error) {
 	for i := range len(values) {
 		values[i] = int64(i)
 	}
-	
+
 	ws, err := weights.TryNewWeights(ends, values)
 	if err != nil {
 		return nil, err

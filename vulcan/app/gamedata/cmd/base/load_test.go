@@ -1,7 +1,6 @@
 package main
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/go-pantheon/roma/gen/gamedata/base"
@@ -9,8 +8,8 @@ import (
 )
 
 func TestLoad(t *testing.T) {
-	jsonDir := filepath.Join("../../../../../gen/gamedata/json")
+	t.Parallel()
 
-	err := base.Load(jsonDir)
-	assert.Nil(t, err)
+	err := base.Load("../../../../../gen/gamedata/json")
+	assert.NoError(t, err)
 }

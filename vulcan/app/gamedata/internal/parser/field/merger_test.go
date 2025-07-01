@@ -9,6 +9,8 @@ import (
 )
 
 func TestMerge(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		in     []*Field
@@ -144,6 +146,8 @@ func TestMerge(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := Merge(tt.in)
 			require.Equal(t, tt.hasErr, err != nil)
 			assert.Equal(t, tt.want.FieldName, got.FieldName)
@@ -152,5 +156,4 @@ func TestMerge(t *testing.T) {
 			assert.Equal(t, tt.want.FieldType, got.FieldType)
 		})
 	}
-
 }

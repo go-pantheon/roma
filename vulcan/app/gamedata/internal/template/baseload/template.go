@@ -78,11 +78,14 @@ func NewService(project string, dir *parser.Sheets) *Service {
 		switch md.Type {
 		case sheet.SheetTypeTable:
 			packages[md.Package] = struct{}{}
+
 			s.TableStructs = append(s.TableStructs, newStruct(gf.GetMetadata(), true))
 		case sheet.SheetTypeKV:
 			packages[md.Package] = struct{}{}
+
 			s.KvStructs = append(s.KvStructs, newStruct(gf.GetMetadata(), false))
 		}
+
 		return true
 	})
 
@@ -108,6 +111,7 @@ func (s *Service) Execute() ([]byte, error) {
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }
 
@@ -139,5 +143,6 @@ func (x StructSlice) Less(i, j int) bool {
 	} else if x[i].Package > x[j].Package {
 		return false
 	}
+
 	return x[i].Struct < x[j].Struct
 }

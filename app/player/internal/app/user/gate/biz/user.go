@@ -48,17 +48,13 @@ func (uc *UserUseCase) onCreated(ctx core.Context) error {
 
 	user := ctx.User()
 
+	user.SID = ctx.SID()
+
 	user.Basic().CreatedAt = ctime
 	user.Status().LoginAt = ctime
 	user.Status().LatestOnlineAt = ctime
 
 	ctx.Changed(object.ModuleKey, statusobj.ModuleKey)
-
-	user.SID = ctx.SID()
-
-	if err := uc.do.UpdateSID(ctx, user.ID, user.SID, user.Version); err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -74,12 +70,15 @@ func (uc *UserUseCase) dailyReset(ctx core.Context) (changed bool) {
 		user  = ctx.User()
 		ctime = ctx.Now()
 	)
+
 	if ctime.Before(user.Status().NextDailyResetAt) {
 		return
 	}
+
 	user.Status().DailyOnlineDuration = 0
 	user.Status().NextDailyResetAt = xtime.NextDailyTime(ctime, 0)
 	changed = true
+
 	return
 }
 

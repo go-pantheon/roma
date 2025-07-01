@@ -16,16 +16,19 @@ func TryNewRange(coords []uint64, values []int64) (*Range, error) {
 	if len(coords) == 0 || len(coords)%2 != 0 {
 		return nil, errors.New("length of coords must be even and greater than 0")
 	}
+
 	if len(coords) != len(values)*2 {
 		return nil, errors.New("length of values must be half of the length of coords")
 	}
 
 	ranges := make([]*Pair, len(coords)/2)
-	for i := 0; i < len(coords)/2; i++ {
+
+	for i := range len(coords) / 2 {
 		r, err := TryNewPair(coords[i*2], coords[i*2+1], values[i])
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to create range")
 		}
+
 		ranges[i] = r
 	}
 
@@ -37,6 +40,7 @@ func TryNewRange(coords []uint64, values []int64) (*Range, error) {
 	if err := ret.validate(); err != nil {
 		return nil, errors.Wrap(err, "invalid range configuration")
 	}
+
 	return ret, nil
 }
 
@@ -47,6 +51,7 @@ func (r *Range) Find(n uint64) (v int64, i int) {
 	if len(r.Pairs) == 0 {
 		return 0, NotFound
 	}
+
 	if n < r.Min() || n >= r.Max() {
 		return 0, NotFound
 	}
@@ -56,15 +61,18 @@ func (r *Range) Find(n uint64) (v int64, i int) {
 		if n < current.Start {
 			return -1
 		}
+
 		if n >= current.End {
 			return 1
 		}
+
 		return 0
 	})
 
 	if found {
 		return r.Pairs[index].Value, index
 	}
+
 	return 0, NotFound
 }
 
@@ -73,9 +81,10 @@ func (r *Range) Rand() (v int64, i int) {
 	if l == 0 {
 		return 0, 0
 	}
+
 	i = int(i64.Random(int64(l)))
-	v = r.Pairs[i].Value
-	return
+
+	return r.Pairs[i].Value, i
 }
 
 func (r *Range) Len() int {
@@ -86,6 +95,7 @@ func (r *Range) Min() uint64 {
 	if len(r.Pairs) == 0 {
 		return 0
 	}
+
 	return r.Pairs[0].Start
 }
 
@@ -93,6 +103,7 @@ func (r *Range) Max() uint64 {
 	if len(r.Pairs) == 0 {
 		return 0
 	}
+
 	return r.Pairs[len(r.Pairs)-1].End
 }
 
@@ -109,8 +120,10 @@ func (r *Range) validate() error {
 			return errors.Errorf("ranges overlap at index %d: previous end %d, current start %d",
 				i, prevEnd, current.Start)
 		}
+
 		prevEnd = current.End
 	}
+
 	return nil
 }
 
@@ -126,6 +139,7 @@ func TryNewPair(start, end uint64, value int64) (*Pair, error) {
 	if start > end {
 		return nil, errors.New("invalid range: start must be less than or equal to end")
 	}
+
 	return &Pair{Start: start, End: end, Value: value}, nil
 }
 

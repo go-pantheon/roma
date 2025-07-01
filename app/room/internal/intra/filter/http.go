@@ -20,6 +20,7 @@ func NewHttpFilter(mgr *core.Manager) *HttpFilter {
 	md := &HttpFilter{
 		mgr: mgr,
 	}
+
 	return md
 }
 
@@ -31,6 +32,7 @@ func (md *HttpFilter) Server() middleware.Middleware {
 			}
 
 			ctx = unimd.TransformContext(ctx)
+
 			oid, err := xcontext.OID(ctx)
 			if err != nil {
 				return nil, err

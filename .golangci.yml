@@ -1,0 +1,82 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+  concurrency: 4
+  go: '1.24'
+
+
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bodyclose
+    - durationcheck
+    - errcheck
+    - errorlint
+    - gocognit
+    - gocritic
+    - gocyclo
+    - gosec
+    - govet
+    - ineffassign
+    - makezero
+    - nakedret
+    - noctx
+    - paralleltest
+    - prealloc
+    - predeclared
+    - reassign
+    - revive
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+    - wsl
+
+  settings:
+    govet:
+      enable-all: true
+      disable:
+        - shadow
+        - fieldalignment
+    gocognit:
+      min-complexity: 30
+    gocyclo:
+      min-complexity: 30
+    gocritic:
+      disabled-tags: ["opinionated", "experimental"]
+    gosec:
+      excludes:
+        - G404  # Exclude weak random number generator check for tests
+        - G115  # Exclude integer overflow conversions check for tests
+    revive:
+      enable-all-rules: false
+      rules:
+        - name: package-comments
+          disabled: true
+        - name: exported
+          disabled: true
+  exclusions:
+    rules:
+      - path: gen/
+        linters:
+          - wsl
+      - path: mercury/gen/
+        linters:
+          - wsl
+      - path: gamedata/*_gen.go
+        linters:
+          - wsl
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+    - gci
+
+issues:
+  max-issues-per-linter: 0 # Unlimited
+  max-same-issues: 0 # Unlimited

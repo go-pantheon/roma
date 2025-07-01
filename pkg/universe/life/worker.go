@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
-
 	"sync/atomic"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/profile"
@@ -99,7 +98,7 @@ func newWorker(
 
 	w.log.WithContext(ctx).Debugf("create worker. %s", w.LogInfo())
 
-	return
+	return w
 }
 
 func (w *Worker) start(ctx context.Context) {
@@ -253,6 +252,7 @@ func (w *Worker) canReuse(ctx context.Context, replier Responsive) bool {
 	if !IsInnerStatus(w.Status()) && !IsInnerContext(ctx) {
 		return false
 	}
+
 	if xcontext.GateReferer(ctx) != w.Referer() {
 		return false
 	}
@@ -273,7 +273,7 @@ func (w *Worker) Stop(ctx context.Context) (err error) {
 			w.notifyStoppedFunc(w.ID(), w.Unique())
 		}
 
-		w.Tickers.stop()
+		w.Tickers.Stop()
 
 		close(w.events)
 
@@ -342,7 +342,8 @@ func (w *Worker) eventFunc(t WorkerEventType, args ...WithArg) (f EventFunc, e e
 
 				return nil
 			}
-			return
+
+			return f, nil
 		}
 	}
 

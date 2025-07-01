@@ -1,6 +1,7 @@
 package lru
 
 import (
+	"math/rand/v2"
 	"testing"
 	"time"
 
@@ -18,6 +19,8 @@ func mockUserProto(id int64) proto.Message {
 }
 
 func TestLRU_Get(t *testing.T) {
+	t.Parallel()
+
 	lru := NewLRU(WithCapacity(2))
 
 	ctime := time.Now()
@@ -35,6 +38,8 @@ func TestLRU_Get(t *testing.T) {
 }
 
 func TestLRU_Put(t *testing.T) {
+	t.Parallel()
+
 	lru := NewLRU(WithCapacity(2))
 	ctime := time.Now()
 
@@ -57,6 +62,8 @@ func TestLRU_Put(t *testing.T) {
 }
 
 func TestLRU_Clear(t *testing.T) {
+	t.Parallel()
+
 	lru := NewLRU(WithCapacity(2))
 	ctime := time.Now()
 	lru.Put(1, mockUserProto(1), ctime)
@@ -73,6 +80,8 @@ func TestLRU_Clear(t *testing.T) {
 }
 
 func TestLRU_Concurrent(t *testing.T) {
+	t.Parallel()
+
 	lru := NewLRU(WithCapacity(100))
 	done := make(chan bool)
 	concurrent := 10
@@ -89,12 +98,14 @@ func TestLRU_Concurrent(t *testing.T) {
 	}
 
 	// Test concurrent reads
-	for i := 0; i < concurrent; i++ {
+	for i := range concurrent {
 		ctime := time.Now()
+
 		go func(id int) {
-			for j := 0; j < 100; j++ {
+			for j := range 100 {
 				lru.Get(int64(id*100+j), ctime)
 			}
+
 			done <- true
 		}(i)
 	}
@@ -109,6 +120,8 @@ func TestLRU_Concurrent(t *testing.T) {
 }
 
 func TestLRU_EdgeCases(t *testing.T) {
+	t.Parallel()
+
 	ctime := time.Now()
 
 	// Test with capacity 1
@@ -140,31 +153,34 @@ func BenchmarkLRU_Get(b *testing.B) {
 		lru.Put(int64(i), mockUserProto(int64(i)), ctime)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		lru.Get(int64(i%size), ctime)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			lru.Get(int64(rand.IntN(size)), ctime)
+		}
+	})
 }
 
 func BenchmarkLRU_Put(b *testing.B) {
 	size := 10_000
 	ctime := time.Now()
 	lru := NewLRU(WithCapacity(size))
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		lru.Put(int64(i), mockUserProto(int64(i)), ctime)
-	}
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			lru.Put(int64(rand.IntN(size)), mockUserProto(int64(rand.IntN(size))), ctime)
+		}
+	})
 }
 
 func BenchmarkLRU_Concurrent(b *testing.B) {
 	size := 10_000
 	ctime := time.Now()
 	lru := NewLRU(WithCapacity(size))
-	b.ResetTimer()
+
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			lru.Put(int64(b.N), mockUserProto(int64(b.N)), ctime)
-			lru.Get(int64(b.N%size), ctime)
+			lru.Put(int64(rand.IntN(size)), mockUserProto(int64(rand.IntN(size))), ctime)
+			lru.Get(int64(rand.IntN(size)), ctime)
 		}
 	})
 }
@@ -173,12 +189,14 @@ func BenchmarkLRU_Mixed(b *testing.B) {
 	size := 1_000_000
 	ctime := time.Now()
 	lru := NewLRU(WithCapacity(size))
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		if i%2 == 0 {
-			lru.Put(int64(i), mockUserProto(int64(i)), ctime)
-		} else {
-			lru.Get(int64(i%size), ctime)
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			if rand.IntN(2) == 0 {
+				lru.Put(int64(rand.IntN(size)), mockUserProto(int64(rand.IntN(size))), ctime)
+			} else {
+				lru.Get(int64(rand.IntN(size)), ctime)
+			}
 		}
-	}
+	})
 }

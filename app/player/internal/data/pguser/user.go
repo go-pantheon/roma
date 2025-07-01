@@ -77,16 +77,16 @@ func ScanUserRow(row pgx.Row, user *dbv1.UserProto, mods []life.ModuleKey, scana
 	return nil
 }
 
-func ParseUpsertModuleSQLParam(user *dbv1.UserProto, i int) (cols []string, values []any, signs []string, err error) {
+func ParseUpsertModuleSQLParam(user *dbv1.UserProto, firstModIndex int) (cols []string, values []any, signs []string, err error) {
 	values = make([]any, 0, len(user.Modules))
 
 	cols = make([]string, 0, len(user.Modules))
 	signs = make([]string, 0, len(user.Modules))
 
 	for k, p := range user.Modules {
-		cols = append(cols, `"`+string(k)+`"`)
-		signs = append(signs, "$"+strconv.Itoa(i))
-		i++
+		cols = append(cols, `"`+k+`"`)
+		signs = append(signs, "$"+strconv.Itoa(firstModIndex))
+		firstModIndex++
 
 		v, err := MarshalUserModule(life.ModuleKey(k), p)
 		if err != nil {
@@ -130,7 +130,7 @@ func UnmarshalUserModule(rawBytes []byte, modKey life.ModuleKey) (*dbv1.UserModu
 }
 
 func MarshalUserModule(key life.ModuleKey, p proto.Message) (ret []byte, err error) {
-	if modulecolumn.ColumnTypeMap[life.ModuleKey(key)] == jsonbType {
+	if modulecolumn.ColumnTypeMap[key] == jsonbType {
 		jsonb, err := protojson.Marshal(p)
 		if err != nil {
 			return nil, errors.Wrapf(err, "marshaling jsonb module %s", key)

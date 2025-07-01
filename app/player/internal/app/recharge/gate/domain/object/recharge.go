@@ -1,7 +1,6 @@
 package object
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/go-pantheon/fabrica-util/errors"
@@ -42,7 +41,9 @@ func buildRecharge(cents int64) *Recharge {
 	r := &Recharge{}
 	num := big.NewInt(cents)
 	denom := new(big.Int).Exp(big.NewInt(10), big.NewInt(RechargePrecision), nil)
+
 	r.amount.SetFrac(num, denom)
+
 	return r
 }
 
@@ -82,24 +83,28 @@ func (o *Recharge) EncodeClient() float32 {
 
 func (o *Recharge) AddRechargeFromString(format string) (err error) {
 	var toAdd big.Rat
+
 	if toAdd, err = amountFromString(format); err != nil {
 		return err
 	}
+
 	o.amount = *new(big.Rat).Add(&o.amount, &toAdd)
+
 	return nil
 }
 
 func (o *Recharge) AddRecharge(cents int64) (err error) {
 	toAdd := buildRecharge(cents)
 	o.amount = *new(big.Rat).Add(&o.amount, &toAdd.amount)
+
 	return nil
 }
 
 func amountFromString(str string) (ret big.Rat, err error) {
 	ret = big.Rat{}
 	if _, ok := ret.SetString(str); !ok {
-		err = fmt.Errorf("invalid amount format: %s", str)
-		return
+		return big.Rat{}, errors.Errorf("invalid amount format: %s", str)
 	}
-	return
+
+	return ret, nil
 }

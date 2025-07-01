@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-pantheon/fabrica-kit/profile"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	userobj "github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/object"
@@ -15,7 +14,7 @@ import (
 )
 
 type UserRepo interface {
-	Create(ctx context.Context, uid int64, defaultUser *dbv1.UserProto, ctime time.Time) error
+	Create(ctx context.Context, user *dbv1.UserProto, ctime time.Time) error
 	QueryByID(ctx context.Context, uid int64, p *dbv1.UserProto, mods []life.ModuleKey) error
 	UpdateByID(ctx context.Context, uid int64, user *dbv1.UserProto) error
 	IsExist(ctx context.Context, uid int64) (bool, error)
@@ -44,18 +43,20 @@ func NewUserDomain(pr UserRepo, logger log.Logger, cache UserCache) *UserDomain 
 }
 
 func (do *UserDomain) Create(ctx context.Context, uid int64, ctime time.Time, p *dbv1.UserProto) (err error) {
-	defaultUser := do.newDefaultUser(uid)
-	defaultUser.EncodeServer(p, userregister.AllModuleKeys())
+	if err = do.newDefaultUser(uid).EncodeServer(p, userregister.AllModuleKeys()); err != nil {
+		return err
+	}
 
-	err = do.repo.Create(ctx, uid, p, ctime)
+	err = do.repo.Create(ctx, p, ctime)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (do *UserDomain) newDefaultUser(id int64) *userobj.User {
-	return userobj.NewUser(id, profile.Version())
+	return userobj.NewUser(id)
 }
 
 func (do *UserDomain) Exist(ctx context.Context, uid int64) (bool, error) {
@@ -67,15 +68,12 @@ func (do *UserDomain) UpdateSID(ctx context.Context, uid int64, sid int64, versi
 }
 
 func (do *UserDomain) TakeUserProto(ctx context.Context, uid int64, allowCreate bool) (ret *dbv1.UserProto, newborn bool, err error) {
-	p := do.cache.Get(ctx, uid, time.Now())
-	if p != nil {
+	if p := do.cache.Get(ctx, uid, time.Now()); p != nil {
 		do.cache.Remove(ctx, uid)
 		return p, false, nil
 	}
 
-	p = dbv1.UserProtoPool.Get()
-
-	p.Id = uid
+	p := dbv1.UserProtoPool.Get()
 
 	if err = do.Load(ctx, uid, p); err != nil {
 		if errors.Is(err, xerrors.ErrDBRecordNotFound) {

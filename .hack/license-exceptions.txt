@@ -1,0 +1,17 @@
+# License Check Exceptions List
+# One package path per line, these packages will be ignored during license checks
+# For example:
+# github.com/example/package
+#
+# Note: Adding exceptions should be done carefully and with sufficient justification
+
+# Project's own packages don't need to be checked
+github.com/go-pantheon/roma
+
+# Dependencies containing assembly code that cannot be fully checked
+# These contain ARM64 assembly optimized code, go-licenses cannot analyze their dependencies
+github.com/cespare/xxhash/v2
+github.com/golang/snappy
+github.com/klauspost/compress/zstd/internal/xxhash
+# Changing to github.com/klauspost/compress would exclude the entire library
+# github.com/klauspost/compress

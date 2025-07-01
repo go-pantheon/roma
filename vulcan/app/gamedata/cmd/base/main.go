@@ -35,11 +35,13 @@ func main() {
 
 	destDir := path.Join(baseDir, destPath)
 	tmpDir := path.Join(baseDir, destTmpPath)
+
 	if err := filewriter.RebuildDir(tmpDir); err != nil {
 		panic(err)
 	}
 
 	excelDir := filepath.Join(baseDir, excelPath)
+
 	sheets, err := parser.Parse(excelDir)
 	if err != nil {
 		panic(err)
@@ -53,6 +55,7 @@ func main() {
 		if err := genBase(tmpDir, sh); err != nil {
 			panic(err)
 		}
+
 		return true
 	})
 
@@ -82,15 +85,12 @@ func genBase(dir string, sh sheet.Sheet) (err error) {
 	}
 
 	var s filewriter.GenService
+
 	switch md.Type {
 	case sheet.SheetTypeTable:
-		if s, err = base.NewTableService(project, sh); err != nil {
-			return
-		}
+		s = base.NewTableService(project, sh)
 	case sheet.SheetTypeKV:
-		if s, err = base.NewKvService(project, sh); err != nil {
-			return
-		}
+		s = base.NewKvService(project, sh)
 	}
 
 	to := path.Join(destDir, camelcase.ToUnderScore(md.Name)+"_gen.go")
@@ -99,16 +99,19 @@ func genBase(dir string, sh sheet.Sheet) (err error) {
 	}
 
 	slog.Info("generated base", "file", filewriter.SprintGenPath(to))
+
 	return
 }
 
 func genLoader(dir string, excelDir *parser.Sheets) (err error) {
 	to := filepath.Join(dir, "loader_gen.go")
 	s := baseload.NewService(project, excelDir)
+
 	if err = filewriter.GenFile(to, s); err != nil {
-		return
+		return err
 	}
 
 	slog.Info("generated base loader", "file", filewriter.SprintGenPath(to))
-	return
+
+	return nil
 }

@@ -17,6 +17,7 @@ func NewRoom() *Room {
 	u := &Room{
 		CreatedAt: time.Now(),
 	}
+
 	return u
 }
 
@@ -26,6 +27,7 @@ func (o *Room) EncodeServer() *dbv1.RoomProto {
 		CreatedAt: o.CreatedAt.Unix(),
 		Version:   o.Version,
 	}
+
 	return p
 }
 
@@ -37,5 +39,6 @@ func (o *Room) DecodeServer(p *dbv1.RoomProto) (err error) {
 	o.Id = p.Id
 	o.CreatedAt = xtime.Time(p.CreatedAt)
 	o.Version = p.Version
+
 	return nil
 }

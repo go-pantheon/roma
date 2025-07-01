@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 
+	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -43,20 +44,21 @@ func (r *BaseRepo) FindByID(ctx context.Context, idKey string, id any, result an
 		return errors.New("result pointer is nil")
 	}
 
-	filter := bson.M{idKey: id}
 	opts := options.FindOne()
 
 	if len(projection) > 0 {
 		opts.SetProjection(projection)
 	}
 
+	filter := bson.M{idKey: id}
+
 	err := r.Coll.FindOne(ctx, filter, opts).Decode(result)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return errors.Wrapf(err, "document not found. id=%d", id)
+			return xerrors.ErrDBRecordNotFound
 		}
 
-		return errors.Wrapf(err, "document querying failed. id=%d", id)
+		return errors.Wrapf(err, "querying document failed. %s=%d", idKey, id)
 	}
 
 	return nil
@@ -67,10 +69,17 @@ func (r *BaseRepo) FindByID(ctx context.Context, idKey string, id any, result an
 // `id` is the value of the ID.
 // `version` is the *new* version of the document. The filter will check for `version - 1`.
 // `update` is the update payload (e.g., `bson.M{"$set": ...}`).
-func (r *BaseRepo) UpdateOne(ctx context.Context, idKey string, id any, version int64, update bson.M) error {
+func (r *BaseRepo) UpdateOne(ctx context.Context, idKey string, id any, version int64, updateFields bson.M) error {
 	filter := bson.M{idKey: id, "version": version - 1}
+	update := bson.M{"$set": updateFields}
 
-	res, err := r.Coll.UpdateOne(ctx, filter, update)
+	opts := options.FindOne()
+
+	if len(update) > 0 {
+		opts.SetProjection(update)
+	}
+
+	res, err := r.Coll.UpdateOne(ctx, filter, opts)
 	if err != nil {
 		return errors.Wrapf(err, "document updating failed. id=%d version=%d", id, version)
 	}

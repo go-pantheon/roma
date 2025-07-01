@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-util/camelcase"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/vulcan/app/gamedata/internal/parser/field"
@@ -31,7 +32,7 @@ type {{.DataStruct}}s struct {
 	List []*{{.DataStruct}}
 	Map  map[int64]*{{.DataStruct}}
 }
-{{ end }}	
+{{ end }}
 
 // {{.DataStruct}}Gen {{.TablePath}}
 type {{.DataStruct}}Gen struct {
@@ -75,7 +76,7 @@ type {{.SubDataStruct}}Gen struct {
 	{{range .SubGameStructs}}
 	{{.FieldName}}{{.DataStruct}} *{{.DataStruct}}
 	{{- end}}
-	{{- range .SubGameStructLists}}	
+	{{- range .SubGameStructLists}}
 	{{.FieldName}}{{.DataStruct}}List []*{{.DataStruct}}
 	{{- end}}
 }
@@ -131,7 +132,7 @@ func new{{.DataStruct}}Gen(base *{{.Package}}_base.{{.BaseStruct}}Gen) (d *{{.Da
 		d.SubDataMap[sd.{{.SubIdField}}] = sd
 	}
 	{{- end}}
-	
+
 	return d, nil
 }
 
@@ -294,7 +295,7 @@ func NewDataService(project string, sh sheet.Sheet) *DataService {
 		s.SubIdField = camelcase.ToUpperCamel(sh.GetSubIdFieldMetadata().FieldName)
 	}
 
-	sh.WalkFieldMetadata(func(md *field.Metadata) error {
+	if err := sh.WalkFieldMetadata(func(md *field.Metadata) error {
 		switch md.JoinedType {
 		case field.JoinedType:
 			s.JoinedStructs = append(s.JoinedStructs, &ExtraStruct{
@@ -328,9 +329,11 @@ func NewDataService(project string, sh sheet.Sheet) *DataService {
 		}
 
 		return nil
-	})
+	}); err != nil {
+		log.Fatalf("walk field metadata error. %+v", err)
+	}
 
-	sh.WalkSubFieldMetadata(func(md *field.Metadata) error {
+	if err := sh.WalkSubFieldMetadata(func(md *field.Metadata) error {
 		switch md.JoinedType {
 		case field.JoinedType:
 			s.JoinedSubStructs = append(s.JoinedSubStructs, &ExtraStruct{
@@ -348,20 +351,25 @@ func NewDataService(project string, sh sheet.Sheet) *DataService {
 				DataStruct: camelcase.ToUpperCamel(md.JoinedName),
 			})
 		}
+
 		if md.GameStructName != "" {
 			s.SubGameStructs = append(s.SubGameStructs, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.GameStructName),
 			})
 		}
+
 		if md.GameStructListName != "" {
 			s.SubGameStructLists = append(s.SubGameStructLists, &ExtraStruct{
 				FieldName:  camelcase.ToUpperCamel(md.FieldName),
 				DataStruct: camelcase.ToUpperCamel(md.GameStructListName),
 			})
 		}
+
 		return nil
-	})
+	}); err != nil {
+		log.Fatalf("walk sub field metadata error. %+v", err)
+	}
 
 	return s
 }
@@ -373,8 +381,10 @@ func (s *DataService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "template new data error.")
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, errors.Wrapf(err, "template execute data error.")
 	}
+
 	return buf.Bytes(), nil
 }

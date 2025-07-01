@@ -96,6 +96,7 @@ func (s *TunnelService) run(ctx context.Context, w life.Workable, stream intrav1
 		s.log.WithContext(ctx).Debugf("tunnel stopped. uid=%d signal=%v", w.ID(), err.Error())
 		return nil
 	}
+
 	return nil
 }
 

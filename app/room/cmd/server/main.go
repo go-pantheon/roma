@@ -88,9 +88,11 @@ func main() {
 
 	profile.Init(bc.Label.Service, bc.Label.Profile, bc.Label.Color, bc.Label.Zone, bc.Label.Version, bc.Label.Node)
 
-	xtime.Init(xtime.Config{
+	if err := xtime.Init(xtime.Config{
 		Language: xtime.Language(bc.Label.Language),
-	})
+	}); err != nil {
+		panic(err)
+	}
 
 	var rc conf.Registry
 	if err := c.Scan(&rc); err != nil {

@@ -81,7 +81,7 @@ func Load{{.Struct}}s(filename string) *{{.Struct}}s {
 	for _, base := range baseList {
 		datas.DataBases = append(datas.DataBases, &base)
 	}
-	
+
 	return datas
 }
 
@@ -100,12 +100,8 @@ type TableService struct {
 	*service
 }
 
-func NewTableService(project string, sh sheet.Sheet) (*TableService, error) {
-	s, err := newService(project, sh)
-	if err != nil {
-		return nil, err
-	}
-	return &TableService{s}, nil
+func NewTableService(project string, sh sheet.Sheet) *TableService {
+	return &TableService{newService(project, sh)}
 }
 
 func (s *TableService) Execute() ([]byte, error) {
@@ -115,8 +111,10 @@ func (s *TableService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }

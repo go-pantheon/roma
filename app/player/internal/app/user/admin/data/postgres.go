@@ -109,6 +109,7 @@ func (r *userPostgresRepo) GetList(ctx context.Context, start, limit int64, cond
 	}
 
 	result = make([]*dbv1.UserProto, 0, limit)
+
 	for rows.Next() {
 		user := dbv1.UserProtoPool.Get()
 

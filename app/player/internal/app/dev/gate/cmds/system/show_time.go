@@ -24,6 +24,7 @@ func NewShowTimeCommander(uc *biz.DevUseCase) *ShowTimeCommander {
 	}
 
 	uc.Register(cmd)
+
 	return cmd
 }
 

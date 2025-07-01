@@ -94,6 +94,7 @@ func NewService(project string, shs []sheet.Sheet) *Service {
 		Project: project,
 		Structs: newStructInfos(shs),
 	}
+
 	return s
 }
 
@@ -109,7 +110,9 @@ func newStructInfos(shs []sheet.Sheet) structSlice {
 	for _, sh := range shs {
 		ss = append(ss, newStructInfo(sh))
 	}
+
 	sort.Sort(ss)
+
 	return ss
 }
 
@@ -120,6 +123,7 @@ func newStructInfo(sh sheet.Sheet) *StructInfo {
 		Order:            sh.GetMetadata().Order,
 		IsTable:          sh.GetMetadata().Type == sheet.SheetTypeTable,
 	}
+
 	return s
 }
 
@@ -130,9 +134,11 @@ func (s *Service) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }
 

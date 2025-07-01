@@ -2,7 +2,7 @@ package u64
 
 import (
 	"math"
-	"math/rand"
+	"math/rand/v2"
 	"strconv"
 )
 
@@ -10,6 +10,7 @@ func Max(x, y uint64) uint64 {
 	if x > y {
 		return x
 	}
+
 	return y
 }
 
@@ -17,6 +18,7 @@ func Min(x, y uint64) uint64 {
 	if x < y {
 		return x
 	}
+
 	return y
 }
 
@@ -24,6 +26,7 @@ func Sub(x, y uint64) uint64 {
 	if x <= y {
 		return 0
 	}
+
 	return x - y
 }
 
@@ -36,24 +39,23 @@ func Add(x, y uint64) uint64 {
 	if r < x || r < y {
 		return math.MaxUint64
 	}
+
 	return r
 }
 
 func Random(v uint64) uint64 {
-	if v == 0 {
+	if v <= 0 {
 		return 0
 	}
 
-	if v > math.MaxInt64 {
-		v = math.MaxInt64
-	}
-	return uint64(rand.Int63n(int64(v)))
+	return rand.Uint64N(v)
 }
 
 func Divide2f64(x, y uint64) float64 {
 	if x == 0 || y == 0 {
 		return 0
 	}
+
 	return float64(x) / float64(y)
 }
 
@@ -64,13 +66,16 @@ func F64WithDigits(v float64, dig int) float64 {
 
 func Pow(a, n uint64) uint64 {
 	var x uint64 = 1
+
 	for n != 0 {
-		if (n & 1) == 1 {
+		if n&1 == 1 {
 			x *= a
 		}
+
 		n >>= 1
 		a *= a
 	}
+
 	return x
 }
 
@@ -82,6 +87,7 @@ func CeilDivide(x, y uint64) uint64 {
 	if x == 0 || y == 0 {
 		return 0
 	}
+
 	if x <= y {
 		return 1
 	}
@@ -89,6 +95,7 @@ func CeilDivide(x, y uint64) uint64 {
 	if x%y > 0 {
 		return x/y + 1
 	}
+
 	return x / y
 }
 
@@ -96,9 +103,11 @@ func ToU32(x uint64) uint32 {
 	if x <= 0 {
 		return 0
 	}
+
 	if x > math.MaxUint32 {
 		return math.MaxUint32
 	}
+
 	return uint32(x)
 }
 

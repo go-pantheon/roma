@@ -8,6 +8,8 @@ import (
 )
 
 func TestLine_EncodeToJson(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		in     *Line
@@ -120,8 +122,11 @@ func TestLine_EncodeToJson(t *testing.T) {
 			hasErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := tt.in.EncodeToJson()
 			if tt.hasErr {
 				assert.Error(t, err)

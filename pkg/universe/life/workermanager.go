@@ -37,7 +37,7 @@ type Manager struct {
 	newContext   newContextFunc
 	newPersister newPersisterFunc
 
-	approximateOnlineCount int
+	similarOnlineCount int
 }
 
 type newContextFunc func(ctx context.Context, w *Worker) Context
@@ -90,16 +90,15 @@ func (m *Manager) Worker(ctx context.Context, oid int64, replier Responsive) (wo
 		return m.load(ctx, oid, replier, NewBroadcaster(m.pusher), allowBorn)
 	})
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	worker, ok := v.(*Worker)
 	if !ok {
-		err = errors.Errorf("not life.Worker type")
-		return
+		return nil, errors.Errorf("not life.Worker type")
 	}
 
-	return
+	return worker, nil
 }
 
 func workerSingleFlightKey(id int64) string {
@@ -225,8 +224,8 @@ func (m *Manager) statisticTick(_ context.Context) {
 		return
 	}
 
-	if c := m.workers.Count(); c != m.approximateOnlineCount {
-		m.approximateOnlineCount = c
+	if c := m.workers.SimilarCount(); c != m.similarOnlineCount {
+		m.similarOnlineCount = c
 	}
 }
 

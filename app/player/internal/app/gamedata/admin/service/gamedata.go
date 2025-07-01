@@ -25,6 +25,7 @@ func NewGamedataAdmin(logger log.Logger, uc *biz.GamedataUseCase) *GamedataAdmin
 		log: log.NewHelper(log.With(logger, "module", "player/gamedata/admin/service")),
 		uc:  uc,
 	}
+
 	return a
 }
 

@@ -40,6 +40,7 @@ func (r *roomMongoRepo) GetByID(ctx context.Context, id int64) (*adminv1.RoomPro
 	}
 
 	filter := bson.M{"_id": id}
+
 	var room adminv1.RoomProto
 
 	err := r.coll.FindOne(ctx, filter).Decode(&room)
@@ -47,6 +48,7 @@ func (r *roomMongoRepo) GetByID(ctx context.Context, id int64) (*adminv1.RoomPro
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, errors.Wrapf(err, "room %d not found", id)
 		}
+
 		return nil, errors.Wrapf(err, "querying room %d", id)
 	}
 

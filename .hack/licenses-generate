@@ -1,0 +1,33 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+CHECK_DIR="${PROJECT_ROOT}"
+
+cd "${PROJECT_ROOT}"
+
+MODULE_NAME=$(grep -E "^module " go.mod | awk '{print $2}')
+echo "Project module: ${MODULE_NAME}"
+
+if ! command -v go-licenses &>/dev/null; then
+  echo "Installing go-licenses..."
+  go install github.com/google/go-licenses@latest
+fi
+
+echo "Generating license report..."
+
+for goos in linux darwin windows; do
+  echo "Generating for ${goos}..."
+  GOOS="${goos}" go-licenses report ./... --template .github/licenses.tmpl >third-party-licenses.${goos}.md 2> >(grep -v "has empty version, defaults to HEAD" >&2 || true)
+done
+
+echo "Saving licenses..."
+go-licenses save ./... --save_path="${CHECK_DIR}/licenses" 2> >(grep -v "has empty version, defaults to HEAD" >&2 || true)
+
+echo "Generating standard report..."
+go-licenses report ./... >"${CHECK_DIR}/license-dependencies.csv" 2> >(grep -v "has empty version, defaults to HEAD" >&2 || true)
+
+echo -e "\n# Note: Project self-module (${MODULE_NAME}) was automatically ignored version warning when generating report" >>"${CHECK_DIR}/license-dependencies.csv"
+
+echo "License reports generated successfully."

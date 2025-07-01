@@ -54,6 +54,7 @@ func Reduce(x, y float64) float64 {
 		if result != 0 && math.Abs(result) < 2.2250738585072014e-308 {
 			result = math.Nextafter(result, math.Inf(int(math.Copysign(1, result))))
 		}
+
 		return result
 	}
 

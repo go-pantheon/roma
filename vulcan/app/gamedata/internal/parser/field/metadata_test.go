@@ -6,10 +6,11 @@ import (
 
 	"github.com/go-pantheon/fabrica-util/camelcase"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestStringToMetadataType(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		in     string
@@ -96,11 +97,15 @@ func TestStringToMetadataType(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			ret, err := parseName(tt.in)
-			require.Equal(t, tt.hasErr, err != nil)
+
 			if tt.hasErr {
+				assert.Error(t, err)
 				return
 			}
+
 			assert.Equal(t, tt.want.Type, ret.Type)
 			assert.Equal(t, tt.want.JoinedType, ret.JoinedType)
 			assert.Equal(t, tt.want.JoinedName, ret.JoinedName)

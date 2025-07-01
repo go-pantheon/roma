@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v2.1.1
+    hooks:
+      - id: golangci-lint
+        args: [--fix=false]
+        stages: [commit]
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.6.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.3
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: license-check
+        name: Check for license compliance
+        description: Ensures all dependencies use approved licenses
+        entry: ./.hack/pre-commit-license-check
+        language: script
+        files: ^go\.(mod|sum)$
+        pass_filenames: false
+        stages: [commit]

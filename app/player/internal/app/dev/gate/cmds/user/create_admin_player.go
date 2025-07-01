@@ -33,6 +33,7 @@ func NewAdminPlayerCommander(uc *biz.DevUseCase, storageDo *storagedo.StorageDom
 	}
 
 	uc.Register(cmd)
+
 	return cmd
 }
 
@@ -57,6 +58,7 @@ func (c *CreateAdminPlayerCommander) Func(ctx core.Context, args map[string]stri
 	prizes, err := gamedata.TryNewItemPrizes(amounts)
 	if err != nil {
 		log.Errorf("failed to create admin player. %+v", err)
+
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
 		sc.Message = life.ErrorMessage(err)
 

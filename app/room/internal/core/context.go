@@ -23,6 +23,7 @@ func newContext(ctx context.Context, w *life.Worker) life.Context {
 	c := &gameContext{
 		Context: life.NewContext(ctx, w),
 	}
+
 	return c
 }
 

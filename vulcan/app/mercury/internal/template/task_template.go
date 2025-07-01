@@ -62,6 +62,7 @@ func NewTaskService(project string, c *compilers.SeqCompiler, api *compilers.Api
 		UnderScoreMod: camelcase.ToUnderScore(string(c.Mod())),
 		Api:           api,
 	}
+
 	return s
 }
 
@@ -72,8 +73,10 @@ func (s *TaskService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }

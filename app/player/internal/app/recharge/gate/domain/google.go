@@ -56,23 +56,25 @@ func newGoogleCli(logger log.Logger, label *conf.Label, c *conf.Recharge_Google,
 
 	if profile.IsDevStr(label.Profile) {
 		do.cli = mocks.NewMockIABProduct(gomock.NewController(nil))
+
 		do.log.Debugf("use mock google recharge client")
-		return
+
+		return do, nil
 	}
 
 	do.cli, err = playstore.New([]byte(c.Json))
 	if err != nil {
-		err = errors.Wrapf(err, "create google api failed")
-		return
+		return nil, errors.Wrapf(err, "create google api failed")
 	}
+
 	return do, nil
 }
 
 func (do *googleCli) verifyReceipt(ctx core.Context, receipt []byte, productId int64) (reset *ResetOrderInfo, err error) {
 	var json *googleReceiptJson
-	json, err = do.buildJson(ctx, receipt, productId)
-	if err != nil {
-		return
+
+	if json, err = do.buildJson(ctx, receipt, productId); err != nil {
+		return nil, err
 	}
 
 	ctx0, cancelFunc := context.WithTimeout(ctx, ttl)
@@ -80,18 +82,17 @@ func (do *googleCli) verifyReceipt(ctx core.Context, receipt []byte, productId i
 
 	resp, err := do.cli.VerifyProduct(ctx0, json.PackageName, json.ProductId, json.PurchaseToken)
 	if err != nil {
-		err = errors.Wrapf(rechargeerrs.ErrApiVerify, "%s", err.Error())
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrApiVerify, "%s", err.Error())
 	}
+
 	// check api resp. PurchaseState: 0. Purchased 1. Canceled 2. Pending
 	if resp.PurchaseState != 0 {
-		err = errors.Wrapf(rechargeerrs.ErrNotPurchased, "purchase_state=%d", resp.PurchaseState)
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrNotPurchased, "purchase_state=%d", resp.PurchaseState)
 	}
 
 	// api verify succeeded, check order is existed
 	if err = checkOrder(ctx, do.repo, do.store, json.OrderId); err != nil {
-		return
+		return nil, err
 	}
 
 	order := do.createOrderProto(ctx.UID(), json, resp, ctx.Now())
@@ -101,43 +102,42 @@ func (do *googleCli) verifyReceipt(ctx core.Context, receipt []byte, productId i
 		Store:    do.store,
 		TransIds: []string{order.TransId},
 	}
-	return
+
+	return reset, nil
 }
 
 func (do *googleCli) buildJson(ctx context.Context, receipt []byte, productId int64) (json *googleReceiptJson, err error) {
 	gr := &googleReceipt{}
-	err = jsoniter.Unmarshal(receipt, gr)
-	if err != nil {
+
+	if err = jsoniter.Unmarshal(receipt, gr); err != nil {
 		do.log.WithContext(ctx).Errorf("unmarshal receipt failed. %s", err.Error())
-		return
+		return nil, err
 	}
 
 	isValid, err := playstore.VerifySignature(do.conf.PubKey, []byte(gr.Json), gr.Signature)
 	if err != nil {
-		err = errors.Wrapf(rechargeerrs.ErrSignature, "%s", err.Error())
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrSignature, "%s", err.Error())
 	}
+
 	if !isValid {
-		err = errors.Wrapf(rechargeerrs.ErrSignature, "signature=%s", gr.Signature)
-		return
+		return nil, errors.Wrapf(rechargeerrs.ErrSignature, "signature=%s", gr.Signature)
 	}
 
 	json = &googleReceiptJson{}
-	err = jsoniter.UnmarshalFromString(gr.Json, json)
-	if err != nil {
-		err = errors.Wrapf(rechargeerrs.ErrUnmarshal, "%s", err.Error())
-		return
-	}
-	if json.ProductId != strconv.FormatInt(productId, 10) {
-		err = errors.Wrapf(rechargeerrs.ErrProductId, "productId=%d resp=%s", productId, json.ProductId)
-		return
-	}
-	if json.PackageName != do.conf.PackageName {
-		err = errors.Wrapf(rechargeerrs.ErrPackageName, "package_name=%s expect=%s", json.PackageName, do.conf.PackageName)
-		return
+
+	if err = jsoniter.UnmarshalFromString(gr.Json, json); err != nil {
+		return nil, errors.Wrapf(rechargeerrs.ErrUnmarshal, "%s", err.Error())
 	}
 
-	return
+	if json.ProductId != strconv.FormatInt(productId, 10) {
+		return nil, errors.Wrapf(rechargeerrs.ErrProductId, "productId=%d resp=%s", productId, json.ProductId)
+	}
+
+	if json.PackageName != do.conf.PackageName {
+		return nil, errors.Wrapf(rechargeerrs.ErrPackageName, "package_name=%s expect=%s", json.PackageName, do.conf.PackageName)
+	}
+
+	return json, nil
 }
 
 func (do *googleCli) createOrderProto(uid int64, receipt *googleReceiptJson, result *androidpublisher.ProductPurchase, ctime time.Time) *dbv1.OrderProto {

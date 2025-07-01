@@ -13,10 +13,12 @@ var (
 
 func TryNewRadioPrizesList(radioSlice []map[int64]uint64) ([]*RadioPrizes, error) {
 	ret := make([]*RadioPrizes, 0, len(radioSlice))
+
 	for _, radios := range radioSlice {
 		if len(radios) == 0 {
 			continue
 		}
+
 		radioPrizes, err := TryNewRadioPrizes(radios)
 		if err != nil {
 			if errors.Is(err, zerrors.ErrEmptyPrize) {
@@ -25,8 +27,10 @@ func TryNewRadioPrizesList(radioSlice []map[int64]uint64) ([]*RadioPrizes, error
 				return nil, err
 			}
 		}
+
 		ret = append(ret, radioPrizes)
 	}
+
 	return ret, nil
 }
 
@@ -52,11 +56,13 @@ func TryNewRadioPrizes(radios map[int64]uint64) (*RadioPrizes, error) {
 
 	radioDatas := make(map[int64]*RadioPrize, len(radios))
 	radioList := make([]*RadioPrize, 0, len(radios))
+
 	for radioId, amount := range radios {
 		radioPrize, err := TryNewRadioPrize(radioId, amount)
 		if err != nil {
 			return nil, err
 		}
+
 		radioDatas[radioId] = radioPrize
 		radioList = append(radioList, radioPrize)
 	}
@@ -81,6 +87,7 @@ func (p *RadioPrizes) CloneWith(others ...*RadioPrizes) *RadioPrizes {
 		if radioPrize == nil || radioPrize.radioData == nil || radioPrize.amount == 0 {
 			continue
 		}
+
 		ret.radios[radioId] = NewRadioPrize(radioPrize.radioData, radioPrize.amount)
 	}
 
@@ -88,10 +95,12 @@ func (p *RadioPrizes) CloneWith(others ...*RadioPrizes) *RadioPrizes {
 		if other == nil {
 			continue
 		}
+
 		for radioId, radioPrize := range other.radios {
 			if radioPrize == nil || radioPrize.radioData == nil || radioPrize.amount == 0 {
 				continue
 			}
+
 			if _, ok := ret.radios[radioId]; ok {
 				ret.radios[radioId].amount += radioPrize.amount
 			} else {
@@ -99,11 +108,13 @@ func (p *RadioPrizes) CloneWith(others ...*RadioPrizes) *RadioPrizes {
 			}
 		}
 	}
+
 	return ret
 }
 
 func (rs *RadioPrizes) Rand() *ItemPrizes {
 	ret := NewEmptyItemPrizes()
+
 	for _, r := range rs.radioList {
 		index := r.radioData.GroupWeightsGroupWeights.Rand()
 		if index >= 0 && int(index) < len(r.radioData.GroupItemsItemPrizesList) {
@@ -113,6 +124,7 @@ func (rs *RadioPrizes) Rand() *ItemPrizes {
 			}
 		}
 	}
+
 	return ret
 }
 
@@ -142,6 +154,7 @@ func TryNewRadioPrize(radioId int64, amount uint64) (*RadioPrize, error) {
 	if radioData == nil {
 		return nil, errors.Wrapf(zerrors.ErrGameDataNotFound, "radioID=%d", radioId)
 	}
+
 	return NewRadioPrize(radioData, amount), nil
 }
 

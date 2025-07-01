@@ -39,30 +39,29 @@ func NewWorkerMap(opts ...Option) *WorkerMap {
 	m := &WorkerMap{
 		shards: make([]*mapShared, opt.shardCount),
 	}
-	for i := uint64(0); i < shardCount; i++ {
+	for i := range opt.shardCount {
 		m.shards[i] = newMapShared()
 	}
+
 	return m
 }
 
 func (m WorkerMap) Set(key int64, value *Worker) (old *Worker) {
 	shard := m.getShard(key)
-	old = shard.loadOrStore(key, value)
-	if old != nil {
-		shard.store(key, value)
-	}
-	return
+
+	return shard.loadAndStore(key, value)
 }
 
 func (m WorkerMap) Get(key int64) *Worker {
 	return m.getShard(key).get(key)
 }
 
-func (m WorkerMap) Count() int {
+func (m WorkerMap) SimilarCount() int {
 	count := 0
-	for i := uint64(0); i < shardCount; i++ {
-		count += int(m.shards[i].size())
+	for i := range shardCount {
+		count += int(m.shards[i].similarCount())
 	}
+
 	return count
 }
 
@@ -78,28 +77,36 @@ type Tuple struct {
 
 // Iter returns a buffered iterator which could be used in a for range loop.
 func (m WorkerMap) Iter() <-chan Tuple {
-	chans := snapshot(m)
 	total := 0
+
+	chans := snapshot(m)
 	for _, c := range chans {
 		total += cap(c)
 	}
+
 	ch := make(chan Tuple, total)
+
 	go fanIn(chans, ch)
+
 	return ch
 }
 
 // fanIn reads elements from channels `chans` into channel `out`
 func fanIn(chans []chan Tuple, out chan Tuple) {
 	wg := sync.WaitGroup{}
+
 	wg.Add(len(chans))
+
 	for _, ch := range chans {
 		go func(ch chan Tuple) {
 			for t := range ch {
 				out <- t
 			}
+
 			wg.Done()
 		}(ch)
 	}
+
 	wg.Wait()
 	close(out)
 }
@@ -111,13 +118,14 @@ func fanIn(chans []chan Tuple, out chan Tuple) {
 func snapshot(m WorkerMap) (chans []chan Tuple) {
 	chans = make([]chan Tuple, shardCount)
 	for index, shard := range m.shards {
-		chans[index] = make(chan Tuple, int(shard.size()))
+		chans[index] = make(chan Tuple, int(shard.similarCount()))
 		shard.workers.Range(func(key, value any) bool {
 			chans[index] <- Tuple{key.(int64), value.(*Worker)}
 			return true
 		})
 		close(chans[index])
 	}
+
 	return chans
 }
 
@@ -126,7 +134,7 @@ func (m WorkerMap) getShard(key int64) *mapShared {
 }
 
 func getShardIndex(key int64) uint64 {
-	return wyhash(key) & (uint64(shardCount) - 1)
+	return wyhash(key) & (shardCount - 1)
 }
 
 // wyhash generates a 64-bit hash for the given 64-bit key using wyhash algorithm.
@@ -156,17 +164,20 @@ func (s *mapShared) get(key int64) *Worker {
 	if val, ok := s.workers.Load(key); ok {
 		return val.(*Worker)
 	}
+
 	return nil
 }
 
-func (s *mapShared) loadOrStore(key int64, value *Worker) (old *Worker) {
+func (s *mapShared) loadAndStore(key int64, value *Worker) (old *Worker) {
 	if val, ok := s.workers.LoadOrStore(key, value); ok {
 		old = val.(*Worker)
+
 		s.workers.Store(key, value)
 	} else {
 		s.count.Add(1)
 	}
-	return
+
+	return old
 }
 
 func (s *mapShared) delete(key int64) {
@@ -175,13 +186,6 @@ func (s *mapShared) delete(key int64) {
 	}
 }
 
-func (s *mapShared) store(key int64, value *Worker) {
-	if _, ok := s.workers.Load(key); !ok {
-		s.count.Add(1)
-	}
-	s.workers.Store(key, value)
-}
-
-func (s *mapShared) size() int64 {
+func (s *mapShared) similarCount() int64 {
 	return s.count.Load()
 }

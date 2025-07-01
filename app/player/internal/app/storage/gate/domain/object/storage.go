@@ -149,23 +149,20 @@ func (o *Storage) AddItem(d *gamedata.ResourceItemData, amount uint64) (err erro
 
 func (o *Storage) SubItem(d *gamedata.ResourceItemData, amount uint64) (err error) {
 	if d == nil {
-		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData")
-		return
+		return errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData")
 	}
 
 	if amount == 0 {
-		err = errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
-		return
+		return errors.Wrapf(zerrors.ErrEmptyPrize, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
 	}
 
 	item := o.Items[d.Id()]
 	if item == nil {
-		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData id=%d", d.Id())
-		return
+		return errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourceItemData id=%d", d.Id())
 	}
+
 	if item.Amount() < amount {
-		err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
-		return
+		return errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourceItemData id=%d, amount=%d", d.Id(), amount)
 	}
 
 	item.Sub(amount)
@@ -177,7 +174,8 @@ func (o *Storage) SubItem(d *gamedata.ResourceItemData, amount uint64) (err erro
 			delete(o.Items, d.Id())
 		}
 	}
-	return
+
+	return nil
 }
 
 func (o *Storage) AddPack(d *gamedata.ResourcePackData, amount uint64) (err error) {
@@ -196,6 +194,7 @@ func (o *Storage) AddPack(d *gamedata.ResourcePackData, amount uint64) (err erro
 	} else {
 		o.Packs[d.Id()] = NewPackInfo(d, amount)
 	}
+
 	return
 }
 
@@ -215,6 +214,7 @@ func (o *Storage) SubPack(d *gamedata.ResourcePackData, amount uint64) (err erro
 		err = errors.Wrapf(zerrors.ErrGameDataNotFound, "Data=ResourcePackData id=%d", d.Id())
 		return
 	}
+
 	if pack.Amount() < amount {
 		err = errors.Wrapf(zerrors.ErrCostInsufficient, "Data=ResourcePackData id=%d, amount=%d", d.Id(), amount)
 		return
@@ -225,5 +225,6 @@ func (o *Storage) SubPack(d *gamedata.ResourcePackData, amount uint64) (err erro
 	if pack.Amount() == 0 {
 		delete(o.Packs, d.Id())
 	}
+
 	return
 }

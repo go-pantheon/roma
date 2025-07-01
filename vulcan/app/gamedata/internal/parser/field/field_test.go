@@ -7,6 +7,8 @@ import (
 )
 
 func TestField_EncodeToJson(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		in     *Field
@@ -67,11 +69,15 @@ func TestField_EncodeToJson(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := tt.in.EncodeToJson()
-			assert.Equal(t, tt.hasErr, err != nil)
+
 			if tt.hasErr {
+				assert.Error(t, err)
 				return
 			}
+
 			assert.Equal(t, tt.want, got)
 		})
 	}

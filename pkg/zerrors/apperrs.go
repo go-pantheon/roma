@@ -1,8 +1,8 @@
 package zerrors
 
 import (
-	"github.com/go-pantheon/fabrica-util/errors"
 	kerrors "github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-pantheon/fabrica-util/errors"
 )
 
 var (

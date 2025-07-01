@@ -37,7 +37,7 @@ func NewOrderPgRepo(data *postgresdb.DB, logger log.Logger) (domain.OrderRepo, e
 }
 
 func (r *orderPgRepo) GetByID(ctx context.Context, store pkg.Store, transId string) (*dbv1.OrderProto, error) {
-	query := fmt.Sprintf(`SELECT info, uid, store, trans_id, ack, ack_at 
+	query := fmt.Sprintf(`SELECT info, uid, store, trans_id, ack, ack_at
 		FROM "%s" WHERE trans_id = $1 AND store = $2 LIMIT 1`, _tableName)
 
 	row := r.data.DB.QueryRow(ctx, query, transId, store)
@@ -52,24 +52,22 @@ func (r *orderPgRepo) GetByID(ctx context.Context, store pkg.Store, transId stri
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errors.Errorf("order not found, store: %s, transId: %s", store, transId)
 		}
+
 		return nil, errors.Wrapf(err, "failed to get order by transId, store: %s, transId: %s", store, transId)
 	}
 
-	err = json.Unmarshal(infoJson, &o.Info)
-	if err != nil {
+	if err = json.Unmarshal(infoJson, &o.Info); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal order info: %s", string(infoJson))
 	}
 
 	return &o, nil
 }
 
-func (r *orderPgRepo) GetList(ctx context.Context, index, limit int64, cond *dbv1.OrderProto) ([]*dbv1.OrderProto, int64, error) {
+func (r *orderPgRepo) GetList(ctx context.Context, index, limit int64, cond *dbv1.OrderProto) (orders []*dbv1.OrderProto, total int64, err error) {
 	where, args := r.buildWhere(cond)
-
 	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM "%s" %s`, _tableName, where)
-	var total int64
-	countRow := r.data.DB.QueryRow(ctx, countQuery, args...)
-	if err := countRow.Scan(&total); err != nil {
+
+	if err := r.data.DB.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
 		return nil, 0, errors.Wrapf(err, "failed to count orders")
 	}
 
@@ -78,23 +76,29 @@ func (r *orderPgRepo) GetList(ctx context.Context, index, limit int64, cond *dbv
 	}
 
 	query := fmt.Sprintf(`SELECT info, uid, store, trans_id, ack, ack_at FROM "%s" %s ORDER BY ack_at DESC LIMIT %d OFFSET %d`, _tableName, where, limit, index)
+
 	rows, err := r.data.DB.Query(ctx, query, args...)
 	if err != nil {
 		return nil, 0, errors.Wrapf(err, "failed to get order list")
 	}
+
 	defer rows.Close()
 
-	var orders []*dbv1.OrderProto
 	for rows.Next() {
-		var o dbv1.OrderProto
-		var infoJson []byte
+		var (
+			o        dbv1.OrderProto
+			infoJson []byte
+		)
+
 		if err := rows.Scan(&infoJson, &o.Uid, &o.Store, &o.TransId, &o.Ack, &o.AckAt); err != nil {
 			return nil, 0, errors.Wrapf(err, "failed to scan order")
 		}
+
 		err = json.Unmarshal(infoJson, &o.Info)
 		if err != nil {
 			return nil, 0, errors.Wrapf(err, "failed to unmarshal order info: %s", string(infoJson))
 		}
+
 		orders = append(orders, &o)
 	}
 
@@ -125,8 +129,11 @@ func (r *orderPgRepo) buildWhere(cond *dbv1.OrderProto) (string, []interface{}) 
 		return "", nil
 	}
 
-	var where []string
-	var args []interface{}
+	var (
+		where []string
+		args  []any
+	)
+
 	argId := 1
 
 	if cond.Uid > 0 {
@@ -159,20 +166,22 @@ func (r *orderPgRepo) buildWhere(cond *dbv1.OrderProto) (string, []interface{}) 
 			args = append(args, cond.Info.Token)
 			argId++
 		}
+
 		if cond.Info.Env != "" {
 			where = append(where, fmt.Sprintf("info->>'env' = $%d", argId))
 			args = append(args, cond.Info.Env)
 			argId++
 		}
+
 		if cond.Info.ProductId != "" {
 			where = append(where, fmt.Sprintf("info->>'product_id' = $%d", argId))
 			args = append(args, cond.Info.ProductId)
 			argId++
 		}
+
 		if cond.Info.PurchasedAt > 0 {
 			where = append(where, fmt.Sprintf("(info->>'purchased_at')::bigint = $%d", argId))
 			args = append(args, cond.Info.PurchasedAt)
-			argId++
 		}
 	}
 

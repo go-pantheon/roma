@@ -27,7 +27,7 @@ func Parse(excel *excelize.File) (sheets map[string]Sheet, err error) {
 
 	kvs, err := parseMetadataSheet(excel)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	for _, sheetName := range excel.GetSheetList() {
@@ -35,24 +35,29 @@ func Parse(excel *excelize.File) (sheets map[string]Sheet, err error) {
 		if err != nil {
 			return nil, errors.WithMessagef(err, "Parse sheet type failed. sheet=%s", sheetName)
 		}
+
 		if t == SheetTypeIgnore {
 			continue
 		}
+
 		md, err := newMetadata(excel.Path, sheetName, dataName, kvs)
 		if err != nil {
 			return nil, errors.WithMessagef(err, "Parse sheet metadata failed. sheet=%s", sheetName)
 		}
 
 		var s Sheet
+
 		switch t {
 		case SheetTypeTable:
 			rows, err := excel.GetRows(sheetName, excelize.Options{RawCellValue: true})
 			if err != nil {
 				return nil, errors.Wrapf(err, "Read excel rows failed. sheet=%s", sheetName)
 			}
+
 			for i := range rows {
 				rows[i] = rows[i][1:]
 			}
+
 			s, err = newTable(md, rows)
 			if err != nil {
 				return nil, errors.Wrapf(err, "Generate table failed. sheet=%s", sheetName)
@@ -62,20 +67,25 @@ func Parse(excel *excelize.File) (sheets map[string]Sheet, err error) {
 			if err != nil {
 				return nil, errors.Wrapf(err, "read excel rows failed. sheet=%s", sheetName)
 			}
+
 			cols := getCols(rows)
+
 			s, err = newKv(md, cols)
 			if err != nil {
 				return nil, errors.Wrapf(err, "GSenerate kv failed. sheet=%s", sheetName)
 			}
 		}
+
 		sheets[dataName] = s
 	}
-	return
+
+	return sheets, nil
 }
 
 func getCols(rows [][]string) [][]string {
 	results := make([][]string, field.KvMetadataColSize)
 	newRows := make([][]string, 0, len(rows))
+
 	for _, row := range rows {
 		newRows = append(newRows, align.Align(row, field.KvMetadataColSize))
 	}
@@ -84,6 +94,7 @@ func getCols(rows [][]string) [][]string {
 		if len(row) != field.KvMetadataColSize {
 			break
 		}
+
 		if i < field.KvMetadataLineSize {
 			continue
 		}
@@ -109,11 +120,14 @@ func parseMetadataSheet(excel *excelize.File) (kvs map[string]string, err error)
 		if i == 0 {
 			continue
 		}
+
 		if len(row) < 2 {
 			continue
 		}
+
 		kvs[row[0]] = row[1]
 	}
+
 	return
 }
 
@@ -125,19 +139,21 @@ func parseSheetType(sheet string, f *excelize.File) (t SheetType, name string, e
 	}
 
 	str = strings.TrimSpace(str)
-	if strings.HasPrefix(str, string(SheetTypeTable)) {
-		name = strings.Replace(str, string(SheetTypeTable), "", 1)
+
+	switch {
+	case strings.HasPrefix(str, string(SheetTypeTable)):
+		name = strings.TrimPrefix(str, string(SheetTypeTable))
 		t = SheetTypeTable
-	} else if strings.HasPrefix(str, string(SheetTypeKV)) {
-		name = strings.Replace(str, string(SheetTypeKV), "", 1)
+	case strings.HasPrefix(str, string(SheetTypeKV)):
+		name = strings.TrimPrefix(str, string(SheetTypeKV))
 		t = SheetTypeKV
-	} else {
-		t = SheetTypeIgnore
-		return
+	default:
+		return SheetTypeIgnore, "", nil
 	}
+
 	if name == "" {
-		err = errors.Errorf("sheet type format error. sheet=%s, type=%s", sheet, str)
-		return
+		return t, "", errors.Errorf("sheet type format error. sheet=%s, type=%s", sheet, str)
 	}
-	return
+
+	return t, name, nil
 }

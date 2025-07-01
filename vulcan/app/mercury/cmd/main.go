@@ -43,6 +43,7 @@ func main() {
 	}
 
 	scs := make([]*compilers.SeqCompiler, 0, 32)
+
 	for _, mc := range mcs {
 		for _, mod := range mc.Mods {
 			if sc, err := compilers.NewSeqCompilers(path.Join(seqDir, string(mod)+".proto"), mc.Group); err != nil {
@@ -51,6 +52,7 @@ func main() {
 				scs = append(scs, sc)
 			}
 		}
+
 		slog.Info("=== prepare to generate api:", "modules", mc.Mods)
 	}
 
@@ -68,7 +70,8 @@ func gen(destTmpDir, destDir string, scs []*compilers.SeqCompiler) error {
 	} else if !os.IsNotExist(err) {
 		return errors.Wrapf(err, "please manually delete the directory: %s", destTmpPath)
 	}
-	if err := os.Mkdir(destTmpDir, 0755); err != nil {
+
+	if err := os.Mkdir(destTmpDir, 0750); err != nil {
 		return errors.Wrapf(err, "failed to create temp directory: %s", destTmpPath)
 	}
 
@@ -80,6 +83,7 @@ func gen(destTmpDir, destDir string, scs []*compilers.SeqCompiler) error {
 	if err := os.RemoveAll(destDir); err != nil {
 		return err
 	}
+
 	if err := os.Rename(destTmpDir, destDir); err != nil {
 		return err
 	}
@@ -97,7 +101,7 @@ func gen(destTmpDir, destDir string, scs []*compilers.SeqCompiler) error {
 func genTask(base string, cs []*compilers.SeqCompiler) error {
 	for _, c := range cs {
 		dir := base + "/" + string(c.Mod())
-		if err := os.Mkdir(dir, 0755); err != nil {
+		if err := os.Mkdir(dir, 0750); err != nil {
 			return errors.Wrapf(err, "failed to create temp directory: %s", dir)
 		}
 
@@ -108,11 +112,14 @@ func genTask(base string, cs []*compilers.SeqCompiler) error {
 
 			s := template.NewTaskService(project, c, api)
 			to := dir + "/" + camelcase.ToUnderScore(api.UpperCamelName) + "_gen.go"
+
 			if err := filewriter.GenFile(to, s); err != nil {
 				return err
 			}
+
 			slog.Info("generated task", "file", filewriter.SprintGenPath(to))
 		}
 	}
+
 	return nil
 }

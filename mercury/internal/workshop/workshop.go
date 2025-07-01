@@ -36,7 +36,7 @@ func NewWorkshop(name string, logger log.Logger) *Workshop {
 	firstWID := core.AppConf().FirstUid
 
 	for i := range core.AppConf().WorkerCount {
-		ws.WIDs = append(ws.WIDs, firstWID+int64(i))
+		ws.WIDs = append(ws.WIDs, firstWID+i)
 	}
 
 	return ws

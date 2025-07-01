@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
@@ -17,9 +16,12 @@ import (
 )
 
 const (
-	_mongoUserTableName = "user"
-	_userIDField        = "id"
-	_userSIDField       = "sid"
+	_mongoUserTableName     = "user"
+	_userIDField            = "id"
+	_userSIDField           = "sid"
+	_userVersionField       = "version"
+	_userServerVersionField = "server_version"
+	_userModulesField       = "modules"
 )
 
 var _ domain.UserRepo = (*userMongoRepo)(nil)
@@ -56,7 +58,7 @@ func NewUserMongoRepo(data *mongodb.DB, logger log.Logger) (r domain.UserRepo, e
 
 	// create id+version index for optimistic locking
 	if _, err := coll.Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{{Key: _userIDField, Value: 1}, {Key: "version", Value: 1}},
+		Keys: bson.D{{Key: _userIDField, Value: 1}, {Key: _userVersionField, Value: 1}},
 	}); err != nil {
 		return nil, errors.Wrap(err, "create mongo version index for user failed")
 	}
@@ -64,15 +66,15 @@ func NewUserMongoRepo(data *mongodb.DB, logger log.Logger) (r domain.UserRepo, e
 	return repo, nil
 }
 
-func (r *userMongoRepo) Create(ctx context.Context, uid int64, defaultUser *dbv1.UserProto, ctime time.Time) error {
-	if defaultUser == nil {
+func (r *userMongoRepo) Create(ctx context.Context, user *dbv1.UserProto, ctime time.Time) error {
+	if user == nil {
 		return errors.New("user proto is nil")
 	}
-	defaultUser.Id = uid
 
-	if err := r.repo.Create(ctx, defaultUser); err != nil {
-		return errors.Wrapf(err, "inserting user %d", uid)
+	if err := r.repo.Create(ctx, user); err != nil {
+		return errors.Wrapf(err, "creating user uid=%d", user.Id)
 	}
+
 	return nil
 }
 
@@ -84,35 +86,20 @@ func (r *userMongoRepo) QueryByID(ctx context.Context, uid int64, p *dbv1.UserPr
 	// Specific projection logic for user repo
 	projection := bson.D{}
 	if len(mods) > 0 {
-		projection = append(projection, bson.E{Key: "id", Value: 1}, bson.E{Key: "version", Value: 1}, bson.E{Key: "server_version", Value: 1})
+		projection = append(projection,
+			bson.E{Key: _userIDField, Value: 1},
+			bson.E{Key: _userSIDField, Value: 1},
+			bson.E{Key: _userVersionField, Value: 1},
+			bson.E{Key: _userServerVersionField, Value: 1},
+		)
 		for _, mod := range mods {
-			projection = append(projection, bson.E{Key: "modules." + string(mod), Value: 1})
+			projection = append(projection, bson.E{Key: _userModulesField + "." + string(mod), Value: 1})
 		}
 	}
 
-	filter := bson.M{"id": uid}
-	opts := options.FindOne()
-
-	if len(projection) > 0 {
-		opts.SetProjection(projection)
+	if err := r.repo.FindByID(ctx, _userIDField, uid, p, projection); err != nil {
+		return errors.Wrapf(err, "querying user %d", uid)
 	}
-
-	err := r.repo.Coll.FindOne(ctx, filter, opts).Decode(p)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return xerrors.ErrDBRecordNotFound
-		}
-
-		return errors.Wrapf(err, "querying document %v failed", uid)
-	}
-
-	// if err := r.repo.FindByID(ctx, _userIDField, uid, p, projection); err != nil {
-	// 	if errors.Is(err, mongo.ErrNoDocuments) {
-	// 		return xerrors.ErrDBRecordNotFound
-	// 	}
-
-	// 	return errors.Wrapf(err, "querying user %d", uid)
-	// }
 
 	return nil
 }
@@ -123,16 +110,18 @@ func (r *userMongoRepo) UpdateByID(ctx context.Context, uid int64, user *dbv1.Us
 	}
 
 	updateFields := bson.M{
-		"version": user.Version,
+		_userSIDField:           user.Sid,
+		_userVersionField:       user.Version,
+		_userServerVersionField: user.ServerVersion,
 	}
+
 	if user.Modules != nil {
 		for k, v := range user.Modules {
-			updateFields["modules."+k] = v
+			updateFields[_userModulesField+"."+k] = v
 		}
 	}
-	update := bson.M{"$set": updateFields}
 
-	if err := r.repo.UpdateOne(ctx, _userIDField, uid, user.Version, update); err != nil {
+	if err := r.repo.UpdateOne(ctx, _userIDField, uid, user.Version, updateFields); err != nil {
 		return errors.Wrapf(err, "updating user %d", uid)
 	}
 
@@ -144,10 +133,12 @@ func (r *userMongoRepo) IsExist(ctx context.Context, uid int64) (bool, error) {
 }
 
 func (r *userMongoRepo) UpdateSID(ctx context.Context, uid int64, sid int64, version int64) error {
-	newVersion := version + 1
-	update := bson.M{"$set": bson.M{"sid": sid, "version": newVersion}}
+	updateFields := bson.M{
+		_userSIDField:     sid,
+		_userVersionField: version,
+	}
 
-	if err := r.repo.UpdateOne(ctx, _userIDField, uid, version, update); err != nil {
+	if err := r.repo.UpdateOne(ctx, _userIDField, uid, version, updateFields); err != nil {
 		return errors.Wrapf(err, "updating sid for user %d", uid)
 	}
 
@@ -158,5 +149,6 @@ func (r *userMongoRepo) IncVersion(ctx context.Context, uid int64, newVersion in
 	if err := r.repo.IncrementVersion(ctx, _userIDField, uid, newVersion); err != nil {
 		return errors.Wrapf(err, "incrementing version for user %d", uid)
 	}
+
 	return nil
 }

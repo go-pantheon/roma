@@ -45,7 +45,7 @@ func Load{{.Struct}}(filename string) *{{.Struct}} {
 	if err != nil {
 		panic(errors.Wrapf(err, "Unmarshal json failed. file=%s", filename))
 	}
-	
+
 	return &data
 }
 
@@ -59,12 +59,8 @@ type KvService struct {
 	*service
 }
 
-func NewKvService(project string, sh sheet.Sheet) (*KvService, error) {
-	s, err := newService(project, sh)
-	if err != nil {
-		return nil, err
-	}
-	return &KvService{s}, nil
+func NewKvService(project string, sh sheet.Sheet) *KvService {
+	return &KvService{newService(project, sh)}
 }
 
 func (s *KvService) Execute() ([]byte, error) {
@@ -74,8 +70,10 @@ func (s *KvService) Execute() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err = tmpl.Execute(buf, s); err != nil {
 		return nil, err
 	}
+
 	return buf.Bytes(), nil
 }

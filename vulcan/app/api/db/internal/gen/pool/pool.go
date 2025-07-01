@@ -23,8 +23,7 @@ func ParseData(path string, goModuleBase string) (*tmpl.Data, error) {
 			return nil
 		}
 
-		parseAllMessages(path, allMsgs)
-		return nil
+		return parseAllMessages(path, allMsgs)
 	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "error during second pass of proto scanning")
@@ -58,12 +57,17 @@ func ParseData(path string, goModuleBase string) (*tmpl.Data, error) {
 	return ret, nil
 }
 
-func parseAllMessages(path string, messages map[string]struct{}) error {
-	reader, err := os.Open(path)
+func parseAllMessages(path string, messages map[string]struct{}) (err error) {
+	reader, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return errors.Wrapf(err, "error opening proto file:%s", path)
 	}
-	defer reader.Close()
+
+	defer func() {
+		if closeErr := reader.Close(); closeErr != nil {
+			err = errors.Join(err, closeErr)
+		}
+	}()
 
 	parser := proto.NewParser(reader)
 	definition, err := parser.Parse()
@@ -80,17 +84,22 @@ func parseAllMessages(path string, messages map[string]struct{}) error {
 	return nil
 }
 
-func genFile(path string, goModuleBase string, allMessages map[string]struct{}) (*tmpl.File, error) {
-	ret := &tmpl.File{
+func genFile(path string, goModuleBase string, allMessages map[string]struct{}) (ret *tmpl.File, err error) {
+	ret = &tmpl.File{
 		Dir:      filepath.Dir(path),
 		FileName: strings.TrimSuffix(filepath.Base(path), ".proto"),
 	}
 
-	reader, err := os.Open(path)
+	reader, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return nil, errors.Wrapf(err, "error opening proto file:%s", path)
 	}
-	defer reader.Close()
+
+	defer func() {
+		if closeErr := reader.Close(); closeErr != nil {
+			err = errors.Join(err, closeErr)
+		}
+	}()
 
 	parser := proto.NewParser(reader)
 	definition, err := parser.Parse()

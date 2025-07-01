@@ -16,6 +16,7 @@ func NewPlunder() *Plunder {
 	p := &Plunder{
 		Weights: make(map[int64]int64, defaultWeightsSize),
 	}
+
 	return p
 }
 

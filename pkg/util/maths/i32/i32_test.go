@@ -8,6 +8,8 @@ import (
 )
 
 func TestMax(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     int32
@@ -23,12 +25,16 @@ func TestMax(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Max(tt.x, tt.y))
 		})
 	}
 }
 
 func TestMin(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     int32
@@ -44,12 +50,16 @@ func TestMin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Min(tt.x, tt.y))
 		})
 	}
 }
 
 func TestReduce(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     int32
@@ -64,12 +74,16 @@ func TestReduce(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Reduce(tt.x, tt.y))
 		})
 	}
 }
 
 func TestAdd(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     int32
@@ -83,12 +97,16 @@ func TestAdd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Add(tt.x, tt.y))
 		})
 	}
 }
 
 func TestRandom(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    int32
@@ -101,6 +119,8 @@ func TestRandom(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got := Random(tt.v)
 			if tt.v == 0 {
 				assert.Equal(t, int32(0), got)
@@ -112,6 +132,8 @@ func TestRandom(t *testing.T) {
 }
 
 func TestDivide2f64(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     int32
@@ -127,12 +149,16 @@ func TestDivide2f64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Divide2f64(tt.x, tt.y))
 		})
 	}
 }
 
 func TestF64WithDigits(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		v        float64
@@ -148,6 +174,8 @@ func TestF64WithDigits(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got := F64WithDigits(tt.v, tt.dig)
 			assert.Equal(t, tt.expected, got)
 		})
@@ -155,6 +183,8 @@ func TestF64WithDigits(t *testing.T) {
 }
 
 func TestPow(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		a, n     int32
@@ -169,12 +199,16 @@ func TestPow(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Pow(tt.a, tt.n))
 		})
 	}
 }
 
 func TestExp(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x        int32
@@ -188,12 +222,16 @@ func TestExp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, Exp(tt.x))
 		})
 	}
 }
 
 func TestCeilDivide(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		x, y     int32
@@ -209,6 +247,8 @@ func TestCeilDivide(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			assert.Equal(t, tt.expected, CeilDivide(tt.x, tt.y))
 		})
 	}

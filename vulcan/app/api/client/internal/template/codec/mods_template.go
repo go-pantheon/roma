@@ -21,7 +21,7 @@ import (
 
 	"{{.Org}}/fabrica-util/errors"
 	climsg "{{.Project}}/gen/api/client/message"
-	cliseq "{{.Project}}/gen/api/client/sequence"	
+	cliseq "{{.Project}}/gen/api/client/sequence"
 	"google.golang.org/protobuf/proto"
 )
 {{- $lowerCamelMod := .LowerCamelMod}}

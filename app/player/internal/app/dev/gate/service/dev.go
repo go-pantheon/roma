@@ -31,6 +31,7 @@ func (s *DevService) DevList(ctx context.Context, cs *climsg.CSDevList) (*climsg
 	if !profile.IsDev() {
 		return nil, status.Errorf(codes.PermissionDenied, "cannot list dev commands in non-dev environment")
 	}
+
 	return s.uc.List(ctx.(core.Context))
 }
 

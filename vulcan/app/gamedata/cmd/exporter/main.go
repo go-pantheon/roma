@@ -67,6 +67,7 @@ func json() {
 		if err = filewriter.WriteFile(jsonFilePath, []byte(content)); err != nil {
 			panic(err)
 		}
+
 		return true
 	})
 }

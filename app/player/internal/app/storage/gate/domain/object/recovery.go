@@ -42,6 +42,7 @@ func decodeRecoveryInfo(p *dbv1.ItemRecoveryInfoProto, items map[int64]*ItemInfo
 	}
 
 	o := newRecoveryInfo(item.Data(), xtime.Time(p.UpdatedAt))
+
 	return o, nil
 }
 
@@ -69,6 +70,7 @@ func (o *RecoveryInfo) Recover(ctime time.Time) (toAdd uint64) {
 func (o *RecoveryInfo) encodeServer(p *dbv1.ItemRecoveryInfoProto) *dbv1.ItemRecoveryInfoProto {
 	p.DataId = o.Id
 	p.UpdatedAt = o.updatedAt.Unix()
+
 	return p
 }
 

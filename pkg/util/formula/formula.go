@@ -17,6 +17,7 @@ func Calc(formula string, params map[string]float64) (float64, error) {
 	if err != nil {
 		return 0, errors.Wrapf(err, "formula calc failed")
 	}
+
 	return result, nil
 }
 

@@ -47,5 +47,6 @@ func (s *BaseCommander) EncodeClient() *climsg.DevCmdProto {
 		Desc: s.desc,
 		Args: s.args,
 	}
+
 	return p
 }

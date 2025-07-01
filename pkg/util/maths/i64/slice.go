@@ -1,9 +1,8 @@
 package i64
 
 import (
-	"sync"
-
 	"maps"
+	"sync"
 
 	"github.com/go-pantheon/roma/pkg/util/sorts"
 	"github.com/pkg/errors"
@@ -169,11 +168,14 @@ func CheckSize(array []int64, size int) error {
 
 func DelElement(array []int64, delId int64) []int64 {
 	j := 0
+
 	for _, id := range array {
-		if id != delId {
-			array[j] = id
-			j++
+		if id == delId {
+			continue
 		}
+
+		array[j] = id
+		j++
 	}
 
 	return array[:j]

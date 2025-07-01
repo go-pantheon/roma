@@ -27,6 +27,7 @@ func NewHeroUseCase(mgr *core.Manager, logger log.Logger,
 
 	mgr.RegisterOnCreatedEvent(uc.onCreated)
 	mgr.RegisterEvent(core.EventStorageItemUpdated, uc.OnStorageUpdated)
+
 	return uc
 }
 
@@ -132,7 +133,7 @@ func (uc *HeroUseCase) HeroLevelUpgrade(ctx core.Context, cs *climsg.CSHeroLevel
 		return sc, nil
 	}
 
-	levelData := heroData.LevelData.SubDataMap[int64(hero.Level)+1]
+	levelData := heroData.LevelData.SubDataMap[hero.Level+1]
 	if levelData == nil {
 		sc.Code = climsg.SCHeroLevelUpgrade_ErrMaxLevel
 		return sc, nil

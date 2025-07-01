@@ -55,7 +55,7 @@ func (o *Dev) DecodeServer(p proto.Message) error {
 }
 
 func (o *Dev) SetTimeOffset(dur time.Duration) bool {
-	o.devTimeOffset = o.devTimeOffset + dur
+	o.devTimeOffset += dur
 	return true
 }
 
@@ -67,5 +67,6 @@ func (o *Dev) TimeOffset() time.Duration {
 	if profile.IsDev() {
 		return o.devTimeOffset
 	}
+
 	return 0
 }

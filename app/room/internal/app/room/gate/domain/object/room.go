@@ -22,6 +22,7 @@ func NewRoom() *Room {
 	u := &Room{
 		CreatedAt: time.Now(),
 	}
+
 	return u
 }
 

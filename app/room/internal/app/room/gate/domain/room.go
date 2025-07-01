@@ -14,7 +14,7 @@ import (
 type RoomRepo interface {
 	Create(ctx context.Context, p *dbv1.RoomProto, ctime time.Time) (err error)
 	QueryByID(ctx context.Context, id int64, p *dbv1.RoomProto) error
-	UpdateByID(ctx context.Context, id int64, user *dbv1.RoomProto) error
+	UpdateByID(ctx context.Context, id int64, room *dbv1.RoomProto) error
 	Exist(ctx context.Context, id int64) (bool, error)
 	IncVersion(ctx context.Context, id int64, newVersion int64) error
 }
@@ -79,6 +79,7 @@ func (do *RoomDomain) Persist(ctx context.Context, id int64, proto life.VersionP
 		err = errors.Wrapf(xerrors.ErrDBProtoEncode, "room domain persist failed. id=%d proto=%T", id, proto)
 		return
 	}
+
 	return do.repo.UpdateByID(ctx, id, data)
 }
 

@@ -12,5 +12,6 @@ func NewPlunderDomain(logger log.Logger) *PlunderDomain {
 	do := &PlunderDomain{
 		log: log.NewHelper(log.With(logger, "module", "player/gate/domain/plunder")),
 	}
+
 	return do
 }

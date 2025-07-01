@@ -59,6 +59,7 @@ func AllModuleDBColumnsString() map[string]string {
 	for key, colType := range allModuleDBColumns {
 		cols[string(key)] = string(colType)
 	}
+
 	return cols
 }
 

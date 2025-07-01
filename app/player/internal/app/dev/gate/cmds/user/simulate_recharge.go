@@ -31,12 +31,13 @@ func NewSimulateRechargeCommander(uc *biz.DevUseCase) *SimulateRechargeCommander
 	}
 
 	uc.Register(cmd)
+
 	return cmd
 }
 
 func (c *SimulateRechargeCommander) Func(ctx core.Context, args map[string]string) (*climsg.SCDevExecute, error) {
 	sc := &climsg.SCDevExecute{}
-	
+
 	var (
 		user  = ctx.User()
 		cents int64
@@ -48,6 +49,7 @@ func (c *SimulateRechargeCommander) Func(ctx core.Context, args map[string]strin
 
 		return sc, nil
 	}
+
 	if err := user.Recharge().AddRecharge(cents); err != nil {
 		sc.Code = climsg.SCDevExecute_ErrArgFormat
 		sc.Message = life.ErrorMessage(err)

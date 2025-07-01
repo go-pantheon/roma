@@ -36,7 +36,7 @@ func NewOrderPgRepo(data *postgresdb.DB, logger log.Logger) (domain.OrderRepo, e
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := migrate.Migrate(ctx, r.data.DB, &dbv1.OrderProto{}, nil); err != nil {
+	if err := migrate.Migrate(ctx, r.data.DB, _tableName, &dbv1.OrderProto{}, nil); err != nil {
 		return nil, err
 	}
 
@@ -50,24 +50,21 @@ func NewOrderPgRepo(data *postgresdb.DB, logger log.Logger) (domain.OrderRepo, e
 func (r *orderPgRepo) updateDB(ctx context.Context) error {
 	{
 		idxTransIdStoreSQL := `CREATE INDEX IF NOT EXISTS idx_orders_trans_id_store ON orders (trans_id, store);`
-		_, err := r.data.DB.Exec(ctx, idxTransIdStoreSQL)
-		if err != nil {
+		if _, err := r.data.DB.Exec(ctx, idxTransIdStoreSQL); err != nil {
 			return errors.Wrapf(err, "failed to create index idx_orders_trans_id_store")
 		}
 	}
 
 	{
 		idxUIDSQL := `CREATE INDEX IF NOT EXISTS idx_uid ON orders (uid);`
-		_, err := r.data.DB.Exec(ctx, idxUIDSQL)
-		if err != nil {
+		if _, err := r.data.DB.Exec(ctx, idxUIDSQL); err != nil {
 			return errors.Wrapf(err, "failed to create index idx_uid")
 		}
 	}
 
 	{
 		idxInfoProductIdSQL := `CREATE INDEX IF NOT EXISTS idx_orders_info_product_id ON orders ((info->>'product_id'));`
-		_, err := r.data.DB.Exec(ctx, idxInfoProductIdSQL)
-		if err != nil {
+		if _, err := r.data.DB.Exec(ctx, idxInfoProductIdSQL); err != nil {
 			return errors.Wrapf(err, "failed to create index idx_orders_info_product_id")
 		}
 	}
@@ -93,7 +90,7 @@ func (r *orderPgRepo) Create(ctx context.Context, order *dbv1.OrderProto) error 
 }
 
 func (r *orderPgRepo) GetByTransId(ctx context.Context, store pkg.Store, transId string) (*dbv1.OrderProto, error) {
-	query := fmt.Sprintf(`SELECT info, uid, store, trans_id, ack, ack_at 
+	query := fmt.Sprintf(`SELECT info, uid, store, trans_id, ack, ack_at
 		FROM "%s" WHERE trans_id = $1 AND store = $2 LIMIT 1`, _tableName)
 
 	row := r.data.DB.QueryRow(ctx, query, transId, store)
@@ -108,11 +105,11 @@ func (r *orderPgRepo) GetByTransId(ctx context.Context, store pkg.Store, transId
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errors.Errorf("order not found, store: %s, transId: %s", store, transId)
 		}
+
 		return nil, errors.Wrapf(err, "failed to get order by transId, store: %s, transId: %s", store, transId)
 	}
 
-	err = json.Unmarshal(infoJson, &o.Info)
-	if err != nil {
+	if err = json.Unmarshal(infoJson, &o.Info); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal order info: %s", string(infoJson))
 	}
 
