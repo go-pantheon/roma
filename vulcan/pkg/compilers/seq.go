@@ -134,7 +134,7 @@ func newApi(mod ModType, comment string, seqText string) (ignore bool, api *Api,
 
 	api.SC = "SC" + api.UpperCamelName
 
-	if !strings.HasPrefix(comment, "@push") {
+	if !strings.Contains(comment, " @push ") {
 		api.CS = "CS" + api.UpperCamelName
 	}
 
