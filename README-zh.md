@@ -4,8 +4,9 @@
 </div>
 
 <p align="center">
-<a href="https://github.com/go-pantheon/roma/actions/workflows/test.yml"><img src="https://github.com/go-pantheon/roma/workflows/Test/badge.svg" alt="测试状态"></a>
+<a href="https://github.com/go-pantheon/roma/actions"><img src="https://github.com/go-pantheon/roma/workflows/Go/badge.svg" alt="构建状态"></a>
 <a href="https://github.com/go-pantheon/roma/releases"><img src="https://img.shields.io/github/v/release/go-pantheon/roma" alt="最新版本"></a>
+<a href="https://github.com/go-kratos/kratos"><img src="https://img.shields.io/badge/Kratos-v2.8.4-blue" alt="Kratos"></a>
 <a href="https://pkg.go.dev/github.com/go-pantheon/roma"><img src="https://pkg.go.dev/badge/github.com/go-pantheon/roma" alt="GoDoc"></a>
 <a href="https://goreportcard.com/report/github.com/go-pantheon/roma"><img src="https://goreportcard.com/badge/github.com/go-pantheon/roma" alt="Go Report Card"></a>
 <a href="https://github.com/go-pantheon/roma/blob/main/LICENSE"><img src="https://img.shields.io/github/license/go-pantheon/roma" alt="许可证"></a>
