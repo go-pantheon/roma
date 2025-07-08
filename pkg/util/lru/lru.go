@@ -73,8 +73,8 @@ func NewLRU(opts ...LRUOption) *LRU {
 
 // Get retrieves a value from the cache
 func (l *LRU) Get(key int64, ctime time.Time) (proto.Message, bool) {
-	l.RLock()
-	defer l.RUnlock()
+	l.Lock()
+	defer l.Unlock()
 
 	if ele, hit := l.cache[key]; hit {
 		if ele.Value.(*entry).exp.Before(ctime) {
