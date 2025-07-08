@@ -7,9 +7,8 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/room/internal/app/room/admin/domain"
 	adminv1 "github.com/go-pantheon/roma/gen/api/server/room/admin/room/v1"
-	"github.com/go-pantheon/roma/pkg/data/mongodb"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
+	gomongo "go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 const (
@@ -20,15 +19,15 @@ var _ domain.RoomRepo = (*roomMongoRepo)(nil)
 
 type roomMongoRepo struct {
 	log  *log.Helper
-	data *mongodb.DB
-	coll *mongo.Collection
+	data *gomongo.Database
+	coll *gomongo.Collection
 }
 
-func NewRoomMongoRepo(data *mongodb.DB, logger log.Logger) (domain.RoomRepo, error) {
+func NewRoomMongoRepo(data *gomongo.Database, logger log.Logger) (domain.RoomRepo, error) {
 	r := &roomMongoRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "room/admin/data")),
-		coll: data.DB.Collection(_mongoRoomTableName),
+		coll: data.Collection(_mongoRoomTableName),
 	}
 
 	return r, nil
@@ -45,7 +44,7 @@ func (r *roomMongoRepo) GetByID(ctx context.Context, id int64) (*adminv1.RoomPro
 
 	err := r.coll.FindOne(ctx, filter).Decode(&room)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
+		if errors.Is(err, gomongo.ErrNoDocuments) {
 			return nil, errors.Wrapf(err, "room %d not found", id)
 		}
 

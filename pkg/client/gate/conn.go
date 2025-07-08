@@ -7,7 +7,7 @@ import (
 	"github.com/go-pantheon/fabrica-kit/router/conn"
 	"github.com/go-pantheon/fabrica-kit/router/routetable"
 	"github.com/go-pantheon/fabrica-kit/router/routetable/redis"
-	"github.com/go-pantheon/roma/pkg/data/redisdb"
+	goredis "github.com/redis/go-redis/v9"
 )
 
 const (
@@ -33,8 +33,8 @@ type GateRouteTable struct {
 	routetable.ReadOnlyRouteTable
 }
 
-func NewGateRouteTable(db *redisdb.DB) *GateRouteTable {
+func NewGateRouteTable(db goredis.UniversalClient) *GateRouteTable {
 	return &GateRouteTable{
-		ReadOnlyRouteTable: routetable.NewReadOnlyRouteTable(redis.New(db.DB), serviceName),
+		ReadOnlyRouteTable: routetable.NewReadOnlyRouteTable(redis.New(db), serviceName),
 	}
 }

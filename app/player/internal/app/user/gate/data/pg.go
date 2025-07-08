@@ -8,13 +8,13 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-pantheon/fabrica-kit/xerrors"
-	"github.com/go-pantheon/fabrica-util/data/db/postgresql/migrate"
+	"github.com/go-pantheon/fabrica-util/data/db/pg"
+	"github.com/go-pantheon/fabrica-util/data/db/pg/migrate"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	"github.com/go-pantheon/roma/app/player/internal/data/pguser"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
-	"github.com/go-pantheon/roma/pkg/data/postgresdb"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
@@ -26,18 +26,18 @@ var _ domain.UserRepo = (*userPostgresRepo)(nil)
 
 type userPostgresRepo struct {
 	log  *log.Helper
-	data *postgresdb.DB
+	data *pg.DB
 }
 
-func NewUserPostgresRepo(data *postgresdb.DB, logger log.Logger) (domain.UserRepo, error) {
+func NewUserPostgresRepo(data *pg.DB, logger log.Logger) (domain.UserRepo, error) {
 	return newUserPostgresRepo(data, logger, userregister.AllModuleKeys())
 }
 
-func TestNewUserPostgresRepo(data *postgresdb.DB, logger log.Logger, mods []life.ModuleKey) (domain.UserRepo, error) {
+func TestNewUserPostgresRepo(data *pg.DB, logger log.Logger, mods []life.ModuleKey) (domain.UserRepo, error) {
 	return newUserPostgresRepo(data, logger, mods)
 }
 
-func newUserPostgresRepo(data *postgresdb.DB, logger log.Logger, _ []life.ModuleKey) (domain.UserRepo, error) {
+func newUserPostgresRepo(data *pg.DB, logger log.Logger, _ []life.ModuleKey) (domain.UserRepo, error) {
 	r := &userPostgresRepo{
 		data: data,
 		log:  log.NewHelper(log.With(logger, "module", "player/user/gate/data")),
@@ -46,19 +46,19 @@ func newUserPostgresRepo(data *postgresdb.DB, logger log.Logger, _ []life.Module
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := migrate.Migrate(ctx, r.data.DB, _tableName, &dbv1.UserProto{}, userregister.AllModuleDBColumnsString()); err != nil {
+	if err := migrate.Migrate(ctx, r.data, _tableName, &dbv1.UserProto{}, userregister.AllModuleDBColumnsString()); err != nil {
 		return nil, err
 	}
 
 	sidIndexSQL := `CREATE INDEX IF NOT EXISTS idx_sid ON "` + _tableName + `" (sid);`
 
-	if _, err := r.data.DB.Exec(ctx, sidIndexSQL); err != nil {
+	if _, err := r.data.ExecContext(ctx, sidIndexSQL); err != nil {
 		return nil, errors.Wrapf(err, "creating sid index")
 	}
 
 	versionIndexSQL := `CREATE INDEX IF NOT EXISTS idx_id_version ON "` + _tableName + `" (id, version);`
 
-	if _, err := r.data.DB.Exec(ctx, versionIndexSQL); err != nil {
+	if _, err := r.data.ExecContext(ctx, versionIndexSQL); err != nil {
 		return nil, errors.Wrapf(err, "creating version index")
 	}
 
@@ -99,7 +99,7 @@ func (r *userPostgresRepo) Create(ctx context.Context, user *dbv1.UserProto, cti
 
 	sqlbuilder.WriteString(")")
 
-	if _, err = r.data.DB.Exec(ctx, sqlbuilder.String(), vals...); err != nil {
+	if _, err = r.data.ExecContext(ctx, sqlbuilder.String(), vals...); err != nil {
 		return errors.Wrapf(err, "inserting user uid=%d", user.Id)
 	}
 
@@ -135,7 +135,7 @@ func (r *userPostgresRepo) QueryByID(ctx context.Context, uid int64, user *dbv1.
 	sqlbuilder.WriteString(_tableName)
 	sqlbuilder.WriteString(`" WHERE id = $1`)
 
-	row := r.data.DB.QueryRow(ctx, sqlbuilder.String(), uid)
+	row := r.data.QueryRowContext(ctx, sqlbuilder.String(), uid)
 
 	if err := row.Scan(scanargs...); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -193,7 +193,7 @@ func (r *userPostgresRepo) UpdateByID(ctx context.Context, uid int64, user *dbv1
 	vals := []any{user.Version, uid, user.Version - 1}
 	vals = append(vals, modvals...)
 
-	if _, err = r.data.DB.Exec(ctx, sqlbuilder.String(), vals...); err != nil {
+	if _, err = r.data.ExecContext(ctx, sqlbuilder.String(), vals...); err != nil {
 		return errors.Wrapf(err, "updating user %d", uid)
 	}
 
@@ -204,7 +204,7 @@ func (r *userPostgresRepo) IsExist(ctx context.Context, uid int64) (bool, error)
 	sql := `SELECT EXISTS(SELECT 1 FROM "` + _tableName + `" WHERE id = $1);`
 
 	var exists bool
-	if err := r.data.DB.QueryRow(ctx, sql, uid).Scan(&exists); err != nil {
+	if err := r.data.QueryRowContext(ctx, sql, uid).Scan(&exists); err != nil {
 		return false, errors.Wrapf(err, "scanning user %d existence", uid)
 	}
 
@@ -215,7 +215,7 @@ func (r *userPostgresRepo) UpdateSID(ctx context.Context, uid int64, sid int64, 
 	newVersion := version + 1
 	sql := `UPDATE "` + _tableName + `" SET sid = $1, version = $2 WHERE id = $3 AND version = $4;`
 
-	if _, err := r.data.DB.Exec(ctx, sql, sid, newVersion, uid, version); err != nil {
+	if _, err := r.data.ExecContext(ctx, sql, sid, newVersion, uid, version); err != nil {
 		return errors.Wrapf(err, "updating sid for user %d", uid)
 	}
 
@@ -225,7 +225,7 @@ func (r *userPostgresRepo) UpdateSID(ctx context.Context, uid int64, sid int64, 
 func (r *userPostgresRepo) IncVersion(ctx context.Context, uid int64, newVersion int64) error {
 	sql := `UPDATE "user" SET version = $1 WHERE id = $2 AND version = $3;`
 
-	_, err := r.data.DB.Exec(ctx, sql, newVersion, uid, newVersion-1)
+	_, err := r.data.ExecContext(ctx, sql, newVersion, uid, newVersion-1)
 	if err != nil {
 		return errors.Wrapf(err, "incrementing user %d version", uid)
 	}

@@ -58,7 +58,7 @@ func NewManager(logger log.Logger, rt routetable.ReNewalRouteTable, pusher *data
 	m.stoppedWorkerChan = make(chan string, constants.WorkerSize)
 	m.workers = NewWorkerMap()
 
-	m.GoAndQuickStop("life-manager", func() error {
+	m.GoAndStop("life-manager", func() error {
 		return m.run()
 	}, func() error {
 		return m.Stop(context.Background())

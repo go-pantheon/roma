@@ -105,6 +105,7 @@ func (do *UserDomain) IncVersion(ctx context.Context, uid int64, newVersion int6
 	return do.repo.IncVersion(ctx, uid, newVersion)
 }
 
-func (do *UserDomain) OnLogout(ctx context.Context, uid int64, proto *dbv1.UserProto) {
+func (do *UserDomain) OnLogout(ctx context.Context, uid int64, proto *dbv1.UserProto) error {
 	do.cache.Put(ctx, uid, proto, time.Now())
+	return nil
 }

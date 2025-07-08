@@ -8,7 +8,7 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
-	"github.com/go-pantheon/roma/pkg/data/mongodb"
+	"github.com/go-pantheon/roma/pkg/data/xmongo"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -28,13 +28,13 @@ var _ domain.UserRepo = (*userMongoRepo)(nil)
 
 type userMongoRepo struct {
 	log  *log.Helper
-	repo *mongodb.BaseRepo
+	repo *xmongo.BaseRepo
 }
 
-func NewUserMongoRepo(data *mongodb.DB, logger log.Logger) (r domain.UserRepo, err error) {
-	coll := data.DB.Collection(_mongoUserTableName)
+func NewUserMongoRepo(data *mongo.Database, logger log.Logger) (r domain.UserRepo, err error) {
+	coll := data.Collection(_mongoUserTableName)
 	repo := &userMongoRepo{
-		repo: mongodb.NewBaseRepo(coll),
+		repo: xmongo.NewBaseRepo(coll),
 		log:  log.NewHelper(log.With(logger, "module", "player/user/gate/data/mongo")),
 	}
 

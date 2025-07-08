@@ -8,7 +8,7 @@ import (
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/room/internal/app/room/gate/domain"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/room/v1"
-	"github.com/go-pantheon/roma/pkg/data/mongodb"
+	"github.com/go-pantheon/roma/pkg/data/xmongo"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -23,13 +23,13 @@ var _ domain.RoomRepo = (*roomMongoRepo)(nil)
 
 type roomMongoRepo struct {
 	log  *log.Helper
-	repo *mongodb.BaseRepo
+	repo *xmongo.BaseRepo
 }
 
-func NewRoomMongoRepo(data *mongodb.DB, logger log.Logger) (domain.RoomRepo, error) {
-	coll := data.DB.Collection(_mongoRoomTableName)
+func NewRoomMongoRepo(data *mongo.Database, logger log.Logger) (domain.RoomRepo, error) {
+	coll := data.Collection(_mongoRoomTableName)
 	r := &roomMongoRepo{
-		repo: mongodb.NewBaseRepo(coll),
+		repo: xmongo.NewBaseRepo(coll),
 		log:  log.NewHelper(log.With(logger, "module", "room/room/gate/data")),
 	}
 

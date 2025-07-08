@@ -5,14 +5,14 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/go-pantheon/fabrica-util/data/db/postgresql"
+	"github.com/go-pantheon/roma/pkg/data/xpg"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 )
 
 var (
 	register           = newUserRegister()
 	allModuleKeys      = make([]life.ModuleKey, 0, 32)
-	allModuleDBColumns = make(map[life.ModuleKey]postgresql.ColumnType)
+	allModuleDBColumns = make(map[life.ModuleKey]string)
 )
 
 type UserRegister struct {
@@ -25,10 +25,10 @@ func newUserRegister() *UserRegister {
 	}
 }
 
-type Option func(key life.ModuleKey, cols map[life.ModuleKey]postgresql.ColumnType)
+type Option func(key life.ModuleKey, cols map[life.ModuleKey]string)
 
-func WithPGColumnType(columnType postgresql.ColumnType) Option {
-	return func(key life.ModuleKey, cols map[life.ModuleKey]postgresql.ColumnType) {
+func WithPGColumnType(columnType string) Option {
+	return func(key life.ModuleKey, cols map[life.ModuleKey]string) {
 		cols[key] = columnType
 	}
 }
@@ -42,22 +42,26 @@ func Register(key life.ModuleKey, newFunc life.NewModuleFunc, opts ...Option) {
 	}
 
 	if _, ok := allModuleDBColumns[key]; !ok {
-		allModuleDBColumns[key] = postgresql.BYTEA
+		allModuleDBColumns[key] = xpg.BytesType
 	}
+}
+
+func GetPGColumnType(key life.ModuleKey) string {
+	return allModuleDBColumns[key]
 }
 
 func AllModuleKeys() []life.ModuleKey {
 	return slices.Clone(allModuleKeys)
 }
 
-func AllModuleDBColumns() map[life.ModuleKey]postgresql.ColumnType {
+func AllModuleDBColumns() map[life.ModuleKey]string {
 	return maps.Clone(allModuleDBColumns)
 }
 
 func AllModuleDBColumnsString() map[string]string {
 	cols := make(map[string]string)
 	for key, colType := range allModuleDBColumns {
-		cols[string(key)] = string(colType)
+		cols[string(key)] = colType
 	}
 
 	return cols

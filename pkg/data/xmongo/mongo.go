@@ -1,4 +1,4 @@
-package mongodb
+package xmongo
 
 import (
 	"context"
@@ -26,9 +26,13 @@ func (r *BaseRepo) Create(ctx context.Context, doc any) error {
 		return errors.New("document is nil")
 	}
 
-	_, err := r.Coll.InsertOne(ctx, doc)
+	ret, err := r.Coll.InsertOne(ctx, doc)
 	if err != nil {
 		return errors.Wrap(err, "creating document failed")
+	}
+
+	if ret.InsertedID == nil {
+		return xerrors.ErrDBRecordExists
 	}
 
 	return nil
@@ -73,19 +77,13 @@ func (r *BaseRepo) UpdateOne(ctx context.Context, idKey string, id any, version 
 	filter := bson.M{idKey: id, "version": version - 1}
 	update := bson.M{"$set": updateFields}
 
-	opts := options.FindOne()
-
-	if len(update) > 0 {
-		opts.SetProjection(update)
-	}
-
-	res, err := r.Coll.UpdateOne(ctx, filter, opts)
+	res, err := r.Coll.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return errors.Wrapf(err, "document updating failed. id=%d version=%d", id, version)
 	}
 
 	if res.MatchedCount == 0 {
-		return errors.Errorf("document not found or version mismatch. id=%d version=%d", id, version)
+		return xerrors.ErrDBRecordNotAffected
 	}
 
 	return nil
@@ -115,7 +113,7 @@ func (r *BaseRepo) IncrementVersion(ctx context.Context, idKey string, id any, n
 	}
 
 	if res.MatchedCount == 0 {
-		return errors.Errorf("document not found or version mismatch. id=%d newVersion=%d", id, newVersion)
+		return xerrors.ErrDBRecordNotAffected
 	}
 
 	return nil

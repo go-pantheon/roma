@@ -5,8 +5,12 @@ import (
 	"testing"
 
 	"github.com/go-pantheon/fabrica-util/errors"
-	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister/modulecolumn"
+	basicobj "github.com/go-pantheon/roma/app/player/internal/app/basic/gate/domain/object"
+	heroobj "github.com/go-pantheon/roma/app/player/internal/app/hero/gate/domain/object"
+	statusobj "github.com/go-pantheon/roma/app/player/internal/app/status/gate/domain/object"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/xpg"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -64,17 +68,15 @@ func convertAssign(dest, src any) error {
 
 //nolint:paralleltest
 func TestBuildUserWhereSQL(t *testing.T) {
-	modulecolumn.ColumnTypeMap = map[life.ModuleKey]string{
-		"module1": "JSONB",
-		"module2": "BYTES",
-		"module3": "JSONB",
-	}
+	userregister.Register(life.ModuleKey("module1"), func() life.Module { return &basicobj.Basic{} }, userregister.WithPGColumnType(xpg.JSONType))
+	userregister.Register(life.ModuleKey("module2"), func() life.Module { return &heroobj.HeroList{} }, userregister.WithPGColumnType(xpg.BytesType))
+	userregister.Register(life.ModuleKey("module3"), func() life.Module { return &statusobj.Status{} }, userregister.WithPGColumnType(xpg.JSONType))
 
 	//nolint:paralleltest
 	t.Run("non-empty conditions", func(t *testing.T) {
 		conds := map[life.ModuleKey]*dbv1.UserModuleProto{
 			"module1": {Module: &dbv1.UserModuleProto_Basic{Basic: &dbv1.UserBasicProto{}}},
-			"module3": {Module: &dbv1.UserModuleProto_Basic{Basic: &dbv1.UserBasicProto{}}},
+			"module3": {Module: &dbv1.UserModuleProto_Status{Status: &dbv1.UserStatusProto{}}},
 		}
 
 		sql, args, err := BuildUserWhereSQL(conds)
@@ -99,7 +101,7 @@ func TestBuildUserWhereSQL(t *testing.T) {
 	t.Run("condition with empty proto", func(t *testing.T) {
 		conds := map[life.ModuleKey]*dbv1.UserModuleProto{
 			"module1": {}, // This will be marshaled to "{}" and skipped.
-			"module3": {Module: &dbv1.UserModuleProto_Basic{Basic: &dbv1.UserBasicProto{}}},
+			"module3": {Module: &dbv1.UserModuleProto_Status{Status: &dbv1.UserStatusProto{}}},
 		}
 
 		sql, args, err := BuildUserWhereSQL(conds)
@@ -111,15 +113,13 @@ func TestBuildUserWhereSQL(t *testing.T) {
 
 //nolint:paralleltest
 func TestParseUpsertModuleSQLParam(t *testing.T) {
-	modulecolumn.ColumnTypeMap = map[life.ModuleKey]string{
-		"module1": "JSONB",
-		"module2": "BYTES",
-	}
+	userregister.Register(life.ModuleKey("module1"), func() life.Module { return &basicobj.Basic{} }, userregister.WithPGColumnType(xpg.JSONType))
+	userregister.Register(life.ModuleKey("module2"), func() life.Module { return &heroobj.HeroList{} }, userregister.WithPGColumnType(xpg.BytesType))
 
 	user := &dbv1.UserProto{
 		Modules: map[string]*dbv1.UserModuleProto{
 			"module1": {Module: &dbv1.UserModuleProto_Basic{Basic: &dbv1.UserBasicProto{}}},
-			"module2": {Module: &dbv1.UserModuleProto_Basic{Basic: &dbv1.UserBasicProto{}}},
+			"module2": {Module: &dbv1.UserModuleProto_HeroList{HeroList: &dbv1.UserHeroListProto{}}},
 		},
 	}
 
@@ -142,10 +142,8 @@ func TestParseQueryModuleSQLParam(t *testing.T) {
 
 //nolint:paralleltest
 func TestMarshalUnmarshalUserModule(t *testing.T) {
-	modulecolumn.ColumnTypeMap = map[life.ModuleKey]string{
-		"jsonb_module": "JSONB",
-		"bytes_module": "BYTES",
-	}
+	userregister.Register(life.ModuleKey("jsonb_module"), func() life.Module { return &basicobj.Basic{} }, userregister.WithPGColumnType(xpg.JSONType))
+	userregister.Register(life.ModuleKey("bytes_module"), func() life.Module { return &heroobj.HeroList{} }, userregister.WithPGColumnType(xpg.BytesType))
 
 	//nolint:paralleltest
 	t.Run("jsonb module", func(t *testing.T) {
@@ -192,7 +190,8 @@ func TestScanUserRow(t *testing.T) {
 
 	//nolint:paralleltest
 	t.Run("successful scan", func(t *testing.T) {
-		modulecolumn.ColumnTypeMap = map[life.ModuleKey]string{"module1": "JSONB"}
+		userregister.Register(life.ModuleKey("module1"), func() life.Module { return &basicobj.Basic{} }, userregister.WithPGColumnType(xpg.JSONType))
+
 		p := dbv1.UserModuleProtoPool.Get()
 		p.Module = &dbv1.UserModuleProto_Basic{Basic: &dbv1.UserBasicProto{}}
 
@@ -224,7 +223,8 @@ func TestScanUserRow(t *testing.T) {
 
 	//nolint:paralleltest
 	t.Run("unmarshal error", func(t *testing.T) {
-		modulecolumn.ColumnTypeMap = map[life.ModuleKey]string{"module1": "JSONB"}
+		userregister.Register(life.ModuleKey("module1"), func() life.Module { return &basicobj.Basic{} }, userregister.WithPGColumnType(xpg.JSONType))
+
 		row := &mockPgxRow{
 			values: []any{[]byte("invalid json")},
 		}

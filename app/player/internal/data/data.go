@@ -3,28 +3,27 @@ package data
 import (
 	"context"
 
-	"github.com/go-pantheon/fabrica-kit/trace/postgresql"
-	xmongo "github.com/go-pantheon/fabrica-util/data/db/mongo"
-	xpg "github.com/go-pantheon/fabrica-util/data/db/postgresql"
-	xredis "github.com/go-pantheon/fabrica-util/data/redis"
+	"github.com/go-pantheon/fabrica-kit/trace/tracepg"
+	"github.com/go-pantheon/fabrica-util/data/db/mongo"
+	"github.com/go-pantheon/fabrica-util/data/db/pg"
+	redis "github.com/go-pantheon/fabrica-util/data/redis"
 	"github.com/go-pantheon/roma/app/player/internal/conf"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/v2/mongo"
+	goredis "github.com/redis/go-redis/v9"
+	gomongo "go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-func NewPostgreSQLClient(c *conf.Data) (pdb *pgxpool.Pool, cleanup func(), err error) {
-	pgConfig := xpg.NewConfig(c.Postgresql.Source, c.Postgresql.Database)
-	return postgresql.NewTracingPool(context.Background(), postgresql.DefaultPostgreSQLConfig(pgConfig))
+func NewPostgreSQLClient(c *conf.Data) (pdb *pg.DB, cleanup func(), err error) {
+	pgConfig := pg.NewConfig(c.Postgresql.Source, c.Postgresql.Database)
+	return tracepg.NewDB(context.Background(), tracepg.DefaultPostgreSQLConfig(pgConfig))
 }
 
-func NewMongoClient(c *conf.Data) (mdb *mongo.Database, cleanup func(), err error) {
-	return xmongo.New(context.Background(), c.Mongo.Source, c.Mongo.Database)
+func NewMongoClient(c *conf.Data) (mdb *gomongo.Database, cleanup func(), err error) {
+	return mongo.New(context.Background(), c.Mongo.Source, c.Mongo.Database)
 }
 
-func NewRedisClient(c *conf.Data) (rdb redis.UniversalClient, cleanup func(), err error) {
+func NewRedisClient(c *conf.Data) (rdb goredis.UniversalClient, cleanup func(), err error) {
 	if c.Redis.Cluster {
-		return xredis.NewCluster(&redis.ClusterOptions{
+		return redis.NewCluster(&goredis.ClusterOptions{
 			Addrs:        []string{c.Redis.Addr},
 			Password:     c.Redis.Password,
 			DialTimeout:  c.Redis.DialTimeout.AsDuration(),
@@ -33,7 +32,7 @@ func NewRedisClient(c *conf.Data) (rdb redis.UniversalClient, cleanup func(), er
 		})
 	}
 
-	return xredis.NewStandalone(&redis.Options{
+	return redis.NewStandalone(&goredis.Options{
 		Addr:         c.Redis.Addr,
 		Password:     c.Redis.Password,
 		DialTimeout:  c.Redis.DialTimeout.AsDuration(),

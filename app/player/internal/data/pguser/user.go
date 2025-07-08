@@ -8,16 +8,13 @@ import (
 
 	"github.com/go-pantheon/fabrica-kit/xerrors"
 	"github.com/go-pantheon/fabrica-util/errors"
-	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister/modulecolumn"
+	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/xpg"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-)
-
-const (
-	jsonbType = "JSONB"
 )
 
 func BuildUserWhereSQL(conds map[life.ModuleKey]*dbv1.UserModuleProto) (sql string, args []any, err error) {
@@ -116,7 +113,7 @@ func ParseQueryModuleSQLParam(mods []life.ModuleKey) (cols []string, values [][]
 func UnmarshalUserModule(rawBytes []byte, modKey life.ModuleKey) (*dbv1.UserModuleProto, error) {
 	p := dbv1.UserModuleProtoPool.Get()
 
-	if modulecolumn.ColumnTypeMap[modKey] == jsonbType {
+	if userregister.GetPGColumnType(modKey) == xpg.JSONType {
 		if err := protojson.Unmarshal(rawBytes, p); err != nil {
 			return nil, errors.Wrapf(err, "unmarshaling jsonb module %s", modKey)
 		}
@@ -130,7 +127,7 @@ func UnmarshalUserModule(rawBytes []byte, modKey life.ModuleKey) (*dbv1.UserModu
 }
 
 func MarshalUserModule(key life.ModuleKey, p proto.Message) (ret []byte, err error) {
-	if modulecolumn.ColumnTypeMap[key] == jsonbType {
+	if userregister.GetPGColumnType(key) == xpg.JSONType {
 		jsonb, err := protojson.Marshal(p)
 		if err != nil {
 			return nil, errors.Wrapf(err, "marshaling jsonb module %s", key)

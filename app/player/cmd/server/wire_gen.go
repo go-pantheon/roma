@@ -60,8 +60,6 @@ import (
 	"github.com/go-pantheon/roma/app/player/internal/server"
 	"github.com/go-pantheon/roma/app/player/internal/server/registry"
 	service6 "github.com/go-pantheon/roma/gen/app/player/service"
-	"github.com/go-pantheon/roma/pkg/data/mongodb"
-	"github.com/go-pantheon/roma/pkg/data/postgresdb"
 	data3 "github.com/go-pantheon/roma/pkg/universe/data"
 )
 
@@ -79,8 +77,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 		cleanup()
 		return nil, nil, err
 	}
-	db := mongodb.NewMongoDB(database)
-	userRepo, err := data2.NewUserMongoRepo(db, logger)
+	userRepo, err := data2.NewUserMongoRepo(database, logger)
 	if err != nil {
 		cleanup2()
 		cleanup()
@@ -125,15 +122,14 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	storageRegistrar := registry6.NewStorageRegistrar(storageServiceServer)
 	heroRegistrar := registry7.NewHeroRegistrar(heroServiceServer)
 	gateRegistrars := registry.NewGateRegistrars(userRegistrar, devRegistrar, systemRegistrar, storageRegistrar, heroRegistrar)
-	pool, cleanup4, err := data.NewPostgreSQLClient(confData)
+	db, cleanup4, err := data.NewPostgreSQLClient(confData)
 	if err != nil {
 		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	postgresdbDB := postgresdb.NewPostgreSQLDB(pool)
-	domainUserRepo, err := data4.NewUserPostgresRepo(postgresdbDB, logger)
+	domainUserRepo, err := data4.NewUserPostgresRepo(db, logger)
 	if err != nil {
 		cleanup4()
 		cleanup3()
@@ -151,7 +147,7 @@ func initApp(confServer *conf.Server, label *conf.Label, recharge *conf.Recharge
 	bizStorageUseCase := biz8.NewStorageUseCase(logger, storageDomain)
 	storageAdminServer := service10.NewStorageAdmin(logger, manager, bizStorageUseCase)
 	registryStorageRegistrar := registry10.NewStorageRegistrar(storageAdminServer)
-	orderRepo, err := data5.NewOrderPgRepo(postgresdbDB, logger)
+	orderRepo, err := data5.NewOrderPgRepo(db, logger)
 	if err != nil {
 		cleanup4()
 		cleanup3()

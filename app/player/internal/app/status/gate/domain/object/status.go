@@ -3,7 +3,6 @@ package object
 import (
 	"time"
 
-	"github.com/go-pantheon/fabrica-util/data/db/postgresql"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
@@ -16,7 +15,7 @@ const (
 )
 
 func init() {
-	userregister.Register(ModuleKey, NewStatus, userregister.WithPGColumnType(postgresql.JSONB))
+	userregister.Register(ModuleKey, NewStatus, userregister.WithPGColumnType("JSONB"))
 }
 
 var _ life.Module = (*Status)(nil)

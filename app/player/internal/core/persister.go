@@ -79,8 +79,7 @@ func (s *UserPersister) PrepareToPersist(ctx context.Context, modules []life.Mod
 func (s *UserPersister) Persist(ctx context.Context, uid int64, proto life.VersionProto) (err error) {
 	p, ok := proto.(*dbv1.UserProto)
 	if !ok {
-		err = errors.Wrapf(xerrors.ErrDBRecordType, "uid=%d proto=%T", uid, proto)
-		return
+		return errors.Wrapf(xerrors.ErrDBRecordType, "uid=%d proto=%T", uid, proto)
 	}
 
 	return s.do.Persist(ctx, uid, p)
@@ -102,8 +101,7 @@ func (s *UserPersister) IncVersion(ctx context.Context, uid int64) (err error) {
 }
 
 func (s *UserPersister) OnStop(ctx context.Context, id int64, p life.VersionProto) (err error) {
-	s.do.OnLogout(ctx, s.uid, proto.Clone(p).(*dbv1.UserProto))
-	return nil
+	return s.do.OnLogout(ctx, s.uid, proto.Clone(p).(*dbv1.UserProto))
 }
 
 func (s *UserPersister) Snapshot() life.VersionProto {

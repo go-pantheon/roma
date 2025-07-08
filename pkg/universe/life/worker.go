@@ -102,7 +102,7 @@ func newWorker(
 }
 
 func (w *Worker) start(ctx context.Context) {
-	w.GoAndQuickStop(fmt.Sprintf("worker-%d", w.ID()), func() error {
+	w.GoAndStop(fmt.Sprintf("worker-%d", w.ID()), func() error {
 		return w.run(ctx)
 	}, func() error {
 		return w.Stop(ctx)

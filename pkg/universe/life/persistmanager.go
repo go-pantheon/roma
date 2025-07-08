@@ -72,11 +72,15 @@ func (s *PersistManager) Stop(ctx context.Context) (err error) {
 		}
 
 		if onStopErr := s.persister.OnStop(ctx, s.ID(), proto); onStopErr != nil {
-			s.log.WithContext(ctx).Errorf("persister on stop failed. oid=%d %+v", s.ID(), onStopErr)
+			err = errors.Join(err, onStopErr)
 		}
 
 		// proto will be reset by persister, other functions should use it Before Persist
-		return s.persist(ctx, proto)
+		if persistErr := s.persist(ctx, proto); persistErr != nil {
+			err = errors.Join(err, persistErr)
+		}
+
+		return err
 	})
 }
 

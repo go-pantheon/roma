@@ -96,7 +96,7 @@ func (w *Worker) Start(ctx context.Context, jobs []*job.Job) (err error) {
 
 	w.tcpCli = tcp.NewClient(w.userId, addr, handshakePack, tcp.WithAuthFunc(w.Auth))
 
-	w.GoAndQuickStop(fmt.Sprintf("worker.%d.work", w.userId), func() error {
+	w.GoAndStop(fmt.Sprintf("worker.%d.work", w.userId), func() error {
 		return w.Run(ctx, jobs)
 	}, func() error {
 		return w.Stop(ctx)

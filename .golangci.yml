@@ -64,6 +64,7 @@ linters:
       - path: gen/
         linters:
           - wsl
+          - whitespace
       - path: mercury/gen/
         linters:
           - wsl

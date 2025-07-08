@@ -30,8 +30,6 @@ import (
 	"github.com/go-pantheon/roma/app/room/internal/server"
 	"github.com/go-pantheon/roma/app/room/internal/server/registry"
 	service2 "github.com/go-pantheon/roma/gen/app/room/service"
-	"github.com/go-pantheon/roma/pkg/data/mongodb"
-	"github.com/go-pantheon/roma/pkg/data/redisdb"
 	data3 "github.com/go-pantheon/roma/pkg/universe/data"
 )
 
@@ -43,15 +41,13 @@ func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Regi
 	if err != nil {
 		return nil, nil, err
 	}
-	db := redisdb.NewRedisDB(universalClient)
-	selfRouteTable := self.NewSelfRouteTable(db, confData)
+	selfRouteTable := self.NewSelfRouteTable(universalClient, confData)
 	database, cleanup2, err := data.NewMongoClient(confData)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	mongodbDB := mongodb.NewMongoDB(database)
-	roomRepo, err := data2.NewRoomMongoRepo(mongodbDB, logger)
+	roomRepo, err := data2.NewRoomMongoRepo(database, logger)
 	if err != nil {
 		cleanup2()
 		cleanup()
@@ -71,7 +67,7 @@ func initApp(confServer *conf.Server, label *conf.Label, confRegistry *conf.Regi
 	serviceRegistrars := registry.NewServiceRegistrars(servicelessUseCase, intraRegistrar)
 	roomRegistrar := registry3.NewRoomRegistrar(roomServiceServer)
 	gateRegistrars := registry.NewGateRegistrars(roomRegistrar)
-	domainRoomRepo, err := data4.NewRoomMongoRepo(mongodbDB, logger)
+	domainRoomRepo, err := data4.NewRoomMongoRepo(database, logger)
 	if err != nil {
 		cleanup3()
 		cleanup2()

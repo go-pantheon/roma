@@ -3,11 +3,11 @@ package object
 import (
 	"time"
 
-	"github.com/go-pantheon/fabrica-util/data/db/postgresql"
 	"github.com/go-pantheon/fabrica-util/errors"
 	"github.com/go-pantheon/fabrica-util/xtime"
 	"github.com/go-pantheon/roma/app/player/internal/app/user/gate/domain/userregister"
 	dbv1 "github.com/go-pantheon/roma/gen/api/db/player/v1"
+	"github.com/go-pantheon/roma/pkg/data/xpg"
 	"github.com/go-pantheon/roma/pkg/universe/life"
 	"google.golang.org/protobuf/proto"
 )
@@ -23,7 +23,7 @@ const (
 )
 
 func init() {
-	userregister.Register(ModuleKey, NewBasic, userregister.WithPGColumnType(postgresql.JSONB))
+	userregister.Register(ModuleKey, NewBasic, userregister.WithPGColumnType(xpg.JSONType))
 }
 
 var _ life.Module = (*Basic)(nil)
