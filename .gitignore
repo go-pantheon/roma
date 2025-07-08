@@ -36,10 +36,6 @@ Thumbs.db
 # private config
 app/*/configs
 
-# submodules
-/api/
-/deps/
-
 # go work
 go.work
 go.work.sum
@@ -54,5 +50,3 @@ vulcan/fixtures/outputs/
 
 .CLAUDE*
 .claude*
-
-.actrc
