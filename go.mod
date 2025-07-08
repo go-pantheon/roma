@@ -10,7 +10,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.8.4
 	github.com/go-pantheon/fabrica-kit v0.0.22
 	github.com/go-pantheon/fabrica-net v0.0.22
-	github.com/go-pantheon/fabrica-util v0.0.30
+	github.com/go-pantheon/fabrica-util v0.0.31
 	github.com/google/wire v0.6.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/json-iterator/go v1.1.12
