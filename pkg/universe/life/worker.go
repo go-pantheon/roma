@@ -60,6 +60,9 @@ type Worker struct {
 	disconnectErr  atomic.Value
 	persistManager *PersistManager
 
+	// drainingEvents flag, indicating that the events are being drained, allowing new events to be added during the process
+	drainingEvents atomic.Bool
+
 	notifyStoppedFunc func(userId int64, index uint64)
 	newContextFunc    newContextFunc
 }
@@ -287,14 +290,9 @@ func (w *Worker) Stop(ctx context.Context) (err error) {
 
 		w.Tickers.Stop()
 
-		close(w.events)
-
 		wctx := w.newContextFunc(ctx, w)
-
-		for e := range w.ConsumeEvent() {
-			if executeErr := w.ExecuteEvent(wctx, e); executeErr != nil {
-				err = errors.Join(err, executeErr)
-			}
+		if drainErr := w.drainEvents(wctx); drainErr != nil {
+			err = errors.Join(err, drainErr)
 		}
 
 		if persistErr := w.persistManager.Stop(ctx); persistErr != nil {
@@ -305,16 +303,6 @@ func (w *Worker) Stop(ctx context.Context) (err error) {
 	})
 }
 
-func (w *Worker) EmitEventFunc(f EventFunc) error {
-	if w.OnStopping() {
-		return xerrors.ErrLifeStopped
-	}
-
-	w.events <- f
-
-	return nil
-}
-
 func (w *Worker) EmitEvent(t WorkerEventType, args ...WithArg) error {
 	if w.OnStopping() {
 		return xerrors.ErrLifeStopped
@@ -323,6 +311,24 @@ func (w *Worker) EmitEvent(t WorkerEventType, args ...WithArg) error {
 	f, err := w.eventFunc(t, args...)
 	if err != nil {
 		return err
+	}
+
+	return w.EmitEventFunc(f)
+}
+
+func (w *Worker) EmitEventFunc(f EventFunc) error {
+	// if the events are being drained, allow new events to be added
+	if w.drainingEvents.Load() {
+		select {
+		case w.events <- f:
+			return nil
+		default:
+			return errors.Errorf("worker event channel is full on draining. %s", w.LogInfo())
+		}
+	}
+
+	if w.OnStopping() {
+		return xerrors.ErrLifeStopped
 	}
 
 	w.events <- f
@@ -383,6 +389,58 @@ func (w *Worker) ExecuteEvent(wctx Context, f EventFunc) error {
 
 		return nil
 	})
+}
+
+// drainEvents drain the events safely, including the new events generated during the event processing
+func (w *Worker) drainEvents(wctx Context) (err error) {
+	w.drainingEvents.Store(true)
+	defer w.drainingEvents.Store(false)
+
+	var (
+		consecutiveEmptyChecks int
+		maxEmptyChecks         = 3 // if the consecutive empty checks is 3, the drain is considered to be completed
+		checkInterval          = time.Millisecond * 10
+	)
+
+	for {
+		hasEvent := false
+
+		select {
+		case e, ok := <-w.ConsumeEvent():
+			if !ok {
+				break
+			}
+
+			hasEvent = true
+
+			if executeErr := w.ExecuteEvent(wctx, e); executeErr != nil {
+				err = errors.Join(err, executeErr)
+			}
+		default:
+		}
+
+		if hasEvent {
+			consecutiveEmptyChecks = 0
+		} else {
+			consecutiveEmptyChecks++
+			if consecutiveEmptyChecks >= maxEmptyChecks {
+				break
+			}
+
+			time.Sleep(checkInterval)
+		}
+	}
+
+	close(w.events)
+
+	// handle the remaining events after the channel is closed
+	for e := range w.ConsumeEvent() {
+		if executeErr := w.ExecuteEvent(wctx, e); executeErr != nil {
+			err = errors.Join(err, executeErr)
+		}
+	}
+
+	return err
 }
 
 func (w *Worker) renewalTick(ctx context.Context) error {
