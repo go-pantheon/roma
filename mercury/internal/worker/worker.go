@@ -164,8 +164,8 @@ func (w *Worker) work(ctx context.Context) error {
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
-			case t := <-w.taskChan:
-				if t == nil {
+			case t, ok := <-w.taskChan:
+				if !ok {
 					w.complete()
 					return w.Stop(ctx)
 				}

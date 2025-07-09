@@ -185,8 +185,10 @@ func (m *Manager) run() error {
 					return ctx.Err()
 				case <-m.statisticTicker.C:
 					m.statisticTick(ctx)
-				case key := <-m.stoppedWorkerChan:
-					m.removeStoppedWorker(ctx, key)
+				case key, ok := <-m.stoppedWorkerChan:
+					if ok {
+						m.removeStoppedWorker(ctx, key)
+					}
 				}
 			}
 		})

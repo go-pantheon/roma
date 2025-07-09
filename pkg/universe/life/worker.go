@@ -165,7 +165,11 @@ func (w *Worker) runEventLoop(ctx context.Context) error {
 					return err
 				}
 			}
-		case e := <-w.ConsumeEvent():
+		case e, ok := <-w.ConsumeEvent():
+			if !ok {
+				return xerrors.ErrLifeStopped
+			}
+
 			if err := w.ExecuteEvent(w.newContextFunc(ctx, w), e); err != nil {
 				return err
 			}
@@ -186,7 +190,11 @@ func (w *Worker) runTunnelResponseLoop(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case msg := <-w.ConsumeTunnelResponse():
+		case msg, ok := <-w.ConsumeTunnelResponse():
+			if !ok {
+				return xerrors.ErrLifeStopped
+			}
+
 			if err := w.ExecuteSend(msg); err != nil {
 				w.log.WithContext(ctx).Errorf("worker execute reply failed. i=%d seq=<%d-%d> %s %+v", msg.GetIndex(), msg.GetMod(), msg.GetSeq(), w.LogInfo(), err)
 			}
@@ -199,7 +207,11 @@ func (w *Worker) runPersistLoop(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case proto := <-w.persistManager.SaveChan():
+		case proto, ok := <-w.persistManager.SaveChan():
+			if !ok {
+				return xerrors.ErrLifeStopped
+			}
+
 			if err := w.persistManager.Persist(ctx, proto); err != nil {
 				if errors.Is(err, xerrors.ErrDBRecordNotAffected) {
 					return err
