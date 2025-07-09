@@ -10,7 +10,7 @@ import (
 
 // LRU implements a thread-safe Least Recently Used cache
 type LRU struct {
-	sync.RWMutex
+	sync.Mutex
 
 	capacity int
 	ttl      time.Duration
@@ -146,8 +146,8 @@ func (l *LRU) Remove(key int64) {
 
 // Len returns the current number of items in the cache
 func (l *LRU) Len() int {
-	l.RLock()
-	defer l.RUnlock()
+	l.Lock()
+	defer l.Unlock()
 
 	return l.ll.Len()
 }
