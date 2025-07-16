@@ -70,6 +70,14 @@ func (m *Packet) validate(all bool) error {
 
 	// no validation rules for Index
 
+	// no validation rules for ConnId
+
+	// no validation rules for FragId
+
+	// no validation rules for FragCount
+
+	// no validation rules for FragIndex
+
 	// no validation rules for Compress
 
 	if len(errors) > 0 {

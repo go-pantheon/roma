@@ -29,6 +29,10 @@ type TunnelRequest struct {
 	Mod           int32                  `protobuf:"varint,4,opt,name=mod,proto3" json:"mod,omitempty"`                                    // Module ID, globally unique
 	Seq           int32                  `protobuf:"varint,5,opt,name=seq,proto3" json:"seq,omitempty"`                                    // Module message ID, unique within the module
 	Index         int32                  `protobuf:"varint,6,opt,name=index,proto3" json:"index,omitempty"`                                // Index of the message in the stream
+	ConnId        int32                  `protobuf:"varint,7,opt,name=conn_id,json=connId,proto3" json:"conn_id,omitempty"`                // Connection ID, default 0 means only used in raw KCP Connection, otherwise it is the stream ID
+	FragId        int32                  `protobuf:"varint,8,opt,name=frag_id,json=fragId,proto3" json:"frag_id,omitempty"`                // Fragment ID, default 0 means no fragment. If frag_id is not 0, the data is a fragment of the message with the same frag_id.
+	FragCount     int32                  `protobuf:"varint,9,opt,name=frag_count,json=fragCount,proto3" json:"frag_count,omitempty"`       // Fragment Count, the number of fragments in the same frag_id
+	FragIndex     int32                  `protobuf:"varint,10,opt,name=frag_index,json=fragIndex,proto3" json:"frag_index,omitempty"`      // Fragment Index, belongs to the same frag_id
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,6 +109,34 @@ func (x *TunnelRequest) GetIndex() int32 {
 	return 0
 }
 
+func (x *TunnelRequest) GetConnId() int32 {
+	if x != nil {
+		return x.ConnId
+	}
+	return 0
+}
+
+func (x *TunnelRequest) GetFragId() int32 {
+	if x != nil {
+		return x.FragId
+	}
+	return 0
+}
+
+func (x *TunnelRequest) GetFragCount() int32 {
+	if x != nil {
+		return x.FragCount
+	}
+	return 0
+}
+
+func (x *TunnelRequest) GetFragIndex() int32 {
+	if x != nil {
+		return x.FragIndex
+	}
+	return 0
+}
+
 type TunnelResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`                                   // Serialized bytes of the cs/sc protocol in the message
@@ -113,6 +145,10 @@ type TunnelResponse struct {
 	Mod           int32                  `protobuf:"varint,4,opt,name=mod,proto3" json:"mod,omitempty"`                                    // Module ID, globally unique
 	Seq           int32                  `protobuf:"varint,5,opt,name=seq,proto3" json:"seq,omitempty"`                                    // Module message ID, unique within the module
 	Index         int32                  `protobuf:"varint,6,opt,name=index,proto3" json:"index,omitempty"`                                // Index of the message in the stream, same as the request
+	ConnId        int32                  `protobuf:"varint,7,opt,name=conn_id,json=connId,proto3" json:"conn_id,omitempty"`                // Connection ID, default 0 means only used in raw KCP Connection, otherwise it is the stream ID
+	FragId        int32                  `protobuf:"varint,8,opt,name=frag_id,json=fragId,proto3" json:"frag_id,omitempty"`                // Fragment ID, default 0 means no fragment. If frag_id is not 0, the data is a fragment of the message with the same frag_id.
+	FragCount     int32                  `protobuf:"varint,9,opt,name=frag_count,json=fragCount,proto3" json:"frag_count,omitempty"`       // Fragment Count, the number of fragments in the same frag_id
+	FragIndex     int32                  `protobuf:"varint,10,opt,name=frag_index,json=fragIndex,proto3" json:"frag_index,omitempty"`      // Fragment Index, belongs to the same frag_id
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -189,25 +225,67 @@ func (x *TunnelResponse) GetIndex() int32 {
 	return 0
 }
 
+func (x *TunnelResponse) GetConnId() int32 {
+	if x != nil {
+		return x.ConnId
+	}
+	return 0
+}
+
+func (x *TunnelResponse) GetFragId() int32 {
+	if x != nil {
+		return x.FragId
+	}
+	return 0
+}
+
+func (x *TunnelResponse) GetFragCount() int32 {
+	if x != nil {
+		return x.FragCount
+	}
+	return 0
+}
+
+func (x *TunnelResponse) GetFragIndex() int32 {
+	if x != nil {
+		return x.FragIndex
+	}
+	return 0
+}
+
 var File_room_intra_v1_tunnel_proto protoreflect.FileDescriptor
 
 const file_room_intra_v1_tunnel_proto_rawDesc = "" +
 	"\n" +
-	"\x1aroom/intra/v1/tunnel.proto\x12\rroom.intra.v1\"\x92\x01\n" +
+	"\x1aroom/intra/v1/tunnel.proto\x12\rroom.intra.v1\"\x82\x02\n" +
 	"\rTunnelRequest\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12!\n" +
 	"\fdata_version\x18\x02 \x01(\x04R\vdataVersion\x12\x10\n" +
 	"\x03obj\x18\x03 \x01(\x03R\x03obj\x12\x10\n" +
 	"\x03mod\x18\x04 \x01(\x05R\x03mod\x12\x10\n" +
 	"\x03seq\x18\x05 \x01(\x05R\x03seq\x12\x14\n" +
-	"\x05index\x18\x06 \x01(\x05R\x05index\"\x93\x01\n" +
+	"\x05index\x18\x06 \x01(\x05R\x05index\x12\x17\n" +
+	"\aconn_id\x18\a \x01(\x05R\x06connId\x12\x17\n" +
+	"\afrag_id\x18\b \x01(\x05R\x06fragId\x12\x1d\n" +
+	"\n" +
+	"frag_count\x18\t \x01(\x05R\tfragCount\x12\x1d\n" +
+	"\n" +
+	"frag_index\x18\n" +
+	" \x01(\x05R\tfragIndex\"\x83\x02\n" +
 	"\x0eTunnelResponse\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12!\n" +
 	"\fdata_version\x18\x02 \x01(\x04R\vdataVersion\x12\x10\n" +
 	"\x03obj\x18\x03 \x01(\x03R\x03obj\x12\x10\n" +
 	"\x03mod\x18\x04 \x01(\x05R\x03mod\x12\x10\n" +
 	"\x03seq\x18\x05 \x01(\x05R\x03seq\x12\x14\n" +
-	"\x05index\x18\x06 \x01(\x05R\x05index2\\\n" +
+	"\x05index\x18\x06 \x01(\x05R\x05index\x12\x17\n" +
+	"\aconn_id\x18\a \x01(\x05R\x06connId\x12\x17\n" +
+	"\afrag_id\x18\b \x01(\x05R\x06fragId\x12\x1d\n" +
+	"\n" +
+	"frag_count\x18\t \x01(\x05R\tfragCount\x12\x1d\n" +
+	"\n" +
+	"frag_index\x18\n" +
+	" \x01(\x05R\tfragIndex2\\\n" +
 	"\rTunnelService\x12K\n" +
 	"\x06Tunnel\x12\x1c.room.intra.v1.TunnelRequest\x1a\x1d.room.intra.v1.TunnelResponse\"\x00(\x010\x01B\"Z api/server/room/intra/v1;intrav1b\x06proto3"
 

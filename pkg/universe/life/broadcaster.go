@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
-	servicev1 "github.com/go-pantheon/roma/gen/api/server/gate/service/push/v1"
+	servicev1 "github.com/go-pantheon/roma/gen/api/server/broadcaster/service/push/v1"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
 	"github.com/go-pantheon/roma/pkg/universe/data"
 	"github.com/pkg/errors"

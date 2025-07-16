@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: gate/service/push/v1/push_error.proto
+// source: broadcaster/service/push/v1/push_error.proto
 
 package servicev1
 
@@ -55,11 +55,11 @@ func (x PushServiceErrorReason) String() string {
 }
 
 func (PushServiceErrorReason) Descriptor() protoreflect.EnumDescriptor {
-	return file_gate_service_push_v1_push_error_proto_enumTypes[0].Descriptor()
+	return file_broadcaster_service_push_v1_push_error_proto_enumTypes[0].Descriptor()
 }
 
 func (PushServiceErrorReason) Type() protoreflect.EnumType {
-	return &file_gate_service_push_v1_push_error_proto_enumTypes[0]
+	return &file_broadcaster_service_push_v1_push_error_proto_enumTypes[0]
 }
 
 func (x PushServiceErrorReason) Number() protoreflect.EnumNumber {
@@ -68,36 +68,36 @@ func (x PushServiceErrorReason) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PushServiceErrorReason.Descriptor instead.
 func (PushServiceErrorReason) EnumDescriptor() ([]byte, []int) {
-	return file_gate_service_push_v1_push_error_proto_rawDescGZIP(), []int{0}
+	return file_broadcaster_service_push_v1_push_error_proto_rawDescGZIP(), []int{0}
 }
 
-var File_gate_service_push_v1_push_error_proto protoreflect.FileDescriptor
+var File_broadcaster_service_push_v1_push_error_proto protoreflect.FileDescriptor
 
-const file_gate_service_push_v1_push_error_proto_rawDesc = "" +
+const file_broadcaster_service_push_v1_push_error_proto_rawDesc = "" +
 	"\n" +
-	"%gate/service/push/v1/push_error.proto\x12\x14gate.service.push.v1\x1a\x13errors/errors.proto*\xaa\x01\n" +
+	",broadcaster/service/push/v1/push_error.proto\x12\x1bbroadcaster.service.push.v1\x1a\x13errors/errors.proto*\xaa\x01\n" +
 	"\x16PushServiceErrorReason\x12/\n" +
 	"%PUSH_SERVICE_ERROR_REASON_UNSPECIFIED\x10\x00\x1a\x04\xa8E\xf4\x03\x12*\n" +
 	" PUSH_SERVICE_ERROR_REASON_SERVER\x10\x01\x1a\x04\xa8E\xf4\x03\x12-\n" +
-	"#PUSH_SERVICE_ERROR_REASON_SERVER_ID\x10\x02\x1a\x04\xa8E\x91\x03\x1a\x04\xa0E\xf4\x03B+Z)api/server/gate/service/push/v1;servicev1b\x06proto3"
+	"#PUSH_SERVICE_ERROR_REASON_SERVER_ID\x10\x02\x1a\x04\xa8E\x91\x03\x1a\x04\xa0E\xf4\x03B2Z0api/server/broadcaster/service/push/v1;servicev1b\x06proto3"
 
 var (
-	file_gate_service_push_v1_push_error_proto_rawDescOnce sync.Once
-	file_gate_service_push_v1_push_error_proto_rawDescData []byte
+	file_broadcaster_service_push_v1_push_error_proto_rawDescOnce sync.Once
+	file_broadcaster_service_push_v1_push_error_proto_rawDescData []byte
 )
 
-func file_gate_service_push_v1_push_error_proto_rawDescGZIP() []byte {
-	file_gate_service_push_v1_push_error_proto_rawDescOnce.Do(func() {
-		file_gate_service_push_v1_push_error_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_gate_service_push_v1_push_error_proto_rawDesc), len(file_gate_service_push_v1_push_error_proto_rawDesc)))
+func file_broadcaster_service_push_v1_push_error_proto_rawDescGZIP() []byte {
+	file_broadcaster_service_push_v1_push_error_proto_rawDescOnce.Do(func() {
+		file_broadcaster_service_push_v1_push_error_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_broadcaster_service_push_v1_push_error_proto_rawDesc), len(file_broadcaster_service_push_v1_push_error_proto_rawDesc)))
 	})
-	return file_gate_service_push_v1_push_error_proto_rawDescData
+	return file_broadcaster_service_push_v1_push_error_proto_rawDescData
 }
 
-var file_gate_service_push_v1_push_error_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_gate_service_push_v1_push_error_proto_goTypes = []any{
-	(PushServiceErrorReason)(0), // 0: gate.service.push.v1.PushServiceErrorReason
+var file_broadcaster_service_push_v1_push_error_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_broadcaster_service_push_v1_push_error_proto_goTypes = []any{
+	(PushServiceErrorReason)(0), // 0: broadcaster.service.push.v1.PushServiceErrorReason
 }
-var file_gate_service_push_v1_push_error_proto_depIdxs = []int32{
+var file_broadcaster_service_push_v1_push_error_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -105,26 +105,26 @@ var file_gate_service_push_v1_push_error_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_gate_service_push_v1_push_error_proto_init() }
-func file_gate_service_push_v1_push_error_proto_init() {
-	if File_gate_service_push_v1_push_error_proto != nil {
+func init() { file_broadcaster_service_push_v1_push_error_proto_init() }
+func file_broadcaster_service_push_v1_push_error_proto_init() {
+	if File_broadcaster_service_push_v1_push_error_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gate_service_push_v1_push_error_proto_rawDesc), len(file_gate_service_push_v1_push_error_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_broadcaster_service_push_v1_push_error_proto_rawDesc), len(file_broadcaster_service_push_v1_push_error_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_gate_service_push_v1_push_error_proto_goTypes,
-		DependencyIndexes: file_gate_service_push_v1_push_error_proto_depIdxs,
-		EnumInfos:         file_gate_service_push_v1_push_error_proto_enumTypes,
+		GoTypes:           file_broadcaster_service_push_v1_push_error_proto_goTypes,
+		DependencyIndexes: file_broadcaster_service_push_v1_push_error_proto_depIdxs,
+		EnumInfos:         file_broadcaster_service_push_v1_push_error_proto_enumTypes,
 	}.Build()
-	File_gate_service_push_v1_push_error_proto = out.File
-	file_gate_service_push_v1_push_error_proto_goTypes = nil
-	file_gate_service_push_v1_push_error_proto_depIdxs = nil
+	File_broadcaster_service_push_v1_push_error_proto = out.File
+	file_broadcaster_service_push_v1_push_error_proto_goTypes = nil
+	file_broadcaster_service_push_v1_push_error_proto_depIdxs = nil
 }

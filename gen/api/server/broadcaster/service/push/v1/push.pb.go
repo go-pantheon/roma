@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: gate/service/push/v1/push.proto
+// source: broadcaster/service/push/v1/push.proto
 
 package servicev1
 
@@ -32,7 +32,7 @@ type PushRequest struct {
 
 func (x *PushRequest) Reset() {
 	*x = PushRequest{}
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[0]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +44,7 @@ func (x *PushRequest) String() string {
 func (*PushRequest) ProtoMessage() {}
 
 func (x *PushRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[0]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +57,7 @@ func (x *PushRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PushRequest.ProtoReflect.Descriptor instead.
 func (*PushRequest) Descriptor() ([]byte, []int) {
-	return file_gate_service_push_v1_push_proto_rawDescGZIP(), []int{0}
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *PushRequest) GetUid() int64 {
@@ -82,7 +82,7 @@ type PushResponse struct {
 
 func (x *PushResponse) Reset() {
 	*x = PushResponse{}
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[1]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +94,7 @@ func (x *PushResponse) String() string {
 func (*PushResponse) ProtoMessage() {}
 
 func (x *PushResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[1]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +107,7 @@ func (x *PushResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PushResponse.ProtoReflect.Descriptor instead.
 func (*PushResponse) Descriptor() ([]byte, []int) {
-	return file_gate_service_push_v1_push_proto_rawDescGZIP(), []int{1}
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{1}
 }
 
 type MulticastRequest struct {
@@ -120,7 +120,7 @@ type MulticastRequest struct {
 
 func (x *MulticastRequest) Reset() {
 	*x = MulticastRequest{}
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[2]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -132,7 +132,7 @@ func (x *MulticastRequest) String() string {
 func (*MulticastRequest) ProtoMessage() {}
 
 func (x *MulticastRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[2]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -145,7 +145,7 @@ func (x *MulticastRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MulticastRequest.ProtoReflect.Descriptor instead.
 func (*MulticastRequest) Descriptor() ([]byte, []int) {
-	return file_gate_service_push_v1_push_proto_rawDescGZIP(), []int{2}
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *MulticastRequest) GetUid() []int64 {
@@ -170,7 +170,7 @@ type MulticastResponse struct {
 
 func (x *MulticastResponse) Reset() {
 	*x = MulticastResponse{}
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[3]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -182,7 +182,7 @@ func (x *MulticastResponse) String() string {
 func (*MulticastResponse) ProtoMessage() {}
 
 func (x *MulticastResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[3]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -195,7 +195,7 @@ func (x *MulticastResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MulticastResponse.ProtoReflect.Descriptor instead.
 func (*MulticastResponse) Descriptor() ([]byte, []int) {
-	return file_gate_service_push_v1_push_proto_rawDescGZIP(), []int{3}
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{3}
 }
 
 type BroadcastRequest struct {
@@ -207,7 +207,7 @@ type BroadcastRequest struct {
 
 func (x *BroadcastRequest) Reset() {
 	*x = BroadcastRequest{}
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[4]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -219,7 +219,7 @@ func (x *BroadcastRequest) String() string {
 func (*BroadcastRequest) ProtoMessage() {}
 
 func (x *BroadcastRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[4]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -232,7 +232,7 @@ func (x *BroadcastRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BroadcastRequest.ProtoReflect.Descriptor instead.
 func (*BroadcastRequest) Descriptor() ([]byte, []int) {
-	return file_gate_service_push_v1_push_proto_rawDescGZIP(), []int{4}
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *BroadcastRequest) GetBodies() []*PushBody {
@@ -250,7 +250,7 @@ type BroadcastResponse struct {
 
 func (x *BroadcastResponse) Reset() {
 	*x = BroadcastResponse{}
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[5]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -262,7 +262,7 @@ func (x *BroadcastResponse) String() string {
 func (*BroadcastResponse) ProtoMessage() {}
 
 func (x *BroadcastResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[5]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -275,7 +275,7 @@ func (x *BroadcastResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BroadcastResponse.ProtoReflect.Descriptor instead.
 func (*BroadcastResponse) Descriptor() ([]byte, []int) {
-	return file_gate_service_push_v1_push_proto_rawDescGZIP(), []int{5}
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{5}
 }
 
 type PushBody struct {
@@ -290,7 +290,7 @@ type PushBody struct {
 
 func (x *PushBody) Reset() {
 	*x = PushBody{}
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[6]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -302,7 +302,7 @@ func (x *PushBody) String() string {
 func (*PushBody) ProtoMessage() {}
 
 func (x *PushBody) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_service_push_v1_push_proto_msgTypes[6]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -315,7 +315,7 @@ func (x *PushBody) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PushBody.ProtoReflect.Descriptor instead.
 func (*PushBody) Descriptor() ([]byte, []int) {
-	return file_gate_service_push_v1_push_proto_rawDescGZIP(), []int{6}
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *PushBody) GetData() []byte {
@@ -346,67 +346,67 @@ func (x *PushBody) GetSeq() int32 {
 	return 0
 }
 
-var File_gate_service_push_v1_push_proto protoreflect.FileDescriptor
+var File_broadcaster_service_push_v1_push_proto protoreflect.FileDescriptor
 
-const file_gate_service_push_v1_push_proto_rawDesc = "" +
+const file_broadcaster_service_push_v1_push_proto_rawDesc = "" +
 	"\n" +
-	"\x1fgate/service/push/v1/push.proto\x12\x14gate.service.push.v1\x1a\x1cgoogle/api/annotations.proto\"W\n" +
+	"&broadcaster/service/push/v1/push.proto\x12\x1bbroadcaster.service.push.v1\x1a\x1cgoogle/api/annotations.proto\"^\n" +
 	"\vPushRequest\x12\x10\n" +
-	"\x03uid\x18\x01 \x01(\x03R\x03uid\x126\n" +
-	"\x06bodies\x18\x02 \x03(\v2\x1e.gate.service.push.v1.PushBodyR\x06bodies\"\x0e\n" +
-	"\fPushResponse\"\\\n" +
+	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12=\n" +
+	"\x06bodies\x18\x02 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\"\x0e\n" +
+	"\fPushResponse\"c\n" +
 	"\x10MulticastRequest\x12\x10\n" +
-	"\x03uid\x18\x01 \x03(\x03R\x03uid\x126\n" +
-	"\x06bodies\x18\x02 \x03(\v2\x1e.gate.service.push.v1.PushBodyR\x06bodies\"\x13\n" +
-	"\x11MulticastResponse\"J\n" +
-	"\x10BroadcastRequest\x126\n" +
-	"\x06bodies\x18\x01 \x03(\v2\x1e.gate.service.push.v1.PushBodyR\x06bodies\"\x13\n" +
+	"\x03uid\x18\x01 \x03(\x03R\x03uid\x12=\n" +
+	"\x06bodies\x18\x02 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\"\x13\n" +
+	"\x11MulticastResponse\"Q\n" +
+	"\x10BroadcastRequest\x12=\n" +
+	"\x06bodies\x18\x01 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\"\x13\n" +
 	"\x11BroadcastResponse\"T\n" +
 	"\bPushBody\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12\x10\n" +
 	"\x03obj\x18\x02 \x01(\x03R\x03obj\x12\x10\n" +
 	"\x03mod\x18\x03 \x01(\x05R\x03mod\x12\x10\n" +
-	"\x03seq\x18\x04 \x01(\x05R\x03seq2\xd8\x02\n" +
-	"\vPushService\x12_\n" +
-	"\x04Push\x12!.gate.service.push.v1.PushRequest\x1a\".gate.service.push.v1.PushResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
-	":\x01*\"\x05/push\x12s\n" +
-	"\tMulticast\x12&.gate.service.push.v1.MulticastRequest\x1a'.gate.service.push.v1.MulticastResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
-	"/multicast\x12s\n" +
-	"\tBroadcast\x12&.gate.service.push.v1.BroadcastRequest\x1a'.gate.service.push.v1.BroadcastResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
-	"/broadcastB+Z)api/server/gate/service/push/v1;servicev1b\x06proto3"
+	"\x03seq\x18\x04 \x01(\x05R\x03seq2\x84\x03\n" +
+	"\vPushService\x12m\n" +
+	"\x04Push\x12(.broadcaster.service.push.v1.PushRequest\x1a).broadcaster.service.push.v1.PushResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
+	":\x01*\"\x05/push\x12\x81\x01\n" +
+	"\tMulticast\x12-.broadcaster.service.push.v1.MulticastRequest\x1a..broadcaster.service.push.v1.MulticastResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
+	"/multicast\x12\x81\x01\n" +
+	"\tBroadcast\x12-.broadcaster.service.push.v1.BroadcastRequest\x1a..broadcaster.service.push.v1.BroadcastResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
+	"/broadcastB2Z0api/server/broadcaster/service/push/v1;servicev1b\x06proto3"
 
 var (
-	file_gate_service_push_v1_push_proto_rawDescOnce sync.Once
-	file_gate_service_push_v1_push_proto_rawDescData []byte
+	file_broadcaster_service_push_v1_push_proto_rawDescOnce sync.Once
+	file_broadcaster_service_push_v1_push_proto_rawDescData []byte
 )
 
-func file_gate_service_push_v1_push_proto_rawDescGZIP() []byte {
-	file_gate_service_push_v1_push_proto_rawDescOnce.Do(func() {
-		file_gate_service_push_v1_push_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_gate_service_push_v1_push_proto_rawDesc), len(file_gate_service_push_v1_push_proto_rawDesc)))
+func file_broadcaster_service_push_v1_push_proto_rawDescGZIP() []byte {
+	file_broadcaster_service_push_v1_push_proto_rawDescOnce.Do(func() {
+		file_broadcaster_service_push_v1_push_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_broadcaster_service_push_v1_push_proto_rawDesc), len(file_broadcaster_service_push_v1_push_proto_rawDesc)))
 	})
-	return file_gate_service_push_v1_push_proto_rawDescData
+	return file_broadcaster_service_push_v1_push_proto_rawDescData
 }
 
-var file_gate_service_push_v1_push_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
-var file_gate_service_push_v1_push_proto_goTypes = []any{
-	(*PushRequest)(nil),       // 0: gate.service.push.v1.PushRequest
-	(*PushResponse)(nil),      // 1: gate.service.push.v1.PushResponse
-	(*MulticastRequest)(nil),  // 2: gate.service.push.v1.MulticastRequest
-	(*MulticastResponse)(nil), // 3: gate.service.push.v1.MulticastResponse
-	(*BroadcastRequest)(nil),  // 4: gate.service.push.v1.BroadcastRequest
-	(*BroadcastResponse)(nil), // 5: gate.service.push.v1.BroadcastResponse
-	(*PushBody)(nil),          // 6: gate.service.push.v1.PushBody
+var file_broadcaster_service_push_v1_push_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_broadcaster_service_push_v1_push_proto_goTypes = []any{
+	(*PushRequest)(nil),       // 0: broadcaster.service.push.v1.PushRequest
+	(*PushResponse)(nil),      // 1: broadcaster.service.push.v1.PushResponse
+	(*MulticastRequest)(nil),  // 2: broadcaster.service.push.v1.MulticastRequest
+	(*MulticastResponse)(nil), // 3: broadcaster.service.push.v1.MulticastResponse
+	(*BroadcastRequest)(nil),  // 4: broadcaster.service.push.v1.BroadcastRequest
+	(*BroadcastResponse)(nil), // 5: broadcaster.service.push.v1.BroadcastResponse
+	(*PushBody)(nil),          // 6: broadcaster.service.push.v1.PushBody
 }
-var file_gate_service_push_v1_push_proto_depIdxs = []int32{
-	6, // 0: gate.service.push.v1.PushRequest.bodies:type_name -> gate.service.push.v1.PushBody
-	6, // 1: gate.service.push.v1.MulticastRequest.bodies:type_name -> gate.service.push.v1.PushBody
-	6, // 2: gate.service.push.v1.BroadcastRequest.bodies:type_name -> gate.service.push.v1.PushBody
-	0, // 3: gate.service.push.v1.PushService.Push:input_type -> gate.service.push.v1.PushRequest
-	2, // 4: gate.service.push.v1.PushService.Multicast:input_type -> gate.service.push.v1.MulticastRequest
-	4, // 5: gate.service.push.v1.PushService.Broadcast:input_type -> gate.service.push.v1.BroadcastRequest
-	1, // 6: gate.service.push.v1.PushService.Push:output_type -> gate.service.push.v1.PushResponse
-	3, // 7: gate.service.push.v1.PushService.Multicast:output_type -> gate.service.push.v1.MulticastResponse
-	5, // 8: gate.service.push.v1.PushService.Broadcast:output_type -> gate.service.push.v1.BroadcastResponse
+var file_broadcaster_service_push_v1_push_proto_depIdxs = []int32{
+	6, // 0: broadcaster.service.push.v1.PushRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
+	6, // 1: broadcaster.service.push.v1.MulticastRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
+	6, // 2: broadcaster.service.push.v1.BroadcastRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
+	0, // 3: broadcaster.service.push.v1.PushService.Push:input_type -> broadcaster.service.push.v1.PushRequest
+	2, // 4: broadcaster.service.push.v1.PushService.Multicast:input_type -> broadcaster.service.push.v1.MulticastRequest
+	4, // 5: broadcaster.service.push.v1.PushService.Broadcast:input_type -> broadcaster.service.push.v1.BroadcastRequest
+	1, // 6: broadcaster.service.push.v1.PushService.Push:output_type -> broadcaster.service.push.v1.PushResponse
+	3, // 7: broadcaster.service.push.v1.PushService.Multicast:output_type -> broadcaster.service.push.v1.MulticastResponse
+	5, // 8: broadcaster.service.push.v1.PushService.Broadcast:output_type -> broadcaster.service.push.v1.BroadcastResponse
 	6, // [6:9] is the sub-list for method output_type
 	3, // [3:6] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -414,26 +414,26 @@ var file_gate_service_push_v1_push_proto_depIdxs = []int32{
 	0, // [0:3] is the sub-list for field type_name
 }
 
-func init() { file_gate_service_push_v1_push_proto_init() }
-func file_gate_service_push_v1_push_proto_init() {
-	if File_gate_service_push_v1_push_proto != nil {
+func init() { file_broadcaster_service_push_v1_push_proto_init() }
+func file_broadcaster_service_push_v1_push_proto_init() {
+	if File_broadcaster_service_push_v1_push_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gate_service_push_v1_push_proto_rawDesc), len(file_gate_service_push_v1_push_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_broadcaster_service_push_v1_push_proto_rawDesc), len(file_broadcaster_service_push_v1_push_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_gate_service_push_v1_push_proto_goTypes,
-		DependencyIndexes: file_gate_service_push_v1_push_proto_depIdxs,
-		MessageInfos:      file_gate_service_push_v1_push_proto_msgTypes,
+		GoTypes:           file_broadcaster_service_push_v1_push_proto_goTypes,
+		DependencyIndexes: file_broadcaster_service_push_v1_push_proto_depIdxs,
+		MessageInfos:      file_broadcaster_service_push_v1_push_proto_msgTypes,
 	}.Build()
-	File_gate_service_push_v1_push_proto = out.File
-	file_gate_service_push_v1_push_proto_goTypes = nil
-	file_gate_service_push_v1_push_proto_depIdxs = nil
+	File_broadcaster_service_push_v1_push_proto = out.File
+	file_broadcaster_service_push_v1_push_proto_goTypes = nil
+	file_broadcaster_service_push_v1_push_proto_depIdxs = nil
 }

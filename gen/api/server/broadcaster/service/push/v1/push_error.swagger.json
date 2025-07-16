@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "gate/service/push/v1/push_error.proto",
+    "title": "broadcaster/service/push/v1/push_error.proto",
     "version": "version not set"
   },
   "consumes": [

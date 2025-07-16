@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: gate/service/push/v1/push.proto
+// source: broadcaster/service/push/v1/push.proto
 
 package servicev1
 
@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PushService_Push_FullMethodName      = "/gate.service.push.v1.PushService/Push"
-	PushService_Multicast_FullMethodName = "/gate.service.push.v1.PushService/Multicast"
-	PushService_Broadcast_FullMethodName = "/gate.service.push.v1.PushService/Broadcast"
+	PushService_Push_FullMethodName      = "/broadcaster.service.push.v1.PushService/Push"
+	PushService_Multicast_FullMethodName = "/broadcaster.service.push.v1.PushService/Multicast"
+	PushService_Broadcast_FullMethodName = "/broadcaster.service.push.v1.PushService/Broadcast"
 )
 
 // PushServiceClient is the client API for PushService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// TCP Gate service
+// Broadcaster service
 // Open to the server cluster
 // Provide HTTP and gRPC interfaces
 type PushServiceClient interface {
@@ -79,7 +79,7 @@ func (c *pushServiceClient) Broadcast(ctx context.Context, in *BroadcastRequest,
 // All implementations must embed UnimplementedPushServiceServer
 // for forward compatibility.
 //
-// TCP Gate service
+// Broadcaster service
 // Open to the server cluster
 // Provide HTTP and gRPC interfaces
 type PushServiceServer interface {
@@ -184,7 +184,7 @@ func _PushService_Broadcast_Handler(srv interface{}, ctx context.Context, dec fu
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var PushService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gate.service.push.v1.PushService",
+	ServiceName: "broadcaster.service.push.v1.PushService",
 	HandlerType: (*PushServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -201,5 +201,5 @@ var PushService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "gate/service/push/v1/push.proto",
+	Metadata: "broadcaster/service/push/v1/push.proto",
 }

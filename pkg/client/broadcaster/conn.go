@@ -1,4 +1,4 @@
-package gate
+package broadcaster
 
 import (
 	"github.com/go-kratos/kratos/v2/log"

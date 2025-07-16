@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.8.4
 // - protoc             (unknown)
-// source: gate/service/push/v1/push.proto
+// source: broadcaster/service/push/v1/push.proto
 
 package servicev1
 
@@ -19,9 +19,9 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationPushServiceBroadcast = "/gate.service.push.v1.PushService/Broadcast"
-const OperationPushServiceMulticast = "/gate.service.push.v1.PushService/Multicast"
-const OperationPushServicePush = "/gate.service.push.v1.PushService/Push"
+const OperationPushServiceBroadcast = "/broadcaster.service.push.v1.PushService/Broadcast"
+const OperationPushServiceMulticast = "/broadcaster.service.push.v1.PushService/Multicast"
+const OperationPushServicePush = "/broadcaster.service.push.v1.PushService/Push"
 
 type PushServiceHTTPServer interface {
 	Broadcast(context.Context, *BroadcastRequest) (*BroadcastResponse, error)

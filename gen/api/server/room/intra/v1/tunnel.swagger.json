@@ -77,6 +77,26 @@
           "type": "integer",
           "format": "int32",
           "title": "Index of the message in the stream, same as the request"
+        },
+        "connId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Connection ID, default 0 means only used in raw KCP Connection, otherwise it is the stream ID"
+        },
+        "fragId": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Fragment ID, default 0 means no fragment. If frag_id is not 0, the data is a fragment of the message with the same frag_id."
+        },
+        "fragCount": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Fragment Count, the number of fragments in the same frag_id"
+        },
+        "fragIndex": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Fragment Index, belongs to the same frag_id"
         }
       }
     }

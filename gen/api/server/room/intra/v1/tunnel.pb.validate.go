@@ -69,6 +69,14 @@ func (m *TunnelRequest) validate(all bool) error {
 
 	// no validation rules for Index
 
+	// no validation rules for ConnId
+
+	// no validation rules for FragId
+
+	// no validation rules for FragCount
+
+	// no validation rules for FragIndex
+
 	if len(errors) > 0 {
 		return TunnelRequestMultiError(errors)
 	}
@@ -180,6 +188,14 @@ func (m *TunnelResponse) validate(all bool) error {
 	// no validation rules for Seq
 
 	// no validation rules for Index
+
+	// no validation rules for ConnId
+
+	// no validation rules for FragId
+
+	// no validation rules for FragCount
+
+	// no validation rules for FragIndex
 
 	if len(errors) > 0 {
 		return TunnelResponseMultiError(errors)

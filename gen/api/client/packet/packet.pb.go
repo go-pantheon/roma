@@ -23,7 +23,7 @@ const (
 
 // TCP packet structure definition
 // For public network access
-// The complete frame format: 4(4 + len(data), bigEndian) + data(encrypt(byte[](Marshal(Packet)))). The client and server send frames in this format.
+// The complete frame format: 4(len(data), bigEndian) + data(encrypt(byte[](Marshal(Packet)))). The client and server send frames in this format.
 // After the handshake protocol, all protocols use AES encryption and decryption
 // The message index number is incremented by 1 each time, and the message index number is unique within the same module
 // mod + seq + obj forms the unique ID of data
@@ -36,7 +36,11 @@ type Packet struct {
 	Seq           int32                  `protobuf:"varint,5,opt,name=seq,proto3" json:"seq,omitempty"`                                    // Message ID within the module, unique within the module
 	Ver           int32                  `protobuf:"varint,6,opt,name=ver,proto3" json:"ver,omitempty"`                                    // Packet Version, default 0 means no version
 	Index         int32                  `protobuf:"varint,7,opt,name=index,proto3" json:"index,omitempty"`                                // Message index number, increment
-	Compress      bool                   `protobuf:"varint,8,opt,name=compress,proto3" json:"compress,omitempty"`                          // Whether the data in the body is compressed. The default compression method is zlib
+	ConnId        int32                  `protobuf:"varint,8,opt,name=conn_id,json=connId,proto3" json:"conn_id,omitempty"`                // Connection ID, default 0 means only used in raw KCP Connection, otherwise it is the stream ID
+	FragId        int32                  `protobuf:"varint,9,opt,name=frag_id,json=fragId,proto3" json:"frag_id,omitempty"`                // Fragment ID, default 0 means no fragment. If frag_id is not 0, the data is a fragment of the message with the same frag_id.
+	FragCount     int32                  `protobuf:"varint,10,opt,name=frag_count,json=fragCount,proto3" json:"frag_count,omitempty"`      // Fragment Count, the number of fragments in the same frag_id
+	FragIndex     int32                  `protobuf:"varint,11,opt,name=frag_index,json=fragIndex,proto3" json:"frag_index,omitempty"`      // Fragment Index, belongs to the same frag_id
+	Compress      bool                   `protobuf:"varint,20,opt,name=compress,proto3" json:"compress,omitempty"`                         // Whether the data in the body is compressed. The default compression method is zlib
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -120,6 +124,34 @@ func (x *Packet) GetIndex() int32 {
 	return 0
 }
 
+func (x *Packet) GetConnId() int32 {
+	if x != nil {
+		return x.ConnId
+	}
+	return 0
+}
+
+func (x *Packet) GetFragId() int32 {
+	if x != nil {
+		return x.FragId
+	}
+	return 0
+}
+
+func (x *Packet) GetFragCount() int32 {
+	if x != nil {
+		return x.FragCount
+	}
+	return 0
+}
+
+func (x *Packet) GetFragIndex() int32 {
+	if x != nil {
+		return x.FragIndex
+	}
+	return 0
+}
+
 func (x *Packet) GetCompress() bool {
 	if x != nil {
 		return x.Compress
@@ -131,7 +163,7 @@ var File_packet_packet_proto protoreflect.FileDescriptor
 
 const file_packet_packet_proto_rawDesc = "" +
 	"\n" +
-	"\x13packet/packet.proto\x12\x06packet\"\xb9\x01\n" +
+	"\x13packet/packet.proto\x12\x06packet\"\xa9\x02\n" +
 	"\x06Packet\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12!\n" +
 	"\fdata_version\x18\x02 \x01(\x04R\vdataVersion\x12\x10\n" +
@@ -139,8 +171,15 @@ const file_packet_packet_proto_rawDesc = "" +
 	"\x03mod\x18\x04 \x01(\x05R\x03mod\x12\x10\n" +
 	"\x03seq\x18\x05 \x01(\x05R\x03seq\x12\x10\n" +
 	"\x03ver\x18\x06 \x01(\x05R\x03ver\x12\x14\n" +
-	"\x05index\x18\a \x01(\x05R\x05index\x12\x1a\n" +
-	"\bcompress\x18\b \x01(\bR\bcompressB\x1aZ\x18api/client/packet;clipktb\x06proto3"
+	"\x05index\x18\a \x01(\x05R\x05index\x12\x17\n" +
+	"\aconn_id\x18\b \x01(\x05R\x06connId\x12\x17\n" +
+	"\afrag_id\x18\t \x01(\x05R\x06fragId\x12\x1d\n" +
+	"\n" +
+	"frag_count\x18\n" +
+	" \x01(\x05R\tfragCount\x12\x1d\n" +
+	"\n" +
+	"frag_index\x18\v \x01(\x05R\tfragIndex\x12\x1a\n" +
+	"\bcompress\x18\x14 \x01(\bR\bcompressB\x1aZ\x18api/client/packet;clipktb\x06proto3"
 
 var (
 	file_packet_packet_proto_rawDescOnce sync.Once
