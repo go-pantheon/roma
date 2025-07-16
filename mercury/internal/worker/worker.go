@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-pantheon/fabrica-net/client"
 	tcp "github.com/go-pantheon/fabrica-net/tcp/client"
+	"github.com/go-pantheon/fabrica-net/xnet"
 	"github.com/go-pantheon/fabrica-util/xsync"
 	climsg "github.com/go-pantheon/roma/gen/api/client/message"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
@@ -34,6 +36,7 @@ type Worker struct {
 
 	tcpCli   *tcp.Client
 	adminCli *core.AdminClients
+	dialog   xnet.ClientDialog
 
 	taskChan chan task.Taskable
 
@@ -41,6 +44,7 @@ type Worker struct {
 	sid        int64
 	hsInfo     *HandshakeInfo
 	clientUser *climsg.UserProto
+	session    xnet.Session
 
 	startTime    time.Time
 	workDuration time.Duration
@@ -52,18 +56,6 @@ type Worker struct {
 	PushMsgCount  atomic.Uint32
 }
 
-func (w *Worker) Log() *log.Helper {
-	return w.log
-}
-
-func (w *Worker) UID() int64 {
-	return w.userId
-}
-
-func (w *Worker) AdminClient() *core.AdminClients {
-	return w.adminCli
-}
-
 func NewWorker(userId int64, logger log.Logger) *Worker {
 	w := &Worker{
 		Stoppable:     xsync.NewStopper(time.Second * 10),
@@ -71,6 +63,7 @@ func NewWorker(userId int64, logger log.Logger) *Worker {
 		userId:        userId,
 		sid:           core.ServerId(),
 		hsInfo:        &HandshakeInfo{},
+		session:       xnet.DefaultSession(),
 		taskChan:      make(chan task.Taskable),
 		CompletedChan: make(chan struct{}),
 	}
@@ -86,15 +79,19 @@ func (w *Worker) Start(ctx context.Context, jobs []*job.Job) (err error) {
 		return err
 	}
 
-	handshakePack, err := w.handshakePack(ctx, w.hsInfo.token, w.hsInfo.cliPub[:])
-	if err != nil {
-		return err
-	}
-
 	addrs := core.BootConf().Gate.Addr
 	addr := addrs[w.userId%int64(len(addrs))]
 
-	w.tcpCli = tcp.NewClient(w.userId, addr, handshakePack, tcp.WithAuthFunc(w.Auth))
+	w.tcpCli = tcp.NewClient(w.userId, addr, func(id uint64) (xnet.Pack, error) {
+		return w.handshakePack(ctx, w.hsInfo.token, w.hsInfo.cliPub[:])
+	}, client.WithAuthFunc(w.Auth))
+
+	dialog, ok := w.tcpCli.DefaultDialog()
+	if !ok {
+		return errors.Errorf("tcp client disconnected")
+	}
+
+	w.dialog = dialog
 
 	w.GoAndStop(fmt.Sprintf("worker.%d.work", w.userId), func() error {
 		return w.Run(ctx, jobs)
@@ -190,7 +187,7 @@ func (w *Worker) work(ctx context.Context) error {
 }
 
 func (w *Worker) send(pkt *clipkt.Packet) (err error) {
-	pkt.Index = w.tcpCli.Session().IncreaseCSIndex()
+	pkt.Index = w.session.IncreaseCSIndex()
 
 	if pkt.Obj == 0 {
 		pkt.Obj = w.UID()
@@ -205,7 +202,7 @@ func (w *Worker) send(pkt *clipkt.Packet) (err error) {
 	w.SentMsgCount.Add(1)
 	task.LogCS(w.log, w.UID(), pkt)
 
-	return w.tcpCli.Send(in)
+	return w.dialog.Send(in)
 }
 
 func (w *Worker) receive(ctx context.Context, t task.Taskable) (done bool, err error) {
@@ -219,7 +216,7 @@ func (w *Worker) receive(ctx context.Context, t task.Taskable) (done bool, err e
 		return false, xsync.ErrStopByTrigger
 	case <-ctx.Done():
 		return false, ctx.Err()
-	case bytes, ok := <-w.tcpCli.Receive():
+	case bytes, ok := <-w.dialog.Receive():
 		if !ok {
 			return false, errors.Errorf("tcp client disconnected")
 		}
@@ -305,4 +302,16 @@ func (w *Worker) Output() string {
 
 func (w *Worker) complete() {
 	w.completed.Store(true)
+}
+
+func (w *Worker) Log() *log.Helper {
+	return w.log
+}
+
+func (w *Worker) UID() int64 {
+	return w.userId
+}
+
+func (w *Worker) AdminClient() *core.AdminClients {
+	return w.adminCli
 }
