@@ -48,5 +48,6 @@ vulcan/fixtures/outputs/
 .specstory/
 .cursor*
 
+CLAUDE.md
 .CLAUDE*
 .claude*
