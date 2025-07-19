@@ -3,14 +3,14 @@ module github.com/go-pantheon/roma
 go 1.24.4
 
 require (
-	github.com/awa/go-iap v1.43.1
+	github.com/awa/go-iap v1.43.2
 	github.com/dengsgo/math-engine v0.0.0-20230823154425-78f211b48149
 	github.com/emicklei/proto v1.14.2
-	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20250714144425-0bf7c1ad32dd
+	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20250716060240-ac92cbe5701c
 	github.com/go-kratos/kratos/v2 v2.8.4
-	github.com/go-pantheon/fabrica-kit v0.0.24
-	github.com/go-pantheon/fabrica-net v0.0.27
-	github.com/go-pantheon/fabrica-util v0.0.35
+	github.com/go-pantheon/fabrica-kit v0.0.25
+	github.com/go-pantheon/fabrica-net v0.0.29
+	github.com/go-pantheon/fabrica-util v0.0.36
 	github.com/google/wire v0.6.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/json-iterator/go v1.1.12
@@ -22,14 +22,14 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.2.2
 	go.uber.org/mock v0.5.2
 	golang.org/x/sync v0.16.0
-	google.golang.org/api v0.241.0
+	google.golang.org/api v0.242.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250715232539-7130f93afb79
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
 )
 
 require (
-	cloud.google.com/go/auth v0.16.2 // indirect
+	cloud.google.com/go/auth v0.16.3 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	dario.cat/mergo v1.0.2 // indirect
@@ -46,7 +46,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-kratos/aegis v0.2.0 // indirect
 	github.com/go-kratos/grpc-gateway/v2 v2.5.1-0.20210811062259-c92d36e434b1 // indirect
-	github.com/go-kratos/kratos/contrib/log/zap/v2 v2.0.0-20250714144425-0bf7c1ad32dd // indirect
+	github.com/go-kratos/kratos/contrib/log/zap/v2 v2.0.0-20250716060240-ac92cbe5701c // indirect
 	github.com/go-kratos/swagger-api v1.0.1 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
