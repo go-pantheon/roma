@@ -151,6 +151,13 @@
             "type": "object",
             "$ref": "#/definitions/v1PushBody"
           }
+        },
+        "color": {
+          "type": "string"
+        },
+        "sid": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -160,24 +167,36 @@
     "v1MulticastRequest": {
       "type": "object",
       "properties": {
-        "uid": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "int64"
-          }
-        },
         "bodies": {
           "type": "array",
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1PushBody"
           }
+        },
+        "uids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "color": {
+          "type": "string"
         }
       }
     },
     "v1MulticastResponse": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "pushedUids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          }
+        }
+      }
     },
     "v1PushBody": {
       "type": "object",
@@ -185,12 +204,17 @@
         "data": {
           "type": "string",
           "format": "byte",
-          "title": "Message body proto bytes array"
+          "title": "Serialized bytes of the cs/sc protocol in the message"
+        },
+        "dataVersion": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Data version number"
         },
         "obj": {
           "type": "string",
           "format": "int64",
-          "title": "Object ID, according to the business agreement"
+          "title": "Module object ID, according to the business agreement to pass the corresponding object ID"
         },
         "mod": {
           "type": "integer",
@@ -200,28 +224,40 @@
         "seq": {
           "type": "integer",
           "format": "int32",
-          "title": "Message ID within the module, unique within the module"
+          "title": "Module message ID, unique within the module"
         }
       }
     },
     "v1PushRequest": {
       "type": "object",
       "properties": {
-        "uid": {
-          "type": "string",
-          "format": "int64"
-        },
         "bodies": {
           "type": "array",
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1PushBody"
           }
+        },
+        "color": {
+          "type": "string"
+        },
+        "sid": {
+          "type": "string",
+          "format": "int64"
+        },
+        "uid": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
     "v1PushResponse": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "pushed": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }

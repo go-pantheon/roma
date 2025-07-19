@@ -1,0 +1,26 @@
+label:
+  service: "${SERVICE:roma.broadcaster.service}"
+  profile: "${PROFILE:DEV}"
+  version: "${VERSION:v0.0.1}"
+  color: "${COLOR:local}"
+  node: "${NODE}"
+  language: "${LANGUAGE:en}"
+trace:
+  endpoint: http://localhost:14268/api/traces
+log:
+  type: zap
+  level: debug
+server:
+  http:
+    addr: 0.0.0.0:8003
+    timeout: 5s
+  grpc:
+    addr: 0.0.0.0:9103
+    timeout: 5s
+data:
+  redis:
+    addr: ${REDIS_ADDR}
+    password: ${REDIS_PASSWORD}
+    dial_timeout: ${REDIS_DIAL_TIMEOUT}
+    read_timeout: ${REDIS_READ_TIMEOUT}
+    write_timeout: ${REDIS_WRITE_TIMEOUT}

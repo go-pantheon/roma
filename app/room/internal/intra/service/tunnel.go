@@ -44,7 +44,7 @@ func (s *TunnelService) Tunnel(stream intrav1.TunnelService_TunnelServer) (err e
 		}
 	}()
 
-	ctx := stream.Context()
+	ctx := xcontext.TransferToServerContext(stream.Context())
 
 	if !life.IsGateContext(ctx) {
 		return errors.Errorf("must be called by Gateway. status=%d", xcontext.Status(ctx))

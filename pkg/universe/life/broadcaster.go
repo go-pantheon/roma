@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/go-kratos/kratos/v2/log"
 	climod "github.com/go-pantheon/roma/gen/api/client/module"
 	servicev1 "github.com/go-pantheon/roma/gen/api/server/broadcaster/service/push/v1"
 	"github.com/go-pantheon/roma/pkg/universe/constants"
@@ -16,8 +15,8 @@ import (
 type Broadcastable interface {
 	Broadcast(wctx Context, mod climod.ModuleID, seq int32, obj int64, body proto.Message) error
 	Multicast(wctx Context, mod climod.ModuleID, seq int32, obj int64, body proto.Message, uids ...int64) error
-	Consume() <-chan *BroadcastMessage
-	ExecuteBroadcast(msg *BroadcastMessage) error
+	ConsumeBroadcast() <-chan *BroadcastMessage
+	ExecuteBroadcast(ctx context.Context, msg *BroadcastMessage) error
 }
 
 var _ Broadcastable = (*WorkerBroadcaster)(nil)
@@ -40,54 +39,41 @@ func NewBroadcaster(pusher *data.PushRepo) Broadcastable {
 func (w *WorkerBroadcaster) Broadcast(wctx Context, mod climod.ModuleID, seq int32, obj int64, body proto.Message) (err error) {
 	bytes, err := proto.Marshal(body)
 	if err != nil {
-		err = errors.Wrapf(err, "[workerBroadcaster.Broadcast] proto.Marshal failed. mod<%d> seq<%d> obj<%d>", mod, seq, obj)
-		return
+		return errors.Wrapf(err, "[workerBroadcaster.Broadcast] proto.Marshal failed. %d-%d %+v", mod, seq, obj)
 	}
 
 	w.msgs <- newBroadcastMessage(true, nil, buildPushBody(mod, seq, obj, bytes))
 
-	return
+	return nil
 }
 
 func (w *WorkerBroadcaster) Multicast(wctx Context, mod climod.ModuleID, seq int32, obj int64, body proto.Message, uids ...int64) (err error) {
 	if len(uids) == 0 {
-		err = errors.New("[workerBroadcaster.Multicast] uids is empty")
-		return
+		return errors.New("[workerBroadcaster.Multicast] uids is empty")
 	}
 
 	bytes, err := proto.Marshal(body)
 	if err != nil {
-		err = errors.Wrapf(err, "[workerBroadcaster.Broadcast] proto.Marshal failed. mod<%d> seq<%d> obj<%d>", mod, seq, obj)
-		return
+		return errors.Wrapf(err, "[workerBroadcaster.Broadcast] proto.Marshal failed. %d-%d %+v", mod, seq, obj)
 	}
 
 	w.msgs <- newBroadcastMessage(false, uids, buildPushBody(mod, seq, obj, bytes))
 
-	return
+	return nil
 }
 
-func (w *WorkerBroadcaster) Consume() <-chan *BroadcastMessage {
+func (w *WorkerBroadcaster) ConsumeBroadcast() <-chan *BroadcastMessage {
 	return w.msgs
 }
 
-func (w *WorkerBroadcaster) ExecuteBroadcast(msg *BroadcastMessage) error {
+func (w *WorkerBroadcaster) ExecuteBroadcast(ctx context.Context, msg *BroadcastMessage) error {
 	defer putBroadcastMessage(msg)
 
 	if msg.all {
-		return w.pusher.Broadcast(context.Background(), msg.out)
+		return w.pusher.Broadcast(ctx, msg.out)
 	}
 
-	if len(msg.uids) > 16 {
-		return w.pusher.Multicast(context.Background(), msg.uids, msg.out)
-	}
-
-	for _, uid := range msg.uids {
-		if err := w.pusher.Push(context.Background(), uid, msg.out); err != nil {
-			log.Errorf("push failed. uid<%d> err<%v>", uid, err)
-		}
-	}
-
-	return nil
+	return w.pusher.Multicast(ctx, msg.uids, msg.out)
 }
 
 type BroadcastMessage struct {

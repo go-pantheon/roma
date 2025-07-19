@@ -3,6 +3,8 @@ package life
 import (
 	"sync"
 	"sync/atomic"
+
+	"github.com/go-pantheon/fabrica-util/xsync"
 )
 
 const shardCount = uint64(512)
@@ -98,13 +100,15 @@ func fanIn(chans []chan Tuple, out chan Tuple) {
 	wg.Add(len(chans))
 
 	for _, ch := range chans {
-		go func(ch chan Tuple) {
+		xsync.Go("workermap.fanIn", func() error {
 			for t := range ch {
 				out <- t
 			}
 
 			wg.Done()
-		}(ch)
+
+			return nil
+		})
 	}
 
 	wg.Wait()

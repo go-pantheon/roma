@@ -129,7 +129,7 @@ func (w *Worker) run(ctx context.Context) error {
 	})
 	eg.Go(func() error {
 		return xsync.Run(func() error {
-			return w.runTunnelResponseLoop(ctx)
+			return w.runResponseLoop(ctx)
 		})
 	})
 	eg.Go(func() error {
@@ -188,7 +188,7 @@ func (w *Worker) runEventLoop(ctx context.Context) error {
 	}
 }
 
-func (w *Worker) runTunnelResponseLoop(ctx context.Context) error {
+func (w *Worker) runResponseLoop(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -200,6 +200,14 @@ func (w *Worker) runTunnelResponseLoop(ctx context.Context) error {
 
 			if err := w.ExecuteSend(msg); err != nil {
 				w.log.WithContext(ctx).Errorf("worker execute reply failed. i=%d seq=<%d-%d> %s %+v", msg.GetIndex(), msg.GetMod(), msg.GetSeq(), w.LogInfo(), err)
+			}
+		case msg, ok := <-w.ConsumeBroadcast():
+			if !ok {
+				return xerrors.ErrLifeStopped
+			}
+
+			if err := w.ExecuteBroadcast(ctx, msg); err != nil {
+				w.log.WithContext(ctx).Errorf("worker execute broadcast failed. %s %+v", w.LogInfo(), err)
 			}
 		}
 	}

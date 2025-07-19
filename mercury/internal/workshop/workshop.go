@@ -67,14 +67,13 @@ func (ws *Workshop) Run(ctx context.Context) error {
 		default:
 			wg.Add(1)
 
-			go func(w *worker.Worker) {
+			xsync.Go("workshop.Run", func() error {
 				defer wg.Done()
 
 				st := time.Now()
 
 				if err := w.Start(ctx, ws.Jobs); err != nil {
-					w.Log().Errorf("[worker-%d] start failed: %+v", w.UID(), err)
-					return
+					return errors.Wrapf(err, "[worker-%d] start failed", w.UID())
 				}
 
 				w.Log().Infof("[worker-%d] start at: %s", w.UID(), st.Format("15:04:05"))
@@ -82,7 +81,9 @@ func (ws *Workshop) Run(ctx context.Context) error {
 				w.WaitStopped()
 
 				w.Log().Infof("[worker-%d] completed. used: %s", w.UID(), time.Since(st).String())
-			}(w)
+
+				return nil
+			})
 
 			time.Sleep(core.AppConf().LoginInterval.AsDuration() + time.Duration(rand.Int63n(2000)*int64(time.Millisecond)))
 		}
@@ -97,19 +98,29 @@ func (ws *Workshop) Stop(ctx context.Context) (err error) {
 	return ws.TurnOff(func() error {
 		var wg sync.WaitGroup
 
+		var (
+			safeErr = errors.NewSafeJoinError()
+		)
+
 		for _, w := range ws.Workers {
 			wg.Add(1)
 
-			go func(w *worker.Worker) {
+			xsync.Go("workshop.Stop", func() error {
 				defer wg.Done()
 
 				if werr := w.Stop(ctx); werr != nil {
-					err = errors.JoinUnsimilar(err, werr)
+					safeErr.Join(werr)
 				}
-			}(w)
+
+				return nil
+			})
 		}
 
 		wg.Wait()
+
+		if safeErr.HasError() {
+			err = errors.Join(err, safeErr)
+		}
 
 		return err
 	})

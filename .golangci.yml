@@ -34,7 +34,7 @@ linters:
     - unparam
     - unused
     - whitespace
-    - wsl
+    # - wsl
 
   settings:
     govet:

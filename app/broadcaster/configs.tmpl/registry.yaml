@@ -1,0 +1,5 @@
+etcd:
+  endpoints:
+    - localhost:2379
+  username: ${ETCD_USERNAME}
+  password: ${ETCD_PASSWORD}

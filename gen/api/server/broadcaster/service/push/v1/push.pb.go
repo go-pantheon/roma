@@ -24,8 +24,10 @@ const (
 
 type PushRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uid           int64                  `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	Bodies        []*PushBody            `protobuf:"bytes,2,rep,name=bodies,proto3" json:"bodies,omitempty"`
+	Bodies        []*PushBody            `protobuf:"bytes,1,rep,name=bodies,proto3" json:"bodies,omitempty"`
+	Color         string                 `protobuf:"bytes,2,opt,name=color,proto3" json:"color,omitempty"`
+	Sid           int64                  `protobuf:"varint,3,opt,name=sid,proto3" json:"sid,omitempty"`
+	Uid           int64                  `protobuf:"varint,4,opt,name=uid,proto3" json:"uid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,13 +62,6 @@ func (*PushRequest) Descriptor() ([]byte, []int) {
 	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *PushRequest) GetUid() int64 {
-	if x != nil {
-		return x.Uid
-	}
-	return 0
-}
-
 func (x *PushRequest) GetBodies() []*PushBody {
 	if x != nil {
 		return x.Bodies
@@ -74,8 +69,30 @@ func (x *PushRequest) GetBodies() []*PushBody {
 	return nil
 }
 
+func (x *PushRequest) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *PushRequest) GetSid() int64 {
+	if x != nil {
+		return x.Sid
+	}
+	return 0
+}
+
+func (x *PushRequest) GetUid() int64 {
+	if x != nil {
+		return x.Uid
+	}
+	return 0
+}
+
 type PushResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Pushed        bool                   `protobuf:"varint,1,opt,name=pushed,proto3" json:"pushed,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -110,10 +127,18 @@ func (*PushResponse) Descriptor() ([]byte, []int) {
 	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *PushResponse) GetPushed() bool {
+	if x != nil {
+		return x.Pushed
+	}
+	return false
+}
+
 type MulticastRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uid           []int64                `protobuf:"varint,1,rep,packed,name=uid,proto3" json:"uid,omitempty"`
-	Bodies        []*PushBody            `protobuf:"bytes,2,rep,name=bodies,proto3" json:"bodies,omitempty"`
+	Bodies        []*PushBody            `protobuf:"bytes,1,rep,name=bodies,proto3" json:"bodies,omitempty"`
+	Uids          []int64                `protobuf:"varint,2,rep,packed,name=uids,proto3" json:"uids,omitempty"`
+	Color         string                 `protobuf:"bytes,3,opt,name=color,proto3" json:"color,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -148,13 +173,6 @@ func (*MulticastRequest) Descriptor() ([]byte, []int) {
 	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *MulticastRequest) GetUid() []int64 {
-	if x != nil {
-		return x.Uid
-	}
-	return nil
-}
-
 func (x *MulticastRequest) GetBodies() []*PushBody {
 	if x != nil {
 		return x.Bodies
@@ -162,8 +180,23 @@ func (x *MulticastRequest) GetBodies() []*PushBody {
 	return nil
 }
 
+func (x *MulticastRequest) GetUids() []int64 {
+	if x != nil {
+		return x.Uids
+	}
+	return nil
+}
+
+func (x *MulticastRequest) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
 type MulticastResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	PushedUids    []int64                `protobuf:"varint,1,rep,packed,name=pushed_uids,json=pushedUids,proto3" json:"pushed_uids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -198,9 +231,18 @@ func (*MulticastResponse) Descriptor() ([]byte, []int) {
 	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{3}
 }
 
+func (x *MulticastResponse) GetPushedUids() []int64 {
+	if x != nil {
+		return x.PushedUids
+	}
+	return nil
+}
+
 type BroadcastRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Bodies        []*PushBody            `protobuf:"bytes,1,rep,name=bodies,proto3" json:"bodies,omitempty"`
+	Color         string                 `protobuf:"bytes,2,opt,name=color,proto3" json:"color,omitempty"`
+	Sid           int64                  `protobuf:"varint,3,opt,name=sid,proto3" json:"sid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -242,6 +284,20 @@ func (x *BroadcastRequest) GetBodies() []*PushBody {
 	return nil
 }
 
+func (x *BroadcastRequest) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *BroadcastRequest) GetSid() int64 {
+	if x != nil {
+		return x.Sid
+	}
+	return 0
+}
+
 type BroadcastResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -278,19 +334,96 @@ func (*BroadcastResponse) Descriptor() ([]byte, []int) {
 	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{5}
 }
 
+type PushMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bodies        []*PushBody            `protobuf:"bytes,1,rep,name=bodies,proto3" json:"bodies,omitempty"`
+	Uids          []int64                `protobuf:"varint,2,rep,packed,name=uids,proto3" json:"uids,omitempty"`
+	Broadcast     bool                   `protobuf:"varint,3,opt,name=broadcast,proto3" json:"broadcast,omitempty"`
+	Color         string                 `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
+	Sid           int64                  `protobuf:"varint,5,opt,name=sid,proto3" json:"sid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PushMessage) Reset() {
+	*x = PushMessage{}
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PushMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PushMessage) ProtoMessage() {}
+
+func (x *PushMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PushMessage.ProtoReflect.Descriptor instead.
+func (*PushMessage) Descriptor() ([]byte, []int) {
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PushMessage) GetBodies() []*PushBody {
+	if x != nil {
+		return x.Bodies
+	}
+	return nil
+}
+
+func (x *PushMessage) GetUids() []int64 {
+	if x != nil {
+		return x.Uids
+	}
+	return nil
+}
+
+func (x *PushMessage) GetBroadcast() bool {
+	if x != nil {
+		return x.Broadcast
+	}
+	return false
+}
+
+func (x *PushMessage) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *PushMessage) GetSid() int64 {
+	if x != nil {
+		return x.Sid
+	}
+	return 0
+}
+
 type PushBody struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"` // Message body proto bytes array
-	Obj           int64                  `protobuf:"varint,2,opt,name=obj,proto3" json:"obj,omitempty"`  // Object ID, according to the business agreement
-	Mod           int32                  `protobuf:"varint,3,opt,name=mod,proto3" json:"mod,omitempty"`  // Module ID, globally unique
-	Seq           int32                  `protobuf:"varint,4,opt,name=seq,proto3" json:"seq,omitempty"`  // Message ID within the module, unique within the module
+	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`                                   // Serialized bytes of the cs/sc protocol in the message
+	DataVersion   uint64                 `protobuf:"varint,2,opt,name=data_version,json=dataVersion,proto3" json:"data_version,omitempty"` // Data version number
+	Obj           int64                  `protobuf:"varint,3,opt,name=obj,proto3" json:"obj,omitempty"`                                    // Module object ID, according to the business agreement to pass the corresponding object ID
+	Mod           int32                  `protobuf:"varint,4,opt,name=mod,proto3" json:"mod,omitempty"`                                    // Module ID, globally unique
+	Seq           int32                  `protobuf:"varint,5,opt,name=seq,proto3" json:"seq,omitempty"`                                    // Module message ID, unique within the module
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *PushBody) Reset() {
 	*x = PushBody{}
-	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[6]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -302,7 +435,7 @@ func (x *PushBody) String() string {
 func (*PushBody) ProtoMessage() {}
 
 func (x *PushBody) ProtoReflect() protoreflect.Message {
-	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[6]
+	mi := &file_broadcaster_service_push_v1_push_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -315,7 +448,7 @@ func (x *PushBody) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PushBody.ProtoReflect.Descriptor instead.
 func (*PushBody) Descriptor() ([]byte, []int) {
-	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{6}
+	return file_broadcaster_service_push_v1_push_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *PushBody) GetData() []byte {
@@ -323,6 +456,13 @@ func (x *PushBody) GetData() []byte {
 		return x.Data
 	}
 	return nil
+}
+
+func (x *PushBody) GetDataVersion() uint64 {
+	if x != nil {
+		return x.DataVersion
+	}
+	return 0
 }
 
 func (x *PushBody) GetObj() int64 {
@@ -350,23 +490,38 @@ var File_broadcaster_service_push_v1_push_proto protoreflect.FileDescriptor
 
 const file_broadcaster_service_push_v1_push_proto_rawDesc = "" +
 	"\n" +
-	"&broadcaster/service/push/v1/push.proto\x12\x1bbroadcaster.service.push.v1\x1a\x1cgoogle/api/annotations.proto\"^\n" +
-	"\vPushRequest\x12\x10\n" +
-	"\x03uid\x18\x01 \x01(\x03R\x03uid\x12=\n" +
-	"\x06bodies\x18\x02 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\"\x0e\n" +
-	"\fPushResponse\"c\n" +
-	"\x10MulticastRequest\x12\x10\n" +
-	"\x03uid\x18\x01 \x03(\x03R\x03uid\x12=\n" +
-	"\x06bodies\x18\x02 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\"\x13\n" +
-	"\x11MulticastResponse\"Q\n" +
+	"&broadcaster/service/push/v1/push.proto\x12\x1bbroadcaster.service.push.v1\x1a\x1cgoogle/api/annotations.proto\"\x86\x01\n" +
+	"\vPushRequest\x12=\n" +
+	"\x06bodies\x18\x01 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\x12\x14\n" +
+	"\x05color\x18\x02 \x01(\tR\x05color\x12\x10\n" +
+	"\x03sid\x18\x03 \x01(\x03R\x03sid\x12\x10\n" +
+	"\x03uid\x18\x04 \x01(\x03R\x03uid\"&\n" +
+	"\fPushResponse\x12\x16\n" +
+	"\x06pushed\x18\x01 \x01(\bR\x06pushed\"{\n" +
+	"\x10MulticastRequest\x12=\n" +
+	"\x06bodies\x18\x01 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\x12\x12\n" +
+	"\x04uids\x18\x02 \x03(\x03R\x04uids\x12\x14\n" +
+	"\x05color\x18\x03 \x01(\tR\x05color\"4\n" +
+	"\x11MulticastResponse\x12\x1f\n" +
+	"\vpushed_uids\x18\x01 \x03(\x03R\n" +
+	"pushedUids\"y\n" +
 	"\x10BroadcastRequest\x12=\n" +
-	"\x06bodies\x18\x01 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\"\x13\n" +
-	"\x11BroadcastResponse\"T\n" +
+	"\x06bodies\x18\x01 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\x12\x14\n" +
+	"\x05color\x18\x02 \x01(\tR\x05color\x12\x10\n" +
+	"\x03sid\x18\x03 \x01(\x03R\x03sid\"\x13\n" +
+	"\x11BroadcastResponse\"\xa6\x01\n" +
+	"\vPushMessage\x12=\n" +
+	"\x06bodies\x18\x01 \x03(\v2%.broadcaster.service.push.v1.PushBodyR\x06bodies\x12\x12\n" +
+	"\x04uids\x18\x02 \x03(\x03R\x04uids\x12\x1c\n" +
+	"\tbroadcast\x18\x03 \x01(\bR\tbroadcast\x12\x14\n" +
+	"\x05color\x18\x04 \x01(\tR\x05color\x12\x10\n" +
+	"\x03sid\x18\x05 \x01(\x03R\x03sid\"w\n" +
 	"\bPushBody\x12\x12\n" +
-	"\x04data\x18\x01 \x01(\fR\x04data\x12\x10\n" +
-	"\x03obj\x18\x02 \x01(\x03R\x03obj\x12\x10\n" +
-	"\x03mod\x18\x03 \x01(\x05R\x03mod\x12\x10\n" +
-	"\x03seq\x18\x04 \x01(\x05R\x03seq2\x84\x03\n" +
+	"\x04data\x18\x01 \x01(\fR\x04data\x12!\n" +
+	"\fdata_version\x18\x02 \x01(\x04R\vdataVersion\x12\x10\n" +
+	"\x03obj\x18\x03 \x01(\x03R\x03obj\x12\x10\n" +
+	"\x03mod\x18\x04 \x01(\x05R\x03mod\x12\x10\n" +
+	"\x03seq\x18\x05 \x01(\x05R\x03seq2\x84\x03\n" +
 	"\vPushService\x12m\n" +
 	"\x04Push\x12(.broadcaster.service.push.v1.PushRequest\x1a).broadcaster.service.push.v1.PushResponse\"\x10\x82\xd3\xe4\x93\x02\n" +
 	":\x01*\"\x05/push\x12\x81\x01\n" +
@@ -387,7 +542,7 @@ func file_broadcaster_service_push_v1_push_proto_rawDescGZIP() []byte {
 	return file_broadcaster_service_push_v1_push_proto_rawDescData
 }
 
-var file_broadcaster_service_push_v1_push_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_broadcaster_service_push_v1_push_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_broadcaster_service_push_v1_push_proto_goTypes = []any{
 	(*PushRequest)(nil),       // 0: broadcaster.service.push.v1.PushRequest
 	(*PushResponse)(nil),      // 1: broadcaster.service.push.v1.PushResponse
@@ -395,23 +550,25 @@ var file_broadcaster_service_push_v1_push_proto_goTypes = []any{
 	(*MulticastResponse)(nil), // 3: broadcaster.service.push.v1.MulticastResponse
 	(*BroadcastRequest)(nil),  // 4: broadcaster.service.push.v1.BroadcastRequest
 	(*BroadcastResponse)(nil), // 5: broadcaster.service.push.v1.BroadcastResponse
-	(*PushBody)(nil),          // 6: broadcaster.service.push.v1.PushBody
+	(*PushMessage)(nil),       // 6: broadcaster.service.push.v1.PushMessage
+	(*PushBody)(nil),          // 7: broadcaster.service.push.v1.PushBody
 }
 var file_broadcaster_service_push_v1_push_proto_depIdxs = []int32{
-	6, // 0: broadcaster.service.push.v1.PushRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
-	6, // 1: broadcaster.service.push.v1.MulticastRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
-	6, // 2: broadcaster.service.push.v1.BroadcastRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
-	0, // 3: broadcaster.service.push.v1.PushService.Push:input_type -> broadcaster.service.push.v1.PushRequest
-	2, // 4: broadcaster.service.push.v1.PushService.Multicast:input_type -> broadcaster.service.push.v1.MulticastRequest
-	4, // 5: broadcaster.service.push.v1.PushService.Broadcast:input_type -> broadcaster.service.push.v1.BroadcastRequest
-	1, // 6: broadcaster.service.push.v1.PushService.Push:output_type -> broadcaster.service.push.v1.PushResponse
-	3, // 7: broadcaster.service.push.v1.PushService.Multicast:output_type -> broadcaster.service.push.v1.MulticastResponse
-	5, // 8: broadcaster.service.push.v1.PushService.Broadcast:output_type -> broadcaster.service.push.v1.BroadcastResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	7, // 0: broadcaster.service.push.v1.PushRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
+	7, // 1: broadcaster.service.push.v1.MulticastRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
+	7, // 2: broadcaster.service.push.v1.BroadcastRequest.bodies:type_name -> broadcaster.service.push.v1.PushBody
+	7, // 3: broadcaster.service.push.v1.PushMessage.bodies:type_name -> broadcaster.service.push.v1.PushBody
+	0, // 4: broadcaster.service.push.v1.PushService.Push:input_type -> broadcaster.service.push.v1.PushRequest
+	2, // 5: broadcaster.service.push.v1.PushService.Multicast:input_type -> broadcaster.service.push.v1.MulticastRequest
+	4, // 6: broadcaster.service.push.v1.PushService.Broadcast:input_type -> broadcaster.service.push.v1.BroadcastRequest
+	1, // 7: broadcaster.service.push.v1.PushService.Push:output_type -> broadcaster.service.push.v1.PushResponse
+	3, // 8: broadcaster.service.push.v1.PushService.Multicast:output_type -> broadcaster.service.push.v1.MulticastResponse
+	5, // 9: broadcaster.service.push.v1.PushService.Broadcast:output_type -> broadcaster.service.push.v1.BroadcastResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_broadcaster_service_push_v1_push_proto_init() }
@@ -425,7 +582,7 @@ func file_broadcaster_service_push_v1_push_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_broadcaster_service_push_v1_push_proto_rawDesc), len(file_broadcaster_service_push_v1_push_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

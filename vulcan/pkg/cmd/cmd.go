@@ -7,6 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/go-pantheon/fabrica-util/errors"
+	"github.com/go-pantheon/fabrica-util/xsync"
 )
 
 func CmdExecute(dir, name string, arg ...string) (string, error) {
@@ -35,13 +36,15 @@ func CmdExecute(dir, name string, arg ...string) (string, error) {
 		return "", errors.Wrapf(err, "command start failed. name:%s, args:%v", name, arg)
 	}
 
-	go func() {
+	xsync.Go("cmd.Execute.stdout", func() error {
 		_, errStdout = io.Copy(stdout, stdoutIn)
-	}()
+		return nil
+	})
 
-	go func() {
+	xsync.Go("cmd.Execute.stderr", func() error {
 		_, errStderr = io.Copy(stderr, stderrIn)
-	}()
+		return nil
+	})
 
 	if err := cmd.Wait(); err != nil {
 		return "", errors.Wrapf(err, "command wait failed. name:%s, args:%v", name, arg)

@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-pantheon/fabrica-kit/xcontext"
 )
 
@@ -48,6 +49,10 @@ type workerContext struct {
 }
 
 func NewContext(ctx context.Context, w *Worker) Context {
+	ctx = metadata.NewServerContext(ctx, metadata.New(map[string][]string{
+		string(xcontext.CtxColor): {},
+	}))
+
 	c := &workerContext{
 		Context:         ctx,
 		EventManageable: w,

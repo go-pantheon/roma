@@ -86,9 +86,13 @@ func (w *Worker) Start(ctx context.Context, jobs []*job.Job) (err error) {
 		return w.handshakePack(ctx, w.hsInfo.token, w.hsInfo.cliPub[:])
 	}, client.WithAuthFunc(w.Auth))
 
+	if err := w.tcpCli.Start(ctx); err != nil {
+		return err
+	}
+
 	dialog, ok := w.tcpCli.DefaultDialog()
 	if !ok {
-		return errors.Errorf("tcp client disconnected")
+		return errors.New("tcp client disconnected")
 	}
 
 	w.dialog = dialog
@@ -103,10 +107,6 @@ func (w *Worker) Start(ctx context.Context, jobs []*job.Job) (err error) {
 }
 
 func (w *Worker) Run(ctx context.Context, jobs []*job.Job) error {
-	if err := w.tcpCli.Start(ctx); err != nil {
-		return err
-	}
-
 	w.startTime = time.Now()
 
 	w.log.Infof("[worker-%d] connect to gate: %s", w.userId, w.tcpCli.Bind())
