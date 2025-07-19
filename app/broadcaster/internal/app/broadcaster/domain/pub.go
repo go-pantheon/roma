@@ -12,7 +12,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var (
+const (
 	broadcastTopic = "gate.broadcast.message"
 )
 
